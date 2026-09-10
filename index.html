@@ -615,8 +615,9 @@ function initial(){
     nextPr:1, nextRun:1,
     flags:{},
     term:[
-      {k:"info", t:"Azure DevOps Flight Sim â€” a sandbox. Nothing here touches a real service."},
-      {k:"dim",  t:"Repo 'taskapi' cloned to C:\\Users\\cody.scott\\dev\\taskapi"},
+      {k:"info", t:"Azure DevOps Flight Sim â€” a simulation running entirely in this browser tab."},
+      {k:"warn", t:"Not connected to anything: no network, no disk, and NOT your real dev\\taskapi folder."},
+      {k:"dim",  t:"The repos here are made up. They only look like your project so the code reads familiar."},
       {k:"dim",  t:"Type 'help' for the command list, or follow the flow on the right."},
       {k:"dim",  t:""}
     ]
@@ -2216,14 +2217,24 @@ function ConnectView(s, act){
   return html`<div class="stack">
     ${pageHead("Clone to your machine","The only thing that differs from GitHub is this URL and how you authenticate to it. Everything after the clone is identical.")}
 
+    <div class="behind-warn" style="background:var(--fail-soft);border-color:var(--fail)">
+      <span class="pill p-fail"><i class="dot"></i>read-only demo</span>
+      <span class="sm" style="flex:1;min-width:230px;color:var(--ink)">
+        <b>This page is a diagram, not a button.</b> The URL below is fictional and the terminal in this app is a
+        simulation running in your browser â€” it never reaches a network, a disk, or your real
+        <span class="mono">dev\\taskapi</span> folder. Copying this URL into real VS Code will fail, by design.
+      </span>
+    </div>
+
     <div class="panel">
-      <div class="panel-h">Clone repository<span class="r mono">${s.activeRepo}</span></div>
+      <div class="panel-h">Clone repository<span class="r mono">${s.activeRepo}</span><span class="pill p-idle">example</span></div>
       <div style="padding:13px">
         <div class="w-k" style="margin-bottom:6px">HTTPS</div>
         <div class="cmdline"><span class="mono">${url}</span></div>
         <div class="w-k" style="margin:13px 0 6px">SSH</div>
         <div class="cmdline"><span class="mono">git@ssh.dev.azure.com:v3/cody/taskapi/${s.activeRepo}</span></div>
-        <div class="sm dim" style="margin-top:11px">In the real product this is behind the <b>Clone</b> button at the top-right of Files.</div>
+        <div class="sm dim" style="margin-top:11px">In the real product this sits behind the <b>Clone</b> button at the top-right of Files. The shape is
+          <span class="mono">https://dev.azure.com/&lt;org&gt;/&lt;project&gt;/_git/&lt;repo&gt;</span> â€” that's the part worth memorising.</div>
       </div>
     </div>
 

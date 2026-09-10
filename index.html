@@ -630,6 +630,23 @@ function initial(){
   };
 }
 
+/* ---------- keep your place across a refresh ---------- */
+var SAVE_KEY = "adosim.v2";
+function saveState(s, tour){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, tour:tour, s:s})); }catch(e){}
+}
+function loadState(){
+  try{
+    var raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    var o = JSON.parse(raw);
+    if(!o || o.v!==2 || !o.s || !o.s.repo || !o.s.repo.branches) return null;
+    o.s.runDlg = null;            // never restore a half-open dialog
+    return o;
+  }catch(e){ return null; }
+}
+function clearSaved(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+
 /* ---------- derived helpers ---------- */
 function headSha(s){ return s.repo.branches[s.repo.head]; }
 function log(s, branch){
@@ -1154,15 +1171,17 @@ var TOUR = [
       <p><b>Do this.</b> Read the five policies listed underneath. Those are the rules that will refuse your push in a few steps' time.</p>`,
     concept:{k:"Terms", v:html`<b>Branch policy</b>, <b>protected branch</b>. Set once by an admin, enforced by the server on everyone. This is the biggest difference between a personal repo and a job.`} },
 
-  { stage:"Look around", title:"Boards — the work itself", goto:"witems",
-    body: html`<p><b>You'll see.</b> Work items: stories, bugs and tasks, with state, assignee and points.</p>
-      <p><b>Do this.</b> Find <b>#42 — Add GET /api/tasks endpoint</b>, assigned to you. Then glance at <b>Board</b> and <b>Sprints</b> in the sidebar to see the same items as a kanban wall and a burndown.</p>`,
-    concept:{k:"Why it matters", v:html`Nothing should reach production without one of these numbers attached. It's the "why was this change allowed" record.`} },
+  { stage:"Look around", title:"Boards — the work itself", goto:["witems","kanban","sprints"],
+    body: html`<p><b>You'll see.</b> Work items: stories, bugs and tasks, each with a state, an assignee and a points estimate.</p>
+      <p><b>Do this.</b> On <b>Work items</b>, look for <b>#42 — Add GET /api/tasks endpoint</b>. It's <i>Active</i> and assigned to Cody Scott — that's you. You'll come back to it in a few steps.</p>
+      <p>Use the two buttons above to see the <i>same</i> items as a kanban wall (<b>Board</b>) and as a burndown (<b>Sprints</b>). One set of data, three ways of looking at it.</p>`,
+    concept:{k:"Why it matters", v:html`Nothing should reach production without one of these numbers attached. It's the "why was this change allowed" record — and in stand-ups people talk about these numbers, not about branches.`} },
 
-  { stage:"Look around", title:"Pipelines, environments and the machines", goto:"pools",
-    body: html`<p><b>You'll see.</b> Agent pools — the actual computers that run your build. A Microsoft-hosted pool with a free-minutes meter, and a self-hosted agent running on a laptop.</p>
-      <p><b>Do this.</b> Then look at <b>Library</b> (variable groups, secrets, a service connection with an expired token) and <b>Environments</b> (dev deploys itself, prod needs a human).</p>`,
-    concept:{k:"Real-world", v:html`An expired <b>service connection</b> or a <b>PAT</b> is the most common cause of "the pipeline worked yesterday". Both are on these screens.`} },
+  { stage:"Look around", title:"The machines, the secrets, the gates", goto:["pools","library","envs"],
+    body: html`<p><b>Agent pools</b> — the actual computers that run your build. One Microsoft-hosted pool with a free-minutes meter, and a self-hosted agent running on someone's desktop.</p>
+      <p><b>Library</b> — where configuration and credentials live so they're never hardcoded. Note the service connection marked red: its token has expired.</p>
+      <p><b>Environments</b> — the deploy targets. <code>dev</code> ships itself; <code>prod</code> is gated on a human. That gate is the whole point of the last third of this tour.</p>`,
+    concept:{k:"Real-world", v:html`An expired <b>service connection</b> or <b>PAT</b> is the single most common cause of "the pipeline worked yesterday". Both live on these screens.`} },
 
   { stage:"Your morning", title:"Time passes — teammates work", goto:"standup",
     body: html`<p><b>Do this.</b> Press <b>End day ⏭</b> in the top bar.</p>
@@ -3249,10 +3268,17 @@ function SettingsView(s, act){
    ============================================================ */
 
 function App(){
-  var st=useState(initial);
+  var st=useState(function(){ var v=loadState(); return (v&&v.s)? v.s : initial(); });
   var s=st[0], set=st[1];
   var readIdx=useState(null), reading=readIdx[0], setReading=readIdx[1];
-  var tourS=useState(0), tour=tourS[0], setTour=tourS[1];
+  var tourS=useState(function(){ var v=loadState(); return (v&&typeof v.tour==="number")? v.tour : 0; });
+  var tour=tourS[0], setTour=tourS[1];
+
+  /* persist where you are, debounced so a running pipeline doesn't thrash it */
+  useEffect(function(){
+    var t=setTimeout(function(){ saveState(s, tour); }, 400);
+    return function(){ clearTimeout(t); };
+  },[s, tour]);
   var guideS=useState(true), guide=guideS[0], setGuide=guideS[1];
   var thS=useState(236), termH=thS[0], setTermH=thS[1];
   var dragS=useState(false), dragging=dragS[0], setDragging=dragS[1];
@@ -3610,7 +3636,7 @@ function App(){
       <span class="sm dim">Day ${s.day}</span>
       <button class="daybtn" onClick=${function(){ act({t:"end_day"}); }} title="Let your teammates work overnight">End day ⏭</button>
       <button class="tbtn" onClick=${function(){ setGuide(!guide); }}>${guide?"Hide guide":"Show guide"}</button>
-      <button class="tbtn" onClick=${function(){ set(initial()); }}>Reset</button>
+      <button class="tbtn" onClick=${function(){ clearSaved(); setTour(0); set(initial()); }} title="Wipe the sandbox and restart the tour">Start over</button>
     </div>
 
     <div class="body">
@@ -3670,16 +3696,27 @@ function App(){
             <div class="progress">
               ${TOUR.map(function(x,i){ return html`<i key=${i} class=${i<tour?"d":i===tour?"c":""}></i>`; })}
             </div>
-            ${T.goto? html`<div style="padding:0 16px 12px">
-              <button class="btn" style="width:100%" onClick=${function(){act({t:"view",v:T.goto});}}>
-                Take me to ${LABEL[T.goto]||T.goto} →
-              </button>
-            </div>`:null}
+            ${(function(){
+              var gs = T.goto ? (Object.prototype.toString.call(T.goto)==="[object Array]" ? T.goto : [T.goto]) : [];
+              if(!gs.length) return null;
+              return html`<div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:6px">
+                ${gs.map(function(g,i){
+                  return html`<button class=${"btn"+(i?" ghost":"")} key=${g} style="width:100%;justify-content:center"
+                    onClick=${function(){act({t:"view",v:g});}}>
+                    ${i===0?"Take me to ":"Then open "}${LABEL[g]||g} →
+                  </button>`;
+                })}
+              </div>`;
+            })()}
             <div class="lab-b">${T.body}</div>
             ${T.check? html`<div class=${"obj"+(done?" done":"")} style="border-bottom:0">
               <span class="bx">${done?"✓":""}</span>
-              <span class="tx">${done? "Done — press Next below." : "Not done yet — this ticks when you've done it."}</span>
-            </div>`:null}
+              <span class="tx">${done? "Done — press Next below." : "This ticks green once you've done it."}</span>
+            </div>`
+            : html`<div class="obj" style="border-bottom:0">
+              <span class="bx" style="border-style:dashed"></span>
+              <span class="tx dim">Nothing to complete here — have a look around, then press <b>Next</b>.</span>
+            </div>`}
             <div class="concept">
               <div class="k">${T.concept.k}</div>
               <div class="v">${T.concept.v}</div>

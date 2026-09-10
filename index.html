@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -111,7 +111,7 @@ button{font-family:inherit;font-size:inherit;color:inherit}
 .navitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-left:3px solid transparent;padding:7px 14px 7px 13px;cursor:pointer;color:var(--ink-2)}
 .navitem:hover{background:var(--surface-2);color:var(--ink)}
 .navitem.on{background:var(--azure-soft);border-left-color:var(--azure);color:var(--ink);font-weight:600}
-/* every inline icon must be sized here â€” an unsized <svg> expands to fill its box */
+/* every inline icon must be sized here — an unsized <svg> expands to fill its box */
 .ico{width:16px;height:16px;flex:none;opacity:.85}
 .ci{width:13px;height:13px;flex:none}
 svg{max-width:100%}
@@ -390,7 +390,7 @@ body.resizing{cursor:ns-resize;user-select:none}
 var htmFn = (typeof htm === "function") ? htm : (htm && htm.default);
 
 /* htm writes plain HTML attributes (class="x", style="a:b"). React wants
-   className and a style OBJECT â€” a string style is a hard throw. Translate
+   className and a style OBJECT — a string style is a hard throw. Translate
    on the way into createElement so the markup below can stay HTML-shaped. */
 function styleObj(str){
   var o = {};
@@ -424,7 +424,7 @@ var html = htmFn.bind(ce);
 var useState = React.useState, useEffect = React.useEffect, useRef = React.useRef;
 
 /* ============================================================
-   1. THE MODEL  â€” a tiny git + Azure DevOps state machine
+   1. THE MODEL  — a tiny git + Azure DevOps state machine
    ============================================================ */
 
 var USER = "Cody Scott";
@@ -476,9 +476,9 @@ function initial(){
     nextWi:48,
     sprint:{name:"Sprint 4",start:"1 Sep",end:"14 Sep",capacity:60,burn:[21,20,18,15,13,13,9,7,5,5,3]},
     wiki:[
-      {path:"Home",body:"# taskapi\n\nA Task API, built to learn Spring Boot and the delivery process around it.\n\n- Runs on **8081** (8080 is taken on Cody's machine)\n- Boot 4.1.1 â€” note the starter renames vs 3.x\n\nSee [Onboarding] and [Runbook: prod deploy]."},
-      {path:"Onboarding",body:"# Onboarding\n\n1. Clone the repo from Azure Repos\n2. `.\\mvnw.cmd spring-boot:run`\n3. Hit http://localhost:8081/actuator/health\n\n## Branching\n\nBranch from `main` as `feature/<thing>`. `main` is protected â€”\nyou cannot push to it directly, and you should not want to."},
-      {path:"Runbook: prod deploy",body:"# Runbook: prod deploy\n\n1. Merge the PR to `main`\n2. Pipeline builds ONE artifact named `drop`\n3. `dev` deploys automatically\n4. `prod` waits for approval â€” this is our change gate\n5. Approver checks: tests green, work item linked, no active incident\n\n## Rollback\n\nRe-run the last known-good run and approve it. Do NOT rebuild â€”\nthe artifact from that run is still stored."}
+      {path:"Home",body:"# taskapi\n\nA Task API, built to learn Spring Boot and the delivery process around it.\n\n- Runs on **8081** (8080 is taken on Cody's machine)\n- Boot 4.1.1 — note the starter renames vs 3.x\n\nSee [Onboarding] and [Runbook: prod deploy]."},
+      {path:"Onboarding",body:"# Onboarding\n\n1. Clone the repo from Azure Repos\n2. `.\\mvnw.cmd spring-boot:run`\n3. Hit http://localhost:8081/actuator/health\n\n## Branching\n\nBranch from `main` as `feature/<thing>`. `main` is protected —\nyou cannot push to it directly, and you should not want to."},
+      {path:"Runbook: prod deploy",body:"# Runbook: prod deploy\n\n1. Merge the PR to `main`\n2. Pipeline builds ONE artifact named `drop`\n3. `dev` deploys automatically\n4. `prod` waits for approval — this is our change gate\n5. Approver checks: tests green, work item linked, no active incident\n\n## Rollback\n\nRe-run the last known-good run and approve it. Do NOT rebuild —\nthe artifact from that run is still stored."}
     ],
     queries:[
       {name:"My active work",wiql:"[Assigned To] = @Me AND [State] = 'Active'",n:1},
@@ -490,10 +490,10 @@ function initial(){
     library:{
       groups:[
         {name:"taskapi-common",kv:null,linked:"CI, CD",vars:[{k:"JAVA_VERSION",v:"21"},{k:"MAVEN_OPTS",v:"-Xmx1024m"},{k:"ARTIFACT_NAME",v:"drop"}]},
-        {name:"taskapi-prod",kv:"Azure Key Vault: taskapi-kv",linked:"CD",vars:[{k:"APP_NAME",v:"taskapi-prod"},{k:"DB_PASSWORD",v:"â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢",secret:true},{k:"APPINSIGHTS_KEY",v:"â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢",secret:true}]}
+        {name:"taskapi-prod",kv:"Azure Key Vault: taskapi-kv",linked:"CD",vars:[{k:"APP_NAME",v:"taskapi-prod"},{k:"DB_PASSWORD",v:"••••••••••",secret:true},{k:"APPINSIGHTS_KEY",v:"••••••••••",secret:true}]}
       ],
       conns:[
-        {name:"azure-sub-prod",type:"Azure Resource Manager",scope:"Subscription Â· Visual Studio Enterprise",ok:true},
+        {name:"azure-sub-prod",type:"Azure Resource Manager",scope:"Subscription · Visual Studio Enterprise",ok:true},
         {name:"github-cody",type:"GitHub",scope:"cody/taskapi",ok:true},
         {name:"acr-taskapi",type:"Docker Registry",scope:"taskapi.azurecr.io",ok:false}
       ],
@@ -505,7 +505,7 @@ function initial(){
       {name:"Default",hosted:false,parallel:"unlimited",used:null,cap:null,
        agents:[{name:"CODY-DESKTOP",online:true,caps:"java=21, maven=3.9.6, Agent.OS=Windows_NT"}]}
     ],
-    testPlan:{name:"taskapi â€” Sprint 4",suites:[
+    testPlan:{name:"taskapi — Sprint 4",suites:[
       {name:"API smoke",cases:[
         {id:101,title:"GET /api/tasks returns 200",outcome:"passed"},
         {id:102,title:"GET /api/tasks returns a JSON array",outcome:"passed"},
@@ -532,7 +532,7 @@ function initial(){
     org:{name:"cody",url:"dev.azure.com/cody",region:"Central US",owner:USER,created:"12 Aug 2026",plan:"Basic"},
     project:"taskapi",
     projects:[
-      {name:"taskapi",desc:"Learning project â€” Spring Boot Task API",vis:"Private",process:"Agile",repos:4,members:3,updated:"today"},
+      {name:"taskapi",desc:"Learning project — Spring Boot Task API",vis:"Private",process:"Agile",repos:4,members:3,updated:"today"},
       {name:"Contoso Payments",desc:"Payment orchestration platform",vis:"Private",process:"Scrum",repos:11,members:24,updated:"2 hours ago"},
       {name:"Platform",desc:"Shared infrastructure, pipelines and tooling",vis:"Private",process:"Basic",repos:6,members:9,updated:"yesterday"}
     ],
@@ -540,7 +540,7 @@ function initial(){
       {name:"Cody Scott",mail:"cody@example.com",access:"Basic",added:"12 Aug 2026",last:"now"},
       {name:"Priya Raman",mail:"priya@example.com",access:"Basic",added:"14 Aug 2026",last:"3 hours ago"},
       {name:"Sam Okoye",mail:"sam@example.com",access:"Stakeholder",added:"2 Sep 2026",last:"yesterday"},
-      {name:"Build Service",mail:"â€”",access:"Service account",added:"12 Aug 2026",last:"now"}
+      {name:"Build Service",mail:"—",access:"Service account",added:"12 Aug 2026",last:"now"}
     ],
     billing:{plan:"Basic",users:3,free:5,paid:0,cost:"$0.00",hosted:"1 free parallel job",extra:"$40 / extra parallel job / month"},
     usage:[
@@ -562,9 +562,9 @@ function initial(){
       {who:USER,what:"Project 'taskapi' created",area:"Organization",when:"12 Aug 2026"}
     ],
     hooks:[
-      {event:"Build completed",target:"Slack â€” #taskapi-builds",ok:true},
-      {event:"Pull request created",target:"Microsoft Teams â€” Dev",ok:true},
-      {event:"Release deployment approval pending",target:"Slack â€” #oncall",ok:true},
+      {event:"Build completed",target:"Slack — #taskapi-builds",ok:true},
+      {event:"Pull request created",target:"Microsoft Teams — Dev",ok:true},
+      {event:"Release deployment approval pending",target:"Slack — #oncall",ok:true},
       {event:"Work item created",target:"https://hooks.example.com/wi",ok:false}
     ],
     pats:[
@@ -572,7 +572,7 @@ function initial(){
       {name:"self-hosted-agent",scope:"Agent Pools (read, manage)",exp:"expires in 9 days",ok:true},
       {name:"old-ci-token",scope:"Full access",exp:"expired 3 days ago",ok:false}
     ],
-    sshKeys:[{name:"CODY-DESKTOP",fp:"SHA256:8Xk2â€¦qP4m",added:"14 Aug 2026"}],
+    sshKeys:[{name:"CODY-DESKTOP",fp:"SHA256:8Xk2…qP4m",added:"14 Aug 2026"}],
     alerts:[
       {sev:"High",type:"Dependency",title:"CVE-2026-1841 in jackson-databind 2.15.0",repo:"taskapi",state:"Open"},
       {sev:"Medium",type:"Code",title:"Possible SQL string concatenation in TaskRepository",repo:"taskapi",state:"Open"},
@@ -593,11 +593,11 @@ function initial(){
       {name:"onprem-legacy",targets:2,online:1,desc:"Two Windows VMs still running the old scheduler"}
     ],
     plans:[
-      {name:"Q3 delivery",teams:"taskapi, Platform",items:14,window:"Jul â€“ Sep 2026"}
+      {name:"Q3 delivery",teams:"taskapi, Platform",items:14,window:"Jul – Sep 2026"}
     ],
     testRuns:[
-      {id:2041,plan:"taskapi â€” Sprint 4",by:"Priya Raman",passed:3,failed:1,when:"today 10:02"},
-      {id:2038,plan:"taskapi â€” Sprint 3",by:USER,passed:6,failed:0,when:"28 Aug 2026"}
+      {id:2041,plan:"taskapi — Sprint 4",by:"Priya Raman",passed:3,failed:1,when:"today 10:02"},
+      {id:2038,plan:"taskapi — Sprint 3",by:USER,passed:6,failed:0,when:"28 Aug 2026"}
     ],
     notifications:[
       {event:"A pull request is created in taskapi",to:"Team members",on:true},
@@ -610,7 +610,7 @@ function initial(){
       prod:{ name:"prod", gated:true,  approvers:[USER], deploys:[] }
     },
     gate:null,           // {runId, stageIdx}
-    day:1,               // the working day â€” teammates act between days
+    day:1,               // the working day — teammates act between days
     teamLog:[],          // what happened while you weren't looking
     view:"connect",
     openFile:"src/main/java/com/cody/taskapi/web/TaskController.java",
@@ -671,7 +671,7 @@ function buildBroken(s, branch){
 }
 
 /* ============================================================
-   2. PIPELINES â€” stage / job / step templates + a tick runner
+   2. PIPELINES — stage / job / step templates + a tick runner
    ============================================================ */
 
 function ciStages(commitSha, msg, broken){
@@ -795,7 +795,7 @@ function advance(state){
 }
 
 /* ============================================================
-   3. THE TERMINAL â€” command parsing
+   3. THE TERMINAL — command parsing
    ============================================================ */
 
 var HELP = [
@@ -850,7 +850,7 @@ function runCommand(s, line){
   if(a[0]==="ls"||a[0]==="dir"){
     say("info","Files in "+st.activeRepo+" (copy one of these):");
     (st.repo.tracked||[]).forEach(function(p){ say("plain","  "+p); });
-    say("dim","Edit one with:  edit <path>     â€” or click it in Files above and press Edit.");
+    say("dim","Edit one with:  edit <path>     — or click it in Files above and press Edit.");
     st.view="files";
     return {state:st,out:out};
   }
@@ -867,9 +867,9 @@ function runCommand(s, line){
     var known = FILES.indexOf(p)>=0;
     st.repo.workdir[p]= known ? "modified" : "untracked";
     st.view="files"; st.openFile=p;
-    if(a.indexOf("--bug")>=0){ st.repo.broken[p]=true; say("warn","Planted a compile error in "+p+". The next build will fail â€” that's the point."); }
+    if(a.indexOf("--bug")>=0){ st.repo.broken[p]=true; say("warn","Planted a compile error in "+p+". The next build will fail — that's the point."); }
     else say("ok",(known?"Modified ":"Created ")+p);
-    say("dim","Look at Files above â€” it's marked "+(known?"modified":"new")+", and it exists only on your laptop.");
+    say("dim","Look at Files above — it's marked "+(known?"modified":"new")+", and it exists only on your laptop.");
     F.edited=true;
     return {state:st,out:out};
   }
@@ -961,7 +961,7 @@ function runCommand(s, line){
       var msg=flagVal(a,"-m")||flagVal(a,"--message");
       var staged=Object.keys(st.repo.index);
       if(!msg){ say("err","Aborting commit: use  git commit -m \"your message\""); return {state:st,out:out}; }
-      if(!staged.length){ say("err","nothing to commit â€” stage something first with: git add ."); return {state:st,out:out}; }
+      if(!staged.length){ say("err","nothing to commit — stage something first with: git add ."); return {state:st,out:out}; }
       var id=sha();
       var isBroken = staged.some(function(p){ return st.repo.broken[p]; });
       st.repo.commits[id]={sha:id,msg:msg,parent:st.repo.branches[st.repo.head],author:USER,branch:st.repo.head,files:staged,broken:isBroken};
@@ -974,7 +974,7 @@ function runCommand(s, line){
       F.committed=true;
       // pushing a new commit to a PR branch resets votes + re-runs validation
       var pr=st.prs.filter(function(p){return p.status==="active"&&p.source===st.repo.head;})[0];
-      if(pr) say("dim","Branch "+st.repo.head+" has an open PR â€” push to re-trigger its build validation.");
+      if(pr) say("dim","Branch "+st.repo.head+" has an open PR — push to re-trigger its build validation.");
       return {state:st,out:out};
     }
 
@@ -988,7 +988,7 @@ function runCommand(s, line){
         say("err"," ! [remote rejected]   main -> main (pre-receive hook declined)");
         say("err","error: failed to push some refs to '"+ORG+"'");
         say("dim","");
-        say("info","That is a BRANCH POLICY, enforced server-side. Your local git is fine â€” the server said no.");
+        say("info","That is a BRANCH POLICY, enforced server-side. Your local git is fine — the server said no.");
         say("info","Make a branch instead:  git checkout -b feature/tasks-endpoint");
         st.pushes.unshift({branch:br,n:ahead(st,br)||1,sha:st.repo.branches[br],rejected:true});
         st.view="branches";
@@ -1002,7 +1002,7 @@ function runCommand(s, line){
       say("plain","Enumerating objects: "+(n*3+2)+", done.");
       say("plain","To "+ORG);
       say("ok"," * ["+(fresh?"new branch":"updated")+"]      "+br+" -> "+br);
-      say("info","â†’ Your code just crossed from LOCAL to SERVER. Look up: it's on the screen above now.");
+      say("info","→ Your code just crossed from LOCAL to SERVER. Look up: it's on the screen above now.");
       say("dim","Everyone on the team can see this branch. That's the difference between committing and pushing.");
       st.pushes.unshift({branch:br,n:n||1,sha:st.repo.branches[br],rejected:false});
       st.view="files";
@@ -1072,7 +1072,7 @@ function runCommand(s, line){
       st.view="prs"; st.openPr=pr.id;
       say("ok","Pull request !"+pr.id+" created: "+srcb+" -> main");
       say("info","Branch policy queued a validation build automatically. Watch it in Pipelines.");
-      if(!wi) say("warn","No work item linked. The policy requires one â€” link it in the PR view.");
+      if(!wi) say("warn","No work item linked. The policy requires one — link it in the PR view.");
       F.openedPR=true;
       return {state:st,out:out};
     }
@@ -1103,7 +1103,7 @@ function runCommand(s, line){
       var wtype=flagVal(a,"--type")||"User Story";
       if(!wt){ say("err","usage: az boards work-item create --title \"...\" [--type Bug|Task]"); return {state:st,out:out}; }
       st.workItems.push({id:st.nextWi,type:wtype,title:wt,state:"New",pts:3,who:"unassigned",pri:2});
-      say("ok","Created work item #"+st.nextWi+" â€” "+wt);
+      say("ok","Created work item #"+st.nextWi+" — "+wt);
       say("dim","It's on the board now. Link it to a PR later with --work-item "+st.nextWi);
       st.nextWi++; st.view="witems"; F.madeWi=true;
       return {state:st,out:out};
@@ -1138,35 +1138,35 @@ var TOUR = [
       <p><b>Do this.</b> Look at the green LOCAL label on the terminal bar, then the blue SERVER chip in the top bar. Everything you learn here is about code moving between those two.</p>`,
     concept:{k:"Why it matters", v:html`Beginners think <b>commit</b> and <b>push</b> are the same action. They aren't: commit saves on the left, push moves it to the right where other people and the rules live.`} },
 
-  { stage:"Look around", title:"Repositories â€” where code lives", goto:"repolist",
+  { stage:"Look around", title:"Repositories — where code lives", goto:"repolist",
     body: html`<p><b>You'll see.</b> Four repos in one project: the Java API, a React front end, Bicep infrastructure, and a shared library.</p>
-      <p><b>Do this.</b> Click any row to switch to it. Notice the terminal's prompt changes with you â€” it follows whichever repo you're in.</p>
+      <p><b>Do this.</b> Click any row to switch to it. Notice the terminal's prompt changes with you — it follows whichever repo you're in.</p>
       <p><b>Why.</b> A project holds <i>many</i> repos. Real work spans them: a feature can need a change in the API and the front end at once.</p>`,
-    concept:{k:"The hierarchy", v:html`<b>organization</b> â†’ <b>project</b> â†’ <b>repo</b>. Billing sits on the org, boards and pipelines on the project, branch policies on the repo. Knowing which level a setting lives on answers most "why can't Iâ€¦" questions.`} },
+    concept:{k:"The hierarchy", v:html`<b>organization</b> → <b>project</b> → <b>repo</b>. Billing sits on the org, boards and pipelines on the project, branch policies on the repo. Knowing which level a setting lives on answers most "why can't I…" questions.`} },
 
-  { stage:"Look around", title:"Files â€” the server's copy", goto:"files",
-    body: html`<p><b>You'll see.</b> The file tree, and the contents of whichever file you click. This is what the <i>server</i> holds â€” what a teammate would get if they cloned right now.</p>
+  { stage:"Look around", title:"Files — the server's copy", goto:"files",
+    body: html`<p><b>You'll see.</b> The file tree, and the contents of whichever file you click. This is what the <i>server</i> holds — what a teammate would get if they cloned right now.</p>
       <p><b>Do this.</b> Click <code>azure-pipelines.yml</code> and read it. That file <i>is</i> the build; you'll watch it execute later.</p>`,
     concept:{k:"Worth knowing", v:html`The pipeline definition lives <i>in the repo</i>, so changing the build is reviewed like any other code change. Search <b>pipeline as code</b>.`} },
 
-  { stage:"Look around", title:"Branches â€” and the one you can't touch", goto:"branches",
+  { stage:"Look around", title:"Branches — and the one you can't touch", goto:"branches",
     body: html`<p><b>You'll see.</b> Every branch, whether the server has it, and a <b>protected</b> badge on <code>main</code>.</p>
       <p><b>Do this.</b> Read the five policies listed underneath. Those are the rules that will refuse your push in a few steps' time.</p>`,
     concept:{k:"Terms", v:html`<b>Branch policy</b>, <b>protected branch</b>. Set once by an admin, enforced by the server on everyone. This is the biggest difference between a personal repo and a job.`} },
 
-  { stage:"Look around", title:"Boards â€” the work itself", goto:"witems",
+  { stage:"Look around", title:"Boards — the work itself", goto:"witems",
     body: html`<p><b>You'll see.</b> Work items: stories, bugs and tasks, with state, assignee and points.</p>
-      <p><b>Do this.</b> Find <b>#42 â€” Add GET /api/tasks endpoint</b>, assigned to you. Then glance at <b>Board</b> and <b>Sprints</b> in the sidebar to see the same items as a kanban wall and a burndown.</p>`,
+      <p><b>Do this.</b> Find <b>#42 — Add GET /api/tasks endpoint</b>, assigned to you. Then glance at <b>Board</b> and <b>Sprints</b> in the sidebar to see the same items as a kanban wall and a burndown.</p>`,
     concept:{k:"Why it matters", v:html`Nothing should reach production without one of these numbers attached. It's the "why was this change allowed" record.`} },
 
   { stage:"Look around", title:"Pipelines, environments and the machines", goto:"pools",
-    body: html`<p><b>You'll see.</b> Agent pools â€” the actual computers that run your build. A Microsoft-hosted pool with a free-minutes meter, and a self-hosted agent running on a laptop.</p>
+    body: html`<p><b>You'll see.</b> Agent pools — the actual computers that run your build. A Microsoft-hosted pool with a free-minutes meter, and a self-hosted agent running on a laptop.</p>
       <p><b>Do this.</b> Then look at <b>Library</b> (variable groups, secrets, a service connection with an expired token) and <b>Environments</b> (dev deploys itself, prod needs a human).</p>`,
     concept:{k:"Real-world", v:html`An expired <b>service connection</b> or a <b>PAT</b> is the most common cause of "the pipeline worked yesterday". Both are on these screens.`} },
 
-  { stage:"Your morning", title:"Time passes â€” teammates work", goto:"standup",
-    body: html`<p><b>Do this.</b> Press <b>End day â­</b> in the top bar.</p>
-      <p><b>What happens.</b> Priya merges something to <code>main</code> overnight. A <b>main is 1 behind</b> badge appears in the top bar â€” the server has a commit your laptop doesn't.</p>
+  { stage:"Your morning", title:"Time passes — teammates work", goto:"standup",
+    body: html`<p><b>Do this.</b> Press <b>End day ⏭</b> in the top bar.</p>
+      <p><b>What happens.</b> Priya merges something to <code>main</code> overnight. A <b>main is 1 behind</b> badge appears in the top bar — the server has a commit your laptop doesn't.</p>
       <p><b>Then.</b> Read this screen: it's what changed while you were away.</p>`,
     check:function(s){return s.day>1;},
     concept:{k:"Why it matters", v:html`Most of a working day is reacting to other people. A repo you haven't pulled is a repo that's already wrong.`} },
@@ -1178,19 +1178,19 @@ var TOUR = [
     check:function(s){return s.flags.pulled;},
     concept:{k:"Terms", v:html`<b>fetch</b> downloads without merging; <b>pull</b> does both. Try <span class="mono">git fetch</span> to feel the difference.`} },
 
-  { stage:"Make a change", title:"Try the obvious thing â€” and fail", goto:"files",
-    body: html`<p><b>Do this.</b> Click <code>TaskController.java</code> in the tree, press <b>âœŽ Edit</b>. A commit bar appears. Type a message, leave the branch as <code>main</code>, press <b>Commit</b>.</p>
+  { stage:"Make a change", title:"Try the obvious thing — and fail", goto:"files",
+    body: html`<p><b>Do this.</b> Click <code>TaskController.java</code> in the tree, press <b>✎ Edit</b>. A commit bar appears. Type a message, leave the branch as <code>main</code>, press <b>Commit</b>.</p>
       <p><b>What happens.</b> Refused: <code>TF402455</code>. The server said no, not your laptop.</p>
-      <p><b>Why.</b> This is the mistake everyone makes â€” you forget to branch, do the work, and find out at push time.</p>`,
+      <p><b>Why.</b> This is the mistake everyone makes — you forget to branch, do the work, and find out at push time.</p>`,
     check:function(s){return s.flags.pushRejected;},
     concept:{k:"Terms", v:html`<b>TF402455</b> is the real Azure DevOps error code for this. Worth recognising on sight.`} },
 
   { stage:"Make a change", title:"Branch from the ticket", goto:"witems",
     body: html`<p><b>Do this.</b> On work item <b>#42</b>, press <b>+ Branch</b>.</p>
       <p><b>What happens.</b> Azure creates <code>feature/42-add-get-api-tasks-endpoint</code>, switches you to it, and links branch to ticket.</p>
-      <p><b>Then.</b> Go back to <b>Files</b>, press <b>Commit</b> again â€” this time the branch box already holds your new branch. It commits and pushes in one go.</p>`,
+      <p><b>Then.</b> Go back to <b>Files</b>, press <b>Commit</b> again — this time the branch box already holds your new branch. It commits and pushes in one go.</p>`,
     check:function(s){return s.flags.pushedBranch;},
-    concept:{k:"Why it matters", v:html`Branching from the item is the habit that makes the audit chain build itself â€” the PR you open next inherits the link for free.`} },
+    concept:{k:"Why it matters", v:html`Branching from the item is the habit that makes the audit chain build itself — the PR you open next inherits the link for free.`} },
 
   { stage:"Review", title:"Open the pull request", goto:"prs",
     body: html`<p><b>Do this.</b> In the terminal: <code>az repos pr create --title "Add tasks endpoint" --work-item 42</code></p>
@@ -1201,25 +1201,25 @@ var TOUR = [
 
   { stage:"Review", title:"Watch the machine check you", goto:"pipelines",
     body: html`<p><b>Do this.</b> Open Pipelines and click any step to expand its log.</p>
-      <p><b>What you'll see.</b> Stages â†’ jobs â†’ steps, with logs streaming. Nobody asked for this build; opening the PR triggered it.</p>`,
+      <p><b>What you'll see.</b> Stages → jobs → steps, with logs streaming. Nobody asked for this build; opening the PR triggered it.</p>`,
     check:function(s){return s.flags.openedLogs;},
-    concept:{k:"Learn this shape", v:html`<b>stages â†’ jobs â†’ steps</b>. Once that hierarchy clicks, YAML pipelines stop being mysterious.`} },
+    concept:{k:"Learn this shape", v:html`<b>stages → jobs → steps</b>. Once that hierarchy clicks, YAML pipelines stop being mysterious.`} },
 
   { stage:"Review", title:"Feedback lands on you", goto:"prs",
-    body: html`<p><b>Do this.</b> Press <b>End day â­</b> again, then come back to the PR.</p>
-      <p><b>What happens.</b> Priya has left a comment on your code. <b>Complete</b> is now blocked by it â€” unresolved comments are a policy, not a suggestion.</p>
+    body: html`<p><b>Do this.</b> Press <b>End day ⏭</b> again, then come back to the PR.</p>
+      <p><b>What happens.</b> Priya has left a comment on your code. <b>Complete</b> is now blocked by it — unresolved comments are a policy, not a suggestion.</p>
       <p><b>Then.</b> Read it and press <b>Resolve</b>, then <b>Approve as Priya</b>, then <b>Complete merge</b>.</p>`,
     check:function(s){return s.flags.prCompleted;},
-    concept:{k:"Terms", v:html`<b>Comment resolution policy</b>. Also note votes reset when you push again â€” search <b>reset votes on new push</b>.`} },
+    concept:{k:"Terms", v:html`<b>Comment resolution policy</b>. Also note votes reset when you push again — search <b>reset votes on new push</b>.`} },
 
   { stage:"Ship it", title:"Run the pipeline yourself", goto:"pipelines",
-    body: html`<p><b>Do this.</b> Press <b>â–· Run pipeline</b> at the top right.</p>
+    body: html`<p><b>Do this.</b> Press <b>▷ Run pipeline</b> at the top right.</p>
       <p><b>What you'll see.</b> The real run panel: a <b>branch selector</b>, typed <b>parameters</b>, and <b>stages to run</b> you can untick. Pick <code>main</code>, leave everything ticked, press Run.</p>
       <p><b>Then.</b> Watch <code>Build</code> publish one artifact, and <code>Deploy_Dev</code> ship it with nobody's permission.</p>`,
     check:function(s){return s.envs.dev.deploys.length>0;},
     concept:{k:"The principle", v:html`<b>Build once, deploy many.</b> One jar is built and promoted through every environment. Rebuild per environment and you never shipped what you tested.`} },
 
-  { stage:"Ship it", title:"The gate â€” this is a CAB", goto:"pipelines",
+  { stage:"Ship it", title:"The gate — this is a CAB", goto:"pipelines",
     body: html`<p><b>What happens.</b> <code>Deploy_Prod</code> stops and sits in <b>waiting</b>. Nothing deploys.</p>
       <p><b>Do this.</b> Press <b>Approve</b> in the amber bar.</p>
       <p><b>Why.</b> That pause is a <b>Change Advisory Board</b> after it's been automated: one approver, one click, and a permanent record of who said yes.</p>`,
@@ -1227,14 +1227,14 @@ var TOUR = [
     concept:{k:"Terms", v:html`<b>Approvals and checks</b>, <b>CAB</b>, <b>RFC</b>, <b>standard vs normal change</b>, <b>change freeze</b>. Getting a deploy reclassified a <i>standard change</i> is how teams escape the weekly meeting.`} },
 
   { stage:"Ship it", title:"Prove it was legitimate", goto:"chain",
-    body: html`<p><b>You'll see.</b> The chain filled in green: work item â†’ commit â†’ PR â†’ build â†’ artifact â†’ approval â†’ deploy.</p>
+    body: html`<p><b>You'll see.</b> The chain filled in green: work item → commit → PR → build → artifact → approval → deploy.</p>
       <p><b>Why.</b> This is the only thing an auditor actually asks for. You built it without trying, just by following the process.</p>`,
     check:function(s){return s.flags.sawBoards&&s.envs.prod.deploys.length>0;},
     concept:{k:"Terms", v:html`<b>Traceability</b>, <b>audit trail</b>, <b>segregation of duties</b>, <b>SOX</b>, <b>DORA metrics</b>.`} },
 
   { stage:"Ship it", title:"Now break it on purpose", goto:"files",
     body: html`<p><b>Do this.</b> In the terminal: <code>edit src/main/java/com/cody/taskapi/web/TaskController.java --bug</code>, then commit it to a new branch and open a PR.</p>
-      <p><b>What happens.</b> The build goes red and the PR is blocked before a human wastes a minute on it. Open the failed step to read the compiler error, then try <b>â†» Re-run</b>.</p>`,
+      <p><b>What happens.</b> The build goes red and the PR is blocked before a human wastes a minute on it. Open the failed step to read the compiler error, then try <b>↻ Re-run</b>.</p>`,
     check:function(s){return s.flags.sawRedBuild;},
     concept:{k:"Terms", v:html`<b>Fail fast</b>, <b>change failure rate</b>, <b>forward-fix vs rollback</b>. A machine saying no is cheap; production saying no is not.`} }
 ];
@@ -1242,8 +1242,8 @@ var FLOW = [
   {
     stage:"Setup",
     title:"Get the code onto your machine",
-    brief: html`<p>Day one at a new job: you're handed a repo URL. Open <b>My day â†’ Clone / VS Code</b> and read how your laptop talks to Azure Repos.</p>
-      <p>The punchline: it's a normal Git remote. VS Code can't tell the difference between this and GitHub â€” only the URL and the sign-in differ.</p>`,
+    brief: html`<p>Day one at a new job: you're handed a repo URL. Open <b>My day → Clone / VS Code</b> and read how your laptop talks to Azure Repos.</p>
+      <p>The punchline: it's a normal Git remote. VS Code can't tell the difference between this and GitHub — only the URL and the sign-in differ.</p>`,
     objectives:[
       {t:html`Open <b>Clone / VS Code</b> and read the clone URL`, check:function(s){return s.flags.sawConnect;}},
       {t:html`Run <code>git remote -v</code> to see where pushes go`, check:function(s){return s.flags.ranRemote;}}
@@ -1253,11 +1253,11 @@ var FLOW = [
   {
     stage:"Morning",
     title:"Start the day: sync and see what moved",
-    brief: html`<p>Press <b>End day â­</b> in the top bar. Your teammates work overnight â€” Priya merges to <code>main</code>.</p>
+    brief: html`<p>Press <b>End day ⏭</b> in the top bar. Your teammates work overnight — Priya merges to <code>main</code>.</p>
       <p>Now you're behind. This is the actual first move of every working morning: pull before you touch anything, or you'll branch off stale code.</p>`,
     objectives:[
-      {t:html`Press <b>End day â­</b> and let time pass`, check:function(s){return s.day>1;}},
-      {t:html`Read <b>My day â†’ What changed</b>`, check:function(s){return s.flags.sawStandup;}},
+      {t:html`Press <b>End day ⏭</b> and let time pass`, check:function(s){return s.day>1;}},
+      {t:html`Read <b>My day → What changed</b>`, check:function(s){return s.flags.sawStandup;}},
       {t:html`Catch up with <code>git pull</code>`, check:function(s){return s.flags.pulled;}}
     ],
     concept:{k:"Terms to look up", v:html`<b>fetch vs pull</b>, <b>fast-forward</b>, <b>behind/ahead</b>. <span class="mono">git fetch</span> downloads without merging; <span class="mono">git pull</span> does both. Try <span class="mono">git fetch</span> first to see the difference.`}
@@ -1265,10 +1265,10 @@ var FLOW = [
   {
     stage:"Morning",
     title:"See what you've been asked to do",
-    brief: html`<p>Work doesn't start with code, it starts with a <b>work item</b> â€” the ticket that says why this change is allowed to exist.</p>
-      <p>Go to <b>Boards â†’ Work items</b> and find <b>#42, "Add GET /api/tasks endpoint"</b>, assigned to you. That number follows the change all the way to production.</p>`,
+    brief: html`<p>Work doesn't start with code, it starts with a <b>work item</b> — the ticket that says why this change is allowed to exist.</p>
+      <p>Go to <b>Boards → Work items</b> and find <b>#42, "Add GET /api/tasks endpoint"</b>, assigned to you. That number follows the change all the way to production.</p>`,
     objectives:[
-      {t:html`Open <b>Boards â†’ Work items</b> and find <b>#42</b>`, check:function(s){return s.flags.sawBoards;}}
+      {t:html`Open <b>Boards → Work items</b> and find <b>#42</b>`, check:function(s){return s.flags.sawBoards;}}
     ],
     concept:{k:"Terms to look up", v:html`<b>Work item</b>, <b>backlog</b>, <b>sprint</b>, <b>assigned to</b>. In a stand-up you talk about these numbers, not about branches.`}
   },
@@ -1276,31 +1276,31 @@ var FLOW = [
     stage:"Code",
     title:"Try the obvious thing first",
     brief: html`<p>Nobody commits straight to <code>main</code> on purpose. What really happens is you forget to branch, do the work, and only find out at push time. Let's make that happen now, on purpose.</p>
-      <p><b>Two ways to do it â€” pick either.</b></p>
-      <p><b>In the UI:</b> go to <b>Repos â†’ Files</b>, click <code>TaskController.java</code> in the tree, press <b>âœŽ Edit</b>, then type a commit message and press <b>Commit</b> with the branch left as <code>main</code>.</p>
+      <p><b>Two ways to do it — pick either.</b></p>
+      <p><b>In the UI:</b> go to <b>Repos → Files</b>, click <code>TaskController.java</code> in the tree, press <b>✎ Edit</b>, then type a commit message and press <b>Commit</b> with the branch left as <code>main</code>.</p>
       <p><b>Or in the terminal:</b> run <code>ls</code> to see the file list, then the four commands below.</p>`,
     objectives:[
-      {t:html`Change a file â€” <b>âœŽ Edit</b> in Files, or <code>edit &lt;path&gt;</code>`, check:function(s){return s.flags.edited;}},
+      {t:html`Change a file — <b>✎ Edit</b> in Files, or <code>edit &lt;path&gt;</code>`, check:function(s){return s.flags.edited;}},
       {t:html`Try to put it on <code>main</code>, and read what the server says back`, check:function(s){return s.flags.pushRejected;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Branch policy</b>, <b>protected branch</b>, <b>pre-receive hook</b>. <b>TF402455</b> is the real Azure DevOps error code. The <i>server</i> refused you â€” your laptop was happy.`}
+    concept:{k:"Terms to look up", v:html`<b>Branch policy</b>, <b>protected branch</b>, <b>pre-receive hook</b>. <b>TF402455</b> is the real Azure DevOps error code. The <i>server</i> refused you — your laptop was happy.`}
   },
   {
     stage:"Code",
     title:"Do it the way the team does",
-    brief: html`<p>The change is fine â€” it just can't live on <code>main</code>. It needs its own branch, and that branch should be tied to the ticket.</p>
-      <p>Go back to <b>Boards â†’ Work items</b> and press <b>+ Branch</b> on <b>#42</b>. Azure names it after the item and links the two, so the PR you open next inherits the link for free.</p>
+    brief: html`<p>The change is fine — it just can't live on <code>main</code>. It needs its own branch, and that branch should be tied to the ticket.</p>
+      <p>Go back to <b>Boards → Work items</b> and press <b>+ Branch</b> on <b>#42</b>. Azure names it after the item and links the two, so the PR you open next inherits the link for free.</p>
       <p>Then commit, and watch it cross from <b style="color:var(--ok)">LOCAL</b> to <b style="color:var(--azure)">SERVER</b>.</p>`,
     objectives:[
       {t:html`Press <b>+ Branch</b> on work item <b>#42</b>`, check:function(s){return s.flags.branchFromWi;}},
-      {t:html`Commit to that branch â€” it pushes as you commit`, check:function(s){return s.flags.pushedBranch;}}
+      {t:html`Commit to that branch — it pushes as you commit`, check:function(s){return s.flags.pushedBranch;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Topic branch</b>, <b>branch naming</b>, <b>trunk-based development</b>, <b>GitFlow</b>, <b>Release Flow</b>. Short-lived branches tied to a ticket are the modern default â€” long ones rot and conflict.`}
+    concept:{k:"Terms to look up", v:html`<b>Topic branch</b>, <b>branch naming</b>, <b>trunk-based development</b>, <b>GitFlow</b>, <b>Release Flow</b>. Short-lived branches tied to a ticket are the modern default — long ones rot and conflict.`}
   },
   {
     stage:"Review",
     title:"Open the pull request",
-    brief: html`<p>The pull request is the unit of change at nearly every company. It's a request to move your branch into <code>main</code>, plus everything needed to judge it.</p><p>Link the work item as you open it â€” the policy requires one anyway.</p>`,
+    brief: html`<p>The pull request is the unit of change at nearly every company. It's a request to move your branch into <code>main</code>, plus everything needed to judge it.</p><p>Link the work item as you open it — the policy requires one anyway.</p>`,
     objectives:[
       {t:html`<code>az repos pr create --title "Add tasks endpoint" --work-item 42</code>`, check:function(s){return s.flags.openedPR;}}
     ],
@@ -1309,7 +1309,7 @@ var FLOW = [
   {
     stage:"Review",
     title:"Watch the machine check you",
-    brief: html`<p>Opening the PR queued a build with no human involved. That's <b>CI</b>, and its verdict is a policy check on the PR itself.</p><p>Open <b>Pipelines</b> and expand a step to read its log â€” pipelines are just stages â†’ jobs â†’ steps.</p>`,
+    brief: html`<p>Opening the PR queued a build with no human involved. That's <b>CI</b>, and its verdict is a policy check on the PR itself.</p><p>Open <b>Pipelines</b> and expand a step to read its log — pipelines are just stages → jobs → steps.</p>`,
     objectives:[
       {t:html`Open <b>Pipelines</b> and expand any step's logs`, check:function(s){return s.flags.openedLogs;}},
       {t:html`Wait for build validation to go green`, check:function(s){return s.runs.some(function(r){return r.prId&&r.status==="succeeded";});}}
@@ -1319,8 +1319,8 @@ var FLOW = [
   {
     stage:"Review",
     title:"Feedback comes back at you",
-    brief: html`<p>Press <b>End day â­</b> again. Priya reviews your PR overnight and leaves a comment.</p>
-      <p>An unresolved comment is a <i>blocking policy</i> here â€” Complete stays locked until every thread is dealt with. Read it, then press <b>Resolve</b>.</p>`,
+    brief: html`<p>Press <b>End day ⏭</b> again. Priya reviews your PR overnight and leaves a comment.</p>
+      <p>An unresolved comment is a <i>blocking policy</i> here — Complete stays locked until every thread is dealt with. Read it, then press <b>Resolve</b>.</p>`,
     objectives:[
       {t:html`End another day so a review lands`, check:function(s){return s.prs.some(function(p){return (p.threads||[]).length;});}},
       {t:html`Resolve the comment thread on your PR`, check:function(s){return s.prs.some(function(p){return (p.threads||[]).some(function(t){return t.resolved;});});}}
@@ -1330,20 +1330,20 @@ var FLOW = [
   {
     stage:"Review",
     title:"Get approved, then merge",
-    brief: html`<p>Every check green? Approve as the reviewer, then <b>Complete merge</b>.</p><p>If Complete is still greyed out, one of the four checks hasn't passed â€” that checklist <i>is</i> the gate.</p>`,
+    brief: html`<p>Every check green? Approve as the reviewer, then <b>Complete merge</b>.</p><p>If Complete is still greyed out, one of the four checks hasn't passed — that checklist <i>is</i> the gate.</p>`,
     objectives:[
       {t:html`Approve the PR as the required reviewer`, check:function(s){return s.prs.some(function(p){return p.reviewers.some(function(r){return r.vote>0;});});}},
       {t:html`Click <b>Complete merge</b>`, check:function(s){return s.flags.prCompleted;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Required reviewer</b>, <b>squash merge</b>, <b>segregation of duties</b>. Votes reset if you push again â€” search <b>reset votes on new push</b>.`}
+    concept:{k:"Terms to look up", v:html`<b>Required reviewer</b>, <b>squash merge</b>, <b>segregation of duties</b>. Votes reset if you push again — search <b>reset votes on new push</b>.`}
   },
   {
     stage:"Deploy",
     title:"Build once, deploy many",
-    brief: html`<p>The merge landed on <code>main</code>. Go to <b>Pipelines</b> and press <b>â–· Run pipeline</b> â€” the real product's run panel, with a branch selector, typed parameters, and stages you can skip.</p>
+    brief: html`<p>The merge landed on <code>main</code>. Go to <b>Pipelines</b> and press <b>▷ Run pipeline</b> — the real product's run panel, with a branch selector, typed parameters, and stages you can skip.</p>
       <p>Pick <code>main</code>, leave both deploy stages ticked, press Run. Then watch <code>Deploy_Dev</code> ship with nobody's permission.</p>`,
     objectives:[
-      {t:html`Press <b>â–· Run pipeline</b> and run from <code>main</code>`, check:function(s){return s.flags.ranPipeline;}},
+      {t:html`Press <b>▷ Run pipeline</b> and run from <code>main</code>`, check:function(s){return s.flags.ranPipeline;}},
       {t:html`See the artifact published`, check:function(s){return s.artifacts.length>0;}},
       {t:html`Watch <code>dev</code> deploy automatically`, check:function(s){return s.envs.dev.deploys.length>0;}}
     ],
@@ -1351,7 +1351,7 @@ var FLOW = [
   },
   {
     stage:"Deploy",
-    title:"The gate â€” this is your CAB",
+    title:"The gate — this is your CAB",
     brief: html`<p><code>Deploy_Prod</code> won't start. It's sitting in <b>waiting</b>, because the <code>prod</code> environment has an approval check on it.</p><p>That pause is a <b>Change Advisory Board</b> after it's been compressed into one button and a permanent record.</p>`,
     objectives:[
       {t:html`Watch <code>Deploy_Prod</code> stop and wait`, check:function(s){return s.flags.sawGate;}},
@@ -1362,13 +1362,13 @@ var FLOW = [
   {
     stage:"Operate",
     title:"Read the chain back",
-    brief: html`<p>The change is live. Now prove it was legitimate â€” which is the only thing an auditor ever actually asks.</p><p>Open <b>Boards</b> and read the chain end to end.</p>`,
+    brief: html`<p>The change is live. Now prove it was legitimate — which is the only thing an auditor ever actually asks.</p><p>Open <b>Boards</b> and read the chain end to end.</p>`,
     objectives:[
       {t:html`Complete a PR carrying a work item`, check:function(s){return s.prs.some(function(p){return p.status==="completed"&&p.workItem;});}},
       {t:html`Ship it to <code>prod</code> through the gate`, check:function(s){return s.envs.prod.deploys.length>0;}},
       {t:html`Open <b>Boards</b> and read the full chain`, check:function(s){return s.flags.sawBoards;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Traceability</b>, <b>audit trail</b>, <b>SOX compliance</b>, <b>DORA metrics</b>. The chain: work item â†’ commit â†’ PR â†’ build â†’ artifact â†’ approval â†’ deploy.`}
+    concept:{k:"Terms to look up", v:html`<b>Traceability</b>, <b>audit trail</b>, <b>SOX compliance</b>, <b>DORA metrics</b>. The chain: work item → commit → PR → build → artifact → approval → deploy.`}
   },
   {
     stage:"Operate",
@@ -1377,7 +1377,7 @@ var FLOW = [
     objectives:[
       {t:html`<code>git checkout -b bugfix/broken-build</code>`, check:function(s){return !!s.repo.branches["bugfix/broken-build"];}},
       {t:html`<code>edit src/.../web/TaskController.java --bug</code>`, check:function(s){return Object.keys(s.repo.broken).length>0||s.flags.sawRedBuild;}},
-      {t:html`Commit, push, open a PR â€” watch validation fail`, check:function(s){return s.flags.sawRedBuild;}},
+      {t:html`Commit, push, open a PR — watch validation fail`, check:function(s){return s.flags.sawRedBuild;}},
       {t:html`Read the compiler error in the failed step`, check:function(s){return s.flags.openedLogs&&s.flags.sawRedBuild;}}
     ],
     concept:{k:"Terms to look up", v:html`<b>Fail fast</b>, <b>red build</b>, <b>forward-fix vs rollback</b>, <b>change failure rate</b>. A machine saying no is cheap; a reviewer saying no is expensive; production saying no is catastrophic.`}
@@ -1407,7 +1407,7 @@ var I={
   set:"M8 10.2a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4zM13 8a5 5 0 00-.1-1l1.3-1-1.4-2.4-1.5.6a5 5 0 00-1.7-1L9.4 1.5H6.6l-.2 1.7a5 5 0 00-1.7 1l-1.5-.6L1.8 6l1.3 1a5 5 0 000 2l-1.3 1 1.4 2.4 1.5-.6a5 5 0 001.7 1l.2 1.7h2.8l.2-1.7a5 5 0 001.7-1l1.5.6 1.4-2.4-1.3-1c.06-.33.1-.66.1-1z"
 };
 
-/* circular status glyph â€” the green tick / red cross Azure DevOps puts everywhere */
+/* circular status glyph — the green tick / red cross Azure DevOps puts everywhere */
 function glyph(status, size){
   var d = size || 15;
   var map = {
@@ -1583,7 +1583,7 @@ var REPO_FILES = {
 };
 
 var REPO_META = {
-  "taskapi":         {lang:"Java",       size:"1.4 MB",  def:"main", desc:"Spring Boot Task API â€” the service itself"},
+  "taskapi":         {lang:"Java",       size:"1.4 MB",  def:"main", desc:"Spring Boot Task API — the service itself"},
   "taskapi-web":     {lang:"JavaScript", size:"820 KB",  def:"main", desc:"React front end that calls the Task API"},
   "taskapi-infra":   {lang:"Bicep",      size:"46 KB",   def:"main", desc:"Azure infrastructure as code for all environments"},
   "shared-java-libs":{lang:"Java",       size:"210 KB",  def:"main", desc:"Error shapes and DTOs shared across services"}
@@ -1749,7 +1749,7 @@ function contentFor(repo, path){
   return "// " + path + "\n// Created in this sandbox. Nothing real behind it yet.";
 }
 
-/* crude highlighter â€” enough to make a file read like code, not a wall of grey */
+/* crude highlighter — enough to make a file read like code, not a wall of grey */
 function hl(line){
   var parts = line.split(/("(?:[^"\\]|\\.)*"|#[^\n]*$|\/\/[^\n]*$|<!--[\s\S]*?-->|@[A-Za-z]+|\b(?:public|private|static|final|class|void|return|import|package|new|extends|implements)\b)/g);
   return parts.map(function(t,i){
@@ -1799,7 +1799,7 @@ function treeRows(node, depth, s, act, out){
       </button>`);
     } else {
       out.push(html`<div class="fx-row" key=${"d"+depth+k} style=${{paddingLeft:(12+depth*13)+"px",cursor:"default"}}>
-        <span class="cx">â–¾</span>
+        <span class="cx">▾</span>
         <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 4A1.5 1.5 0 013 2.5h3l1.5 2h5A1.5 1.5 0 0114 6v6.5a1 1 0 01-1 1H2.5a1 1 0 01-1-1z"/></svg>
         <span style="color:var(--ink-2)">${k}</span>
       </div>`);
@@ -1832,7 +1832,7 @@ function FilesView(s, act){
 
     ${behind(s,"main") ? html`<div class="behind-warn">
       <span class="pill p-wait"><i class="dot"></i>${behind(s,"main")} behind</span>
-      <span class="sm" style="flex:1;min-width:200px">Someone pushed to <span class="mono">main</span> while you were away. Your copy is stale â€” pull before you branch, or you'll build on old code.</span>
+      <span class="sm" style="flex:1;min-width:200px">Someone pushed to <span class="mono">main</span> while you were away. Your copy is stale — pull before you branch, or you'll build on old code.</span>
       <span class="mono sm" style="color:var(--azure)">git pull</span>
     </div>` : null}
 
@@ -1841,7 +1841,7 @@ function FilesView(s, act){
         <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.5"><path d="M4 2v8M4 14a2 2 0 100-4 2 2 0 000 4zM4 4a1 1 0 100-2 1 1 0 000 2zM12 4a1 1 0 100-2 1 1 0 000 2zM12 4v3a3 3 0 01-3 3H6"/></svg>
         <span class="mono" style="color:var(--azure)">${s.repo.head}</span>
         ${!onServer
-          ? html`<span class="pill p-wait"><i class="dot"></i>local only â€” never pushed</span>`
+          ? html`<span class="pill p-wait"><i class="dot"></i>local only — never pushed</span>`
           : ah>0
             ? html`<span class="pill p-wait"><i class="dot"></i>${ah} commit${ah>1?"s":""} not pushed</span>`
             : html`<span class="pill p-ok"><i class="dot"></i>in sync with origin</span>`}
@@ -1851,7 +1851,7 @@ function FilesView(s, act){
       ${dirtyCount ? html`<div style="background:var(--wait-soft);border-bottom:1px solid var(--border);padding:11px 13px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px">
           <span class="pill p-wait"><i class="dot"></i>${dirtyCount} only on your machine</span>
-          <span class="sm" style="color:var(--ink-2)">These edits exist in the <b style="color:var(--ok)">LOCAL</b> half â€” the terminal below. They cross to the <b style="color:var(--azure)">SERVER</b> when you push.</span>
+          <span class="sm" style="color:var(--ink-2)">These edits exist in the <b style="color:var(--ok)">LOCAL</b> half — the terminal below. They cross to the <b style="color:var(--azure)">SERVER</b> when you push.</span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <input class="fld" style="flex:2;min-width:190px" placeholder="Commit message"
@@ -1863,7 +1863,7 @@ function FilesView(s, act){
         </div>
         ${((s.draftBranch===undefined?s.repo.head:s.draftBranch)==="main")
           ? html`<div class="sm" style="color:var(--wait);margin-top:8px">
-              <b>main is protected.</b> Committing here will be refused. Type a new branch name above â€” that's what the real product nudges you to do.</div>`
+              <b>main is protected.</b> Committing here will be refused. Type a new branch name above — that's what the real product nudges you to do.</div>`
           : html`<div class="sm" style="color:var(--ok);margin-top:8px">
               Will create <span class="mono">${s.draftBranch}</span>, commit to it, and push it to the server.</div>`}
       </div>` : null}
@@ -1874,7 +1874,7 @@ function FilesView(s, act){
           <div class="fx-head">
             <span class="fn">${open || "no file"}</span>
             ${open && !s.repo.workdir[open] && !s.repo.index[open]
-              ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px" onClick=${function(){act({t:"edit_file"});}}>âœŽ Edit</button>`
+              ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px" onClick=${function(){act({t:"edit_file"});}}>✎ Edit</button>`
               : null}
             ${open && s.repo.index[open] ? html`<span class="pill p-run"><i class="dot"></i>staged</span>` : null}
             ${open && s.repo.workdir[open] ? html`<span class="pill p-wait"><i class="dot"></i>${s.repo.workdir[open]==="untracked"?"new, untracked":"modified"}</span>` : null}
@@ -1912,7 +1912,7 @@ function ReposView(s, act){
   <div class="stack">
     <div class="head">
       <h1 class="h-title">Repos</h1>
-      <div class="h-sub">Plain Git underneath. Everything Azure adds sits on the <i>server</i> side â€” policies, pull requests, permissions.</div>
+      <div class="h-sub">Plain Git underneath. Everything Azure adds sits on the <i>server</i> side — policies, pull requests, permissions.</div>
     </div>
 
     <div class="grid2">
@@ -1924,11 +1924,11 @@ function ReposView(s, act){
             var n = pushed?ahead(s,b):0;
             return html`<div class="row" key=${b}>
               <div class="branchline" style="flex:1;min-width:0">
-                <span style=${{color:b===s.repo.head?"var(--azure)":"var(--ink-2)",fontWeight:b===s.repo.head?600:400}}>${b===s.repo.head?"â— ":"  "}${b}</span>
+                <span style=${{color:b===s.repo.head?"var(--azure)":"var(--ink-2)",fontWeight:b===s.repo.head?600:400}}>${b===s.repo.head?"● ":"  "}${b}</span>
                 ${b==="main" ? html`<span class="pill p-idle">protected</span>` : null}
               </div>
               <span class="sha">${s.repo.branches[b].slice(0,7)}</span>
-              ${!pushed ? html`<span class="ahead">local only</span>` : (n>0? html`<span class="ahead">â†‘${n}</span>` : html`<span class="sm dim">in sync</span>`)}
+              ${!pushed ? html`<span class="ahead">local only</span>` : (n>0? html`<span class="ahead">↑${n}</span>` : html`<span class="sm dim">in sync</span>`)}
             </div>`;
           })}
         </div>
@@ -1940,7 +1940,7 @@ function ReposView(s, act){
           <div class="policybox">
             <div class="sm" style="font-weight:600">Why your push gets rejected</div>
             <ul>
-              <li>Require a pull request â€” direct pushes blocked</li>
+              <li>Require a pull request — direct pushes blocked</li>
               <li>Minimum ${s.policy.minReviewers} reviewer approval</li>
               <li>Build validation must succeed</li>
               <li>Linked work item required</li>
@@ -1960,10 +1960,10 @@ function ReposView(s, act){
     </div>
 
     <div class="panel">
-      <div class="panel-h">History<span class="r mono">${s.repo.head}${ah>0?" Â· "+ah+" unpushed":""}</span></div>
+      <div class="panel-h">History<span class="r mono">${s.repo.head}${ah>0?" · "+ah+" unpushed":""}</span></div>
       <div class="graph">
         ${cs.map(function(c,i){
-          return html`<div key=${c.sha}><span class="g">${i===0?"â—":"â”‚"}</span>  <span class="sha">${c.sha}</span>  ${c.msg} ${c.broken?html`<span class="pill p-fail">breaks build</span>`:null}</div>`;
+          return html`<div key=${c.sha}><span class="g">${i===0?"●":"│"}</span>  <span class="sha">${c.sha}</span>  ${c.msg} ${c.broken?html`<span class="pill p-fail">breaks build</span>`:null}</div>`;
         })}
       </div>
     </div>
@@ -1984,7 +1984,7 @@ function PRsView(s, act){
   var approvals = pr.reviewers.filter(function(r){return r.vote>0;}).length;
   var open = (pr.threads||[]).filter(function(t){return !t.resolved;}).length;
   var checks=[
-    {ok: buildOk, wait: !run||run.status==="running", label:"Build validation â€” taskapi CI", detail: run? ("run #"+run.id+" Â· "+run.status) : "not queued"},
+    {ok: buildOk, wait: !run||run.status==="running", label:"Build validation — taskapi CI", detail: run? ("run #"+run.id+" · "+run.status) : "not queued"},
     {ok: approvals>=s.policy.minReviewers, wait:false, label:"Required reviewers ("+approvals+"/"+s.policy.minReviewers+")", detail: approvals?"approved":"awaiting review"},
     {ok: !!pr.workItem, wait:false, label:"Linked work item", detail: pr.workItem? ("#"+pr.workItem) : "none linked"},
     {ok: open===0, wait:false, label:"All comments resolved", detail: open? (open+" open") : ((pr.threads||[]).length? "all resolved":"no comments")}
@@ -2011,7 +2011,7 @@ function PRsView(s, act){
         ${statusPill(pr.status)}
       </div>
       <div class="row" style="gap:14px;flex-wrap:wrap">
-        <span class="mono sm">${pr.source}</span><span class="dim">â†’</span><span class="mono sm">${pr.target}</span>
+        <span class="mono sm">${pr.source}</span><span class="dim">→</span><span class="mono sm">${pr.target}</span>
         <span class="dim sm" style="margin-left:auto">opened by ${pr.author}</span>
       </div>
 
@@ -2047,7 +2047,7 @@ function PRsView(s, act){
               : html`<button class="btn ghost" style="padding:2px 10px;font-size:12px" onClick=${function(){act({t:"resolve_thread",pr:pr.id,id:t.id});}}>Resolve</button>`}
           </div>
         </div>`; })}
-        ${open? html`<div style="padding:9px 13px"><div class="sm dim">A reviewer's comment is a blocking policy here â€” <b>Complete</b> stays locked until every thread is resolved. Search <b>comment resolution policy</b>.</div></div>`:null}
+        ${open? html`<div style="padding:9px 13px"><div class="sm dim">A reviewer's comment is a blocking policy here — <b>Complete</b> stays locked until every thread is resolved. Search <b>comment resolution policy</b>.</div></div>`:null}
       </div>` : null}
 
       ${pr.status==="active" ? html`<div class="row" style="gap:9px;flex-wrap:wrap">
@@ -2056,7 +2056,7 @@ function PRsView(s, act){
         </button>
         ${!pr.workItem ? html`<button class="btn ghost" onClick=${function(){act({t:"link_wi",id:pr.id,wi:42});}}>Link work item #42</button>` : null}
         <button class="btn" onClick=${function(){act({t:"complete_pr",id:pr.id});}} disabled=${!canComplete}>Complete merge</button>
-        ${!canComplete? html`<span class="sm dim">Complete stays disabled until all three checks pass â€” that's the policy doing its job.</span>`:null}
+        ${!canComplete? html`<span class="sm dim">Complete stays disabled until all three checks pass — that's the policy doing its job.</span>`:null}
       </div>` : html`<div class="row"><span class="sm dim">This pull request was ${pr.status}. Its merge commit is on <span class="mono">main</span>.</span></div>`}
     </div>
   </div>`;
@@ -2071,7 +2071,7 @@ function RunDialog(s, act){
     <div class="modal" role="dialog" aria-label="Run pipeline">
       <div class="modal-h">
         <span>Run pipeline</span>
-        <button class="tbtn" style="margin-left:auto" onClick=${function(){act({t:"run_dlg",v:null});}}>âœ•</button>
+        <button class="tbtn" style="margin-left:auto" onClick=${function(){act({t:"run_dlg",v:null});}}>✕</button>
       </div>
       <div class="modal-b">
         <div class="w-k">Branch/tag</div>
@@ -2079,7 +2079,7 @@ function RunDialog(s, act){
                 onChange=${function(e){act({t:"run_set",k:"branch",v:e.target.value});}}>
           ${branches.map(function(b){ return html`<option key=${b} value=${b}>${b}</option>`; })}
         </select>
-        <div class="sm dim" style="margin-bottom:14px">The pipeline runs the <span class="mono">azure-pipelines.yml</span> as it exists <i>on that branch</i> â€” so a change to the pipeline is reviewed like any other change.</div>
+        <div class="sm dim" style="margin-bottom:14px">The pipeline runs the <span class="mono">azure-pipelines.yml</span> as it exists <i>on that branch</i> — so a change to the pipeline is reviewed like any other change.</div>
 
         <div class="w-k">Parameters</div>
         <div style="margin:6px 0 14px">
@@ -2089,7 +2089,7 @@ function RunDialog(s, act){
             </select></div>
           <div class="minirow"><span class="sm" style="flex:1">runTests</span>
             <input type="checkbox" checked=${dlg.runTests} onChange=${function(e){act({t:"run_set",k:"runTests",v:e.target.checked});}} /></div>
-          <div class="sm dim" style="margin-top:5px">Declared as <span class="mono">parameters:</span> at the top of the YAML. Typed, with defaults â€” search <b>runtime parameters</b>.</div>
+          <div class="sm dim" style="margin-top:5px">Declared as <span class="mono">parameters:</span> at the top of the YAML. Typed, with defaults — search <b>runtime parameters</b>.</div>
         </div>
 
         <div class="w-k">Stages to run</div>
@@ -2105,7 +2105,7 @@ function RunDialog(s, act){
             </div>`;
           })}
         </div>
-        <div class="sm dim">Unticking a stage skips it for this run only â€” how you'd deploy to dev without touching prod.</div>
+        <div class="sm dim">Unticking a stage skips it for this run only — how you'd deploy to dev without touching prod.</div>
       </div>
       <div class="modal-f">
         <button class="btn ghost" onClick=${function(){act({t:"run_dlg",v:null});}}>Cancel</button>
@@ -2118,7 +2118,7 @@ function RunDialog(s, act){
 /* ---------- Pipelines ---------- */
 function PipesView(s, act){
   var run = s.runs.filter(function(r){return r.id===s.openRun;})[0] || s.runs[0];
-  var runBtn = html`<button class="btn" onClick=${function(){act({t:"run_dlg",v:"open"});}}>â–· Run pipeline</button>`;
+  var runBtn = html`<button class="btn" onClick=${function(){act({t:"run_dlg",v:"open"});}}>▷ Run pipeline</button>`;
 
   if(!s.runs.length) return html`<div class="stack">
     <div class="head" style="display:flex;align-items:flex-start;gap:12px">
@@ -2127,7 +2127,7 @@ function PipesView(s, act){
     </div>
     ${RunDialog(s, act)}
     <div class="panel"><div class="panel-h">taskapi CI<span class="r mono">azure-pipelines.yml</span></div>
-      <div class="empty">This pipeline has never run.<br/>Press <b>â–· Run pipeline</b> above, or push to <code>main</code> to trigger it automatically.</div></div>
+      <div class="empty">This pipeline has never run.<br/>Press <b>▷ Run pipeline</b> above, or push to <code>main</code> to trigger it automatically.</div></div>
   </div>`;
 
   return html`
@@ -2135,7 +2135,7 @@ function PipesView(s, act){
     <div class="head" style="display:flex;align-items:flex-start;gap:12px">
       <div style="flex:1">
         <h1 class="h-title">Pipelines</h1>
-        <div class="h-sub">One build artifact flows through every environment â€” never rebuilt. Search the phrase <b>build once, deploy many</b>.</div>
+        <div class="h-sub">One build artifact flows through every environment — never rebuilt. Search the phrase <b>build once, deploy many</b>.</div>
       </div>
       ${runBtn}
     </div>
@@ -2155,7 +2155,7 @@ function PipesView(s, act){
           <span class="mono sm num" style="color:var(--azure);min-width:38px">#${r.id}</span>
           <div style="flex:1;min-width:0">
             <div class="sm" style="font-weight:${r.id===run.id?600:400}">${r.name}</div>
-            <div class="sm dim mono">${r.branch} Â· ${r.commit} Â· ${r.trigger}</div>
+            <div class="sm dim mono">${r.branch} · ${r.commit} · ${r.trigger}</div>
           </div>
           ${statusPill(r.status)}
         </div>`; })}
@@ -2169,14 +2169,14 @@ function PipesView(s, act){
         ${run.status==="running"||run.status==="waiting"
           ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:8px" onClick=${function(){act({t:"cancel_run",id:run.id});}}>Cancel</button>` : null}
         ${run.status==="failed"||run.status==="canceled"
-          ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:8px" onClick=${function(){act({t:"retry_run",id:run.id});}}>â†» Re-run</button>` : null}
+          ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:8px" onClick=${function(){act({t:"retry_run",id:run.id});}}>↻ Re-run</button>` : null}
       </div>
       <div class="stagestrip">
         ${run.stages.map(function(st,i){
           return html`<div class=${"stage"+(i===run.cursor.st&&run.status==="running"?" act":"")} key=${i}>
             <div class="stage-n">${glyph(st.status,16)}<span>${st.name}</span></div>
-            ${st.env? html`<div class="stage-j">env: ${st.env}${s.envs[st.env].gated?" Â· gated":""}</div>`:null}
-            ${st.jobs.map(function(j,k){ return html`<div class="stage-j" key=${k}>â–¸ ${j.name} <span class="dim">(${j.pool})</span></div>`; })}
+            ${st.env? html`<div class="stage-j">env: ${st.env}${s.envs[st.env].gated?" · gated":""}</div>`:null}
+            ${st.jobs.map(function(j,k){ return html`<div class="stage-j" key=${k}>▸ ${j.name} <span class="dim">(${j.pool})</span></div>`; })}
           </div>`;
         })}
       </div>
@@ -2192,7 +2192,7 @@ function PipesView(s, act){
                   ${glyph(sp.status,15)}
                   <span class="nm">${st.name} / ${sp.name}</span>
                   <span class="dur">${sp.duration||""}</span>
-                  <span class="dim" style="margin-left:8px">${open?"â–¾":"â–¸"}</span>
+                  <span class="dim" style="margin-left:8px">${open?"▾":"▸"}</span>
                 </button>
                 ${open&&visible.length ? html`<div class="logs">
                   ${visible.map(function(l,li){
@@ -2227,14 +2227,14 @@ function EnvsView(s, act){
           <div class="panel-h"><span class="mono">${e.name}</span>${e.gated?html`<span class="pill p-wait">approval required</span>`:html`<span class="pill p-ok">automatic</span>`}</div>
           <div style="padding:13px">
             <div class="sm" style="color:var(--ink-2)">${e.gated
-              ? html`Deploys pause here until an approver clicks. In ITIL language this is the <b>change approval</b> â€” the CAB, compressed into one button and an audit record.`
-              : html`Deploys run unattended. Low blast radius, so no gate â€” search <b>standard change</b> for the ITIL term that describes this.`}</div>
+              ? html`Deploys pause here until an approver clicks. In ITIL language this is the <b>change approval</b> — the CAB, compressed into one button and an audit record.`
+              : html`Deploys run unattended. Low blast radius, so no gate — search <b>standard change</b> for the ITIL term that describes this.`}</div>
             ${e.approvers.length? html`<div class="sm dim" style="margin-top:9px">Approvers: ${e.approvers.join(", ")}</div>`:null}
           </div>
           <div class="panel-h" style="border-top:1px solid var(--border)">Deployment history<span class="r num">${e.deploys.length}</span></div>
           ${e.deploys.length? html`<div class="rows">${e.deploys.map(function(d,i){ return html`<div class="row" key=${i}>
             <span class="mono sm num" style="color:var(--azure)">#${d.run}</span>
-            <div style="flex:1;min-width:0"><div class="sm">${d.msg}</div><div class="sm dim mono">${d.commit} Â· ${d.approvedBy?("approved by "+d.approvedBy):"no approval needed"}</div></div>
+            <div style="flex:1;min-width:0"><div class="sm">${d.msg}</div><div class="sm dim mono">${d.commit} · ${d.approvedBy?("approved by "+d.approvedBy):"no approval needed"}</div></div>
             <span class="pill p-ok"><i class="dot"></i>deployed</span>
           </div>`; })}</div>` : html`<div class="empty">Never deployed.</div>`}
         </div>`;
@@ -2249,7 +2249,7 @@ function BoardsView(s, act){
   <div class="stack">
     <div class="head">
       <h1 class="h-title">Traceability</h1>
-      <div class="h-sub">Work items are the front of the traceability chain: <span class="mono sm">work item â†’ commit â†’ PR â†’ build â†’ artifact â†’ approval â†’ deploy</span>.</div>
+      <div class="h-sub">Work items are the front of the traceability chain: <span class="mono sm">work item → commit → PR → build → artifact → approval → deploy</span>.</div>
     </div>
     <div class="panel">
       <div class="panel-h">Work items<span class="r">Sprint 4</span></div>
@@ -2261,7 +2261,7 @@ function BoardsView(s, act){
             <span class="pill p-idle">${w.type}</span>
             <div style="flex:1;min-width:0">
               <div class="sm">${w.title}</div>
-              ${linked.length? html`<div class="sm dim mono">linked to PR !${linked[0].id} Â· ${linked[0].status}</div>`:null}
+              ${linked.length? html`<div class="sm dim mono">linked to PR !${linked[0].id} · ${linked[0].status}</div>`:null}
             </div>
             <span class=${"pill "+(w.state==="Done"?"p-ok":w.state==="Active"?"p-run":"p-idle")}>${w.state}</span>
           </div>`;
@@ -2277,11 +2277,11 @@ function BoardsView(s, act){
           var dep=s.envs.prod.deploys[0];
           var steps=[
             {l:"Work item", v:pr? ("#"+pr.workItem) : "not linked yet", ok:!!pr},
-            {l:"Commit",    v:pr? s.repo.branches[pr.source] || "â€”" : "â€”", ok:!!pr},
-            {l:"Pull request", v:pr? ("!"+pr.id+" Â· "+pr.status) : "â€”", ok:!!pr&&pr.status==="completed"},
-            {l:"Build + artifact", v:dep? ("run #"+dep.run+" Â· drop") : "â€”", ok:!!dep},
-            {l:"Approval", v:dep&&dep.approvedBy? dep.approvedBy : "â€”", ok:!!(dep&&dep.approvedBy)},
-            {l:"Deploy", v:dep? "prod" : "â€”", ok:!!dep}
+            {l:"Commit",    v:pr? s.repo.branches[pr.source] || "—" : "—", ok:!!pr},
+            {l:"Pull request", v:pr? ("!"+pr.id+" · "+pr.status) : "—", ok:!!pr&&pr.status==="completed"},
+            {l:"Build + artifact", v:dep? ("run #"+dep.run+" · drop") : "—", ok:!!dep},
+            {l:"Approval", v:dep&&dep.approvedBy? dep.approvedBy : "—", ok:!!(dep&&dep.approvedBy)},
+            {l:"Deploy", v:dep? "prod" : "—", ok:!!dep}
           ];
           return html`<div style="display:flex;flex-direction:column;gap:0">
             ${steps.map(function(x,i){ return html`<div class="checkrow" key=${i} style="border:0;padding:6px 0">
@@ -2291,7 +2291,7 @@ function BoardsView(s, act){
             </div>`; })}
           </div>`;
         })()}
-        <div class="sm dim" style="margin-top:11px">Every green row is evidence. Complete the chain and you've satisfied what most compliance regimes actually ask for â€” search <b>segregation of duties</b> and <b>audit trail</b>.</div>
+        <div class="sm dim" style="margin-top:11px">Every green row is evidence. Complete the chain and you've satisfied what most compliance regimes actually ask for — search <b>segregation of duties</b> and <b>audit trail</b>.</div>
       </div>
     </div>
   </div>`;
@@ -2309,7 +2309,7 @@ function ArtsView(s){
       <div class="panel-h">Published artifacts<span class="r num">${s.artifacts.length}</span></div>
       ${s.artifacts.length? html`<div class="rows">${s.artifacts.map(function(a,i){ return html`<div class="row" key=${i}>
         <span class="mono sm" style="color:var(--azure)">drop</span>
-        <div style="flex:1;min-width:0"><div class="sm mono">taskapi-0.0.1-SNAPSHOT.jar</div><div class="sm dim mono">run #${a.run} Â· ${a.commit} Â· 24.8 MB</div></div>
+        <div style="flex:1;min-width:0"><div class="sm mono">taskapi-0.0.1-SNAPSHOT.jar</div><div class="sm dim mono">run #${a.run} · ${a.commit} · 24.8 MB</div></div>
         <span class="sm dim">${a.envs.length? "deployed to "+a.envs.join(", ") : "not deployed"}</span>
       </div>`; })}</div>` : html`<div class="empty">Nothing published yet. A successful Build stage puts a jar here.</div>`}
     </div>
@@ -2332,21 +2332,21 @@ function ConnectView(s, act){
 
     <div class="split">
       <div class="split-side">
-        <div class="split-k" style="color:var(--term-green)">â— LOCAL â€” your machine</div>
+        <div class="split-k" style="color:var(--term-green)">● LOCAL — your machine</div>
         <div class="sm" style="color:var(--ink-2)">The <b>terminal at the bottom of this page</b> is your laptop. Your clone, your working tree, your branches. Nobody else can see anything here.</div>
         <div class="sm mono dim" style="margin-top:7px">~/dev/${s.activeRepo}</div>
       </div>
       <div class="split-arrow">
-        <div class="mono sm" style="color:var(--azure);font-weight:700">git push â†’</div>
-        <div class="mono sm dim">â† git pull</div>
+        <div class="mono sm" style="color:var(--azure);font-weight:700">git push →</div>
+        <div class="mono sm dim">← git pull</div>
       </div>
       <div class="split-side">
-        <div class="split-k" style="color:var(--azure)">â— SERVER â€” Azure DevOps</div>
+        <div class="split-k" style="color:var(--azure)">● SERVER — Azure DevOps</div>
         <div class="sm" style="color:var(--ink-2)">Everything <b>above the terminal</b> is the server. Shared with your team. Policies live here, and they can refuse your push.</div>
         <div class="sm mono dim" style="margin-top:7px">dev.azure.com/cody/taskapi</div>
       </div>
     </div>
-    <div class="sm dim">Both halves are simulated inside this page, so you can watch code cross the line. Cloning was already done for you â€” the commands below are what produced the local side.</div>
+    <div class="sm dim">Both halves are simulated inside this page, so you can watch code cross the line. Cloning was already done for you — the commands below are what produced the local side.</div>
 
     <div class="panel">
       <div class="panel-h">Clone repository<span class="r mono">${s.activeRepo}</span><span class="pill p-idle">example</span></div>
@@ -2356,7 +2356,7 @@ function ConnectView(s, act){
         <div class="w-k" style="margin:13px 0 6px">SSH</div>
         <div class="cmdline"><span class="mono">git@ssh.dev.azure.com:v3/cody/taskapi/${s.activeRepo}</span></div>
         <div class="sm dim" style="margin-top:11px">In the real product this sits behind the <b>Clone</b> button at the top-right of Files. The shape is
-          <span class="mono">https://dev.azure.com/&lt;org&gt;/&lt;project&gt;/_git/&lt;repo&gt;</span> â€” that's the part worth memorising.</div>
+          <span class="mono">https://dev.azure.com/&lt;org&gt;/&lt;project&gt;/_git/&lt;repo&gt;</span> — that's the part worth memorising.</div>
       </div>
     </div>
 
@@ -2364,10 +2364,10 @@ function ConnectView(s, act){
       <div class="panel">
         <div class="panel-h">From VS Code</div>
         <div style="padding:13px">
-          ${[["1","Ctrl+Shift+P â†’ <b>Git: Clone</b>","or Clone Repository in the Source Control view"],
+          ${[["1","Ctrl+Shift+P → <b>Git: Clone</b>","or Clone Repository in the Source Control view"],
              ["2","Paste the HTTPS URL above","pick a local folder"],
-             ["3","A sign-in window appears","Git Credential Manager handles it â€” including MFA"],
-             ["4","Work normally","the Source Control panel, staging, commits â€” all unchanged"]].map(function(x,i){
+             ["3","A sign-in window appears","Git Credential Manager handles it — including MFA"],
+             ["4","Work normally","the Source Control panel, staging, commits — all unchanged"]].map(function(x,i){
             return html`<div key=${i} style="display:flex;gap:11px;padding:6px 0;border-bottom:1px solid var(--border)">
               <span class="stepno">${x[0]}</span>
               <div><div class="sm" dangerouslySetInnerHTML=${{__html:x[1]}}></div><div class="sm dim">${x[2]}</div></div>
@@ -2380,10 +2380,10 @@ function ConnectView(s, act){
       <div class="panel">
         <div class="panel-h">How you authenticate</div>
         <div style="padding:13px">
-          <div class="minirow">${glyph("succeeded",15)}<span class="sm" style="flex:1"><b>Git Credential Manager</b> â€” the default</span></div>
+          <div class="minirow">${glyph("succeeded",15)}<span class="sm" style="flex:1"><b>Git Credential Manager</b> — the default</span></div>
           <div class="sm dim" style="margin:2px 0 10px 24px">Ships with Git for Windows. Pops a browser sign-in, supports MFA and Entra ID, then caches the credential in Windows Credential Manager. You never see a token.</div>
-          <div class="minirow">${glyph("waiting",15)}<span class="sm" style="flex:1"><b>Personal access token</b> â€” the fallback</span></div>
-          <div class="sm dim" style="margin:2px 0 10px 24px">For scripts, CI, or a self-hosted agent. Paste it where Git asks for a password. Scoped and expiring â€” see <b>Tokens &amp; SSH</b>.</div>
+          <div class="minirow">${glyph("waiting",15)}<span class="sm" style="flex:1"><b>Personal access token</b> — the fallback</span></div>
+          <div class="sm dim" style="margin:2px 0 10px 24px">For scripts, CI, or a self-hosted agent. Paste it where Git asks for a password. Scoped and expiring — see <b>Tokens &amp; SSH</b>.</div>
           <div class="minirow">${glyph("pending",15)}<span class="sm" style="flex:1"><b>SSH key</b></span></div>
           <div class="sm dim" style="margin:2px 0 0 24px">Use the SSH URL. Common on Linux and macOS, or where HTTPS is blocked.</div>
         </div>
@@ -2394,13 +2394,13 @@ function ConnectView(s, act){
       <div class="panel-h">Push goes here, not to GitHub</div>
       <div style="padding:13px">
         <div class="mono sm" style="line-height:2">
-          <div>your laptop  <span class="dim">â€” VS Code, your working tree</span></div>
-          <div style="padding-left:22px">â”‚  <span class="dim">git push</span></div>
-          <div style="padding-left:22px">â–¼</div>
-          <div><span style="color:var(--azure)">Azure Repos</span>  <span class="dim">â€” the server copy everyone shares</span></div>
-          <div style="padding-left:22px">â”œâ”€ <span class="dim">branch policies run here, and can refuse your push</span></div>
-          <div style="padding-left:22px">â”œâ”€ <span class="dim">a pull request opens here</span></div>
-          <div style="padding-left:22px">â””â”€ <span class="dim">a push can trigger Pipelines automatically</span></div>
+          <div>your laptop  <span class="dim">— VS Code, your working tree</span></div>
+          <div style="padding-left:22px">│  <span class="dim">git push</span></div>
+          <div style="padding-left:22px">▼</div>
+          <div><span style="color:var(--azure)">Azure Repos</span>  <span class="dim">— the server copy everyone shares</span></div>
+          <div style="padding-left:22px">├─ <span class="dim">branch policies run here, and can refuse your push</span></div>
+          <div style="padding-left:22px">├─ <span class="dim">a pull request opens here</span></div>
+          <div style="padding-left:22px">└─ <span class="dim">a push can trigger Pipelines automatically</span></div>
         </div>
         <div class="sm dim" style="margin-top:11px">Your teammates pull from that same server copy. That is the whole point of it, and the reason a push is never just "saving".</div>
       </div>
@@ -2411,21 +2411,21 @@ function ConnectView(s, act){
 /* ---------- what happened while you were away ---------- */
 function StandupView(s, act){
   return html`<div class="stack">
-    ${pageHead("Day " + s.day + " â€” what changed overnight","Most of a working day is reacting to what other people did. This is the screen that tells you.")}
+    ${pageHead("Day " + s.day + " — what changed overnight","Most of a working day is reacting to what other people did. This is the screen that tells you.")}
     <div class="panel">
       <div class="panel-h">Activity<span class="r num">${s.teamLog.length}</span></div>
       ${s.teamLog.length ? html`<div class="rows">${s.teamLog.map(function(e,i){ return html`<div class="row" key=${i}>
         <span class="avatar">${e.who.split(" ").map(function(x){return x[0];}).join("").slice(0,2)}</span>
-        <div style="flex:1;min-width:0"><div class="sm">${e.what}</div><div class="sm dim">${e.who} Â· day ${e.day}</div></div>
+        <div style="flex:1;min-width:0"><div class="sm">${e.what}</div><div class="sm dim">${e.who} · day ${e.day}</div></div>
         ${e.tag ? html`<span class=${"pill "+e.cls}>${e.tag}</span>` : null}
       </div>`; })}</div>`
-      : html`<div class="empty">Nothing yet â€” you're on day 1.<br/>Press <b>End day</b> in the top bar to let your teammates work.</div>`}
+      : html`<div class="empty">Nothing yet — you're on day 1.<br/>Press <b>End day</b> in the top bar to let your teammates work.</div>`}
     </div>
     <div class="panel">
       <div class="panel-h">Your morning checklist</div>
       <div style="padding:13px">
         <div class="minirow">${glyph(behind(s,"main")?"failed":"succeeded",15)}<span class="sm" style="flex:1">Local <span class="mono">main</span> up to date</span>
-          <span class="sm dim">${behind(s,"main") ? behind(s,"main")+" behind â€” run git pull" : "in sync"}</span></div>
+          <span class="sm dim">${behind(s,"main") ? behind(s,"main")+" behind — run git pull" : "in sync"}</span></div>
         <div class="minirow">${glyph(openPRs(s).length?"waiting":"succeeded",15)}<span class="sm" style="flex:1">Pull requests waiting on you</span>
           <span class="sm dim">${openPRs(s).length || "none"}</span></div>
         <div class="minirow">${glyph(unresolved(s)?"failed":"succeeded",15)}<span class="sm" style="flex:1">Review comments to address</span>
@@ -2449,14 +2449,14 @@ function repoBar(s, act){
         <span>${n}</span>
       </button>`;
     })}
-    <span class="sm dim" style="margin-left:auto">${REPO_META[s.activeRepo].lang} Â· ${REPO_META[s.activeRepo].size}</span>
+    <span class="sm dim" style="margin-left:auto">${REPO_META[s.activeRepo].lang} · ${REPO_META[s.activeRepo].size}</span>
   </div>`;
 }
 
 /* ---------- Repos > Repositories ---------- */
 function RepoListView(s, act){
   return html`<div class="stack">
-    ${pageHead("Repositories","A project holds many repos. This is where they live â€” the thing you actually clone from.")}
+    ${pageHead("Repositories","A project holds many repos. This is where they live — the thing you actually clone from.")}
     <div class="panel">
       <div class="panel-h">Repositories in <span class="mono" style="color:var(--azure)">${s.project}</span><span class="r num">${Object.keys(REPO_META).length}</span></div>
       <div class="rows">
@@ -2466,7 +2466,7 @@ function RepoListView(s, act){
           return html`<div class="row" key=${n} style="cursor:pointer" onClick=${function(){act({t:"switch_repo",name:n,go:"files"});}}>
             <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.4"><path d="M4 2h8v12H4zM4 11h8"/></svg>
             <div style="flex:1;min-width:0">
-              <div class="sm" style="font-weight:${n===s.activeRepo?600:400}">${n}${n===s.activeRepo?"  â† the terminal is pointed here":""}</div>
+              <div class="sm" style="font-weight:${n===s.activeRepo?600:400}">${n}${n===s.activeRepo?"  ← the terminal is pointed here":""}</div>
               <div class="sm dim">${m.desc}</div>
             </div>
             <span class="pill p-idle">${m.lang}</span>
@@ -2509,7 +2509,7 @@ function SecurityView(s, act){
         <span class="mono sm dim">${a.repo}</span>
         <span class=${"pill "+(a.state==="Open"?"p-fail":a.state==="Fixed"?"p-ok":"p-idle")}>${a.state}</span>
       </div>`; })}</div>
-      <div style="padding:11px 13px"><div class="sm dim">A secret in git history stays there forever â€” rotating the key is the fix, not deleting the file. Search <b>secret scanning</b> and <b>push protection</b>.</div></div>
+      <div style="padding:11px 13px"><div class="sm dim">A secret in git history stays there forever — rotating the key is the fix, not deleting the file. Search <b>secret scanning</b> and <b>push protection</b>.</div></div>
     </div>
   </div>`;
 }
@@ -2547,7 +2547,7 @@ function ForksView(s, act){
       <div class="panel-h">Forks of <span class="mono" style="color:var(--azure)">${s.activeRepo}</span><span class="r num">1</span></div>
       <div class="rows"><div class="row">
         <span class="avatar">SO</span>
-        <div style="flex:1;min-width:0"><div class="sm mono">sam-okoye/taskapi</div><div class="sm dim">1 commit ahead Â· experimenting with pagination</div></div>
+        <div style="flex:1;min-width:0"><div class="sm mono">sam-okoye/taskapi</div><div class="sm dim">1 commit ahead · experimenting with pagination</div></div>
         <span class="pill p-run"><i class="dot"></i>PR open to upstream</span>
       </div></div>
       <div style="padding:11px 13px"><div class="sm dim">Inner-source pattern: read access to everyone, write access to no one, contribution via fork and pull request. Search <b>inner source</b>.</div></div>
@@ -2572,7 +2572,7 @@ function ProjectsView(s, act){
         <span class="sm dim num" style="min-width:78px;text-align:right">${p.members} members</span>
         <span class="sm dim" style="min-width:76px;text-align:right">${p.updated}</span>
       </div>`; })}</div>
-      <div style="padding:11px 13px"><div class="sm dim">Only <b>${s.project}</b> is simulated in depth here. The others exist to show the shape â€” in a real org this list is how you find anything.</div></div>
+      <div style="padding:11px 13px"><div class="sm dim">Only <b>${s.project}</b> is simulated in depth here. The others exist to show the shape — in a real org this list is how you find anything.</div></div>
     </div>
     <div class="grid2">
       <div class="panel"><div class="panel-h">Organization</div><div style="padding:13px">
@@ -2581,12 +2581,12 @@ function ProjectsView(s, act){
       </div></div>
       <div class="panel"><div class="panel-h">The hierarchy</div><div style="padding:13px">
         <div class="mono sm" style="line-height:1.9">
-          <div style="color:var(--azure)">organization  <span class="dim">â€” ${s.org.url}</span></div>
-          <div style="padding-left:16px">â””â”€ project  <span class="dim">â€” ${s.project}</span></div>
-          <div style="padding-left:36px">â”œâ”€ repos  <span class="dim">â€” ${Object.keys(REPO_META).length} of them</span></div>
-          <div style="padding-left:36px">â”œâ”€ boards  <span class="dim">â€” one backlog per team</span></div>
-          <div style="padding-left:36px">â”œâ”€ pipelines  <span class="dim">â€” shared across repos</span></div>
-          <div style="padding-left:36px">â””â”€ artifacts  <span class="dim">â€” feeds</span></div>
+          <div style="color:var(--azure)">organization  <span class="dim">— ${s.org.url}</span></div>
+          <div style="padding-left:16px">└─ project  <span class="dim">— ${s.project}</span></div>
+          <div style="padding-left:36px">├─ repos  <span class="dim">— ${Object.keys(REPO_META).length} of them</span></div>
+          <div style="padding-left:36px">├─ boards  <span class="dim">— one backlog per team</span></div>
+          <div style="padding-left:36px">├─ pipelines  <span class="dim">— shared across repos</span></div>
+          <div style="padding-left:36px">└─ artifacts  <span class="dim">— feeds</span></div>
         </div>
         <div class="sm dim" style="margin-top:11px">Permissions, policies and billing each attach at a different level of this tree. Knowing which level a setting lives on is most of the battle.</div>
       </div></div>
@@ -2606,7 +2606,7 @@ function OrgUsersView(s, act){
         <span class="sm dim" style="min-width:96px;text-align:right">added ${u.added}</span>
         <span class="sm dim" style="min-width:88px;text-align:right">last ${u.last}</span>
       </div>`; })}</div>
-      <div style="padding:11px 13px"><div class="sm dim"><b>Stakeholder</b> can file work items and see dashboards but not browse repos â€” the usual licence for a product owner.</div></div>
+      <div style="padding:11px 13px"><div class="sm dim"><b>Stakeholder</b> can file work items and see dashboards but not browse repos — the usual licence for a product owner.</div></div>
     </div>
   </div>`;
 }
@@ -2619,7 +2619,7 @@ function BillingView(s, act){
       <div class="w"><div class="w-k">Current bill</div><div class="w-big"><span class="w-n">${b.cost}</span><span class="w-u">/ month</span></div><div class="w-f">Plan: ${b.plan}</div></div>
       <div class="w"><div class="w-k">Users</div><div class="w-big"><span class="w-n">${b.users}</span><span class="w-u">of ${b.free} free</span></div><div class="w-f">Basic users past 5 are billed per user</div></div>
       <div class="w"><div class="w-k">Parallel jobs</div><div class="w-big"><span class="w-n">1</span><span class="w-u">hosted</span></div><div class="w-f">${b.extra}</div></div>
-      <div class="w"><div class="w-k">Self-hosted</div><div class="w-big"><span class="w-n">âˆž</span></div><div class="w-f">Your own machine is free and unlimited</div></div>
+      <div class="w"><div class="w-k">Self-hosted</div><div class="w-big"><span class="w-n">∞</span></div><div class="w-f">Your own machine is free and unlimited</div></div>
     </div>
     <div class="panel"><div class="panel-h">Usage this month</div>
       <div style="padding:13px">${s.usage.map(function(u,i){ return html`<div key=${i} style="margin-bottom:11px">
@@ -2650,7 +2650,7 @@ function ExtensionsView(s, act){
     <div class="panel"><div class="panel-h">Installed & available<span class="r num">${s.extensions.length}</span></div>
       <div class="rows">${s.extensions.map(function(e){ return html`<div class="row" key=${e.name}>
         <div style=${{width:"26px",height:"26px",borderRadius:"5px",background:"var(--azure-soft)",color:"var(--azure)",display:"grid",placeItems:"center",fontWeight:700,fontSize:"11px",flex:"none"}}>${e.name.slice(0,1)}</div>
-        <div style="flex:1;min-width:0"><div class="sm">${e.name}</div><div class="sm dim">${e.desc} Â· by ${e.pub}</div></div>
+        <div style="flex:1;min-width:0"><div class="sm">${e.name}</div><div class="sm dim">${e.desc} · by ${e.pub}</div></div>
         <span class=${"pill "+(e.state==="Installed"?"p-ok":"p-idle")}>${e.state}</span>
       </div>`; })}</div>
     </div>
@@ -2665,7 +2665,7 @@ function TaskGroupsView(s, act){
       <div class="rows">${s.taskGroups.map(function(t){ return html`<div class="row" key=${t.name}>
         <div style="flex:1;min-width:0"><div class="sm">${t.name}</div><div class="sm dim">${t.desc}</div></div>
         <span class="sm dim num">${t.steps} steps</span><span class="sm dim">${t.used}</span></div>`; })}</div>
-      <div style="padding:11px 13px"><div class="sm dim">In YAML pipelines the modern equivalent is a <b>template</b> â€” search <b>pipeline templates</b> and <b>extends</b>.</div></div>
+      <div style="padding:11px 13px"><div class="sm dim">In YAML pipelines the modern equivalent is a <b>template</b> — search <b>pipeline templates</b> and <b>extends</b>.</div></div>
     </div>
     <div class="panel"><div class="panel-h">Deployment groups<span class="r num">${s.deployGroups.length}</span></div>
       <div class="rows">${s.deployGroups.map(function(d){ return html`<div class="row" key=${d.name}>
@@ -2692,7 +2692,7 @@ function PlansView(s, act){
           return html`<div key=${sp} style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
             <span class="mono sm" style="min-width:70px;color:var(--ink-3)">${sp}</span>
             <div style=${{flex:1,height:"22px",borderRadius:"4px",background:i===2?"var(--azure)":"var(--surface-2)",color:i===2?"#fff":"var(--ink-3)",display:"flex",alignItems:"center",paddingLeft:"10px",fontSize:"11.5px"}}>
-              ${i===2? "current â€” "+s.sprint.name : i<2? "closed" : "planned"}
+              ${i===2? "current — "+s.sprint.name : i<2? "closed" : "planned"}
             </div></div>`;
         })}
       </div>
@@ -2731,13 +2731,13 @@ function FeedsView(s, act){
       <div style="padding:11px 13px;border-top:1px solid var(--border)">
         <div class="sm" style="font-weight:600;margin-bottom:5px">Upstream sources</div>
         ${f.upstreams.map(function(u){ return html`<div class="minirow" key=${u}>${glyph("succeeded",14)}<span class="sm">${u}</span><span class="sm dim" style="margin-left:auto">cached on first request</span></div>`; })}
-        <div class="sm dim" style="margin-top:8px">An upstream makes this feed a proxy for the public registry too â€” so one URL serves both your packages and Maven Central, and you keep a copy if the internet disappears.</div>
+        <div class="sm dim" style="margin-top:8px">An upstream makes this feed a proxy for the public registry too — so one URL serves both your packages and Maven Central, and you keep a copy if the internet disappears.</div>
       </div>
     </div>`; })}
     <div class="panel"><div class="panel-h">Build artifacts (from pipeline runs)<span class="r num">${s.artifacts.length}</span></div>
       ${s.artifacts.length? html`<div class="rows">${s.artifacts.map(function(a,i){ return html`<div class="row" key=${i}>
         <span class="mono sm" style="color:var(--azure)">drop</span>
-        <div style="flex:1;min-width:0"><div class="sm mono">taskapi-0.0.1-SNAPSHOT.jar</div><div class="sm dim mono">run #${a.run} Â· ${a.commit}</div></div>
+        <div style="flex:1;min-width:0"><div class="sm mono">taskapi-0.0.1-SNAPSHOT.jar</div><div class="sm dim mono">run #${a.run} · ${a.commit}</div></div>
         <span class="sm dim">${a.envs.length? "deployed to "+a.envs.join(", "):"not deployed"}</span></div>`; })}</div>`
         : html`<div class="empty">No build artifacts yet. A successful Build stage puts a jar here.</div>`}
     </div>
@@ -2766,13 +2766,13 @@ function HooksView(s, act){
 
 function TokensView(s, act){
   return html`<div class="stack">
-    ${pageHead("Personal access tokens","How anything that isn't a browser authenticates â€” a CLI, a script, a self-hosted agent. Scoped and expiring, and the cause of an enormous number of Monday-morning outages.")}
+    ${pageHead("Personal access tokens","How anything that isn't a browser authenticates — a CLI, a script, a self-hosted agent. Scoped and expiring, and the cause of an enormous number of Monday-morning outages.")}
     <div class="panel"><div class="panel-h">Tokens<span class="r num">${s.pats.length}</span></div>
       <div class="rows">${s.pats.map(function(p){ return html`<div class="row" key=${p.name}>
         ${glyph(p.ok?"succeeded":"failed",15)}
         <div style="flex:1;min-width:0"><div class="sm mono">${p.name}</div><div class="sm dim">${p.scope}</div></div>
         <span class=${"pill "+(p.ok?"p-ok":"p-fail")}>${p.exp}</span></div>`; })}</div>
-      <div style="padding:11px 13px"><div class="sm dim">Least privilege matters here: <span class="mono">old-ci-token</span> has <b>Full access</b> and has expired â€” exactly the token nobody remembers creating and everybody is afraid to delete.</div></div>
+      <div style="padding:11px 13px"><div class="sm dim">Least privilege matters here: <span class="mono">old-ci-token</span> has <b>Full access</b> and has expired — exactly the token nobody remembers creating and everybody is afraid to delete.</div></div>
     </div>
     <div class="panel"><div class="panel-h">SSH public keys<span class="r num">${s.sshKeys.length}</span></div>
       <div class="rows">${s.sshKeys.map(function(k){ return html`<div class="row" key=${k.name}>
@@ -2789,25 +2789,25 @@ function SummaryView(s, act){
   var pr = s.prs.filter(function(p){return p.workItem;})[0];
   var dep = s.envs.prod.deploys[0];
   var chain=[
-    {l:"Work item",       v:pr? ("#"+pr.workItem):"â€”", ok:!!pr},
-    {l:"Commit",          v:pr? s.repo.branches[pr.source]||"â€”":"â€”", ok:!!pr},
-    {l:"Pull request",    v:pr? ("!"+pr.id+" Â· "+pr.status):"â€”", ok:!!pr&&pr.status==="completed"},
-    {l:"Build + artifact",v:dep? ("run #"+dep.run+" Â· drop"):"â€”", ok:!!dep},
-    {l:"Approval",        v:dep&&dep.approvedBy? dep.approvedBy:"â€”", ok:!!(dep&&dep.approvedBy)},
-    {l:"Deploy",          v:dep? "prod":"â€”", ok:!!dep}
+    {l:"Work item",       v:pr? ("#"+pr.workItem):"—", ok:!!pr},
+    {l:"Commit",          v:pr? s.repo.branches[pr.source]||"—":"—", ok:!!pr},
+    {l:"Pull request",    v:pr? ("!"+pr.id+" · "+pr.status):"—", ok:!!pr&&pr.status==="completed"},
+    {l:"Build + artifact",v:dep? ("run #"+dep.run+" · drop"):"—", ok:!!dep},
+    {l:"Approval",        v:dep&&dep.approvedBy? dep.approvedBy:"—", ok:!!(dep&&dep.approvedBy)},
+    {l:"Deploy",          v:dep? "prod":"—", ok:!!dep}
   ];
   return html`<div class="stack">
     ${pageHead("Summary","The project's front page. In a real org this is the first thing a new joiner opens.")}
     <div class="wgrid">
       <div class="w"><div class="w-k">Last run</div>
-        <div class="w-big">${lastRun?glyph(lastRun.status,22):null}<span class="w-n">${lastRun?"#"+lastRun.id:"â€”"}</span></div>
+        <div class="w-big">${lastRun?glyph(lastRun.status,22):null}<span class="w-n">${lastRun?"#"+lastRun.id:"—"}</span></div>
         <div class="w-f">${lastRun? lastRun.name+" on "+lastRun.branch : "No pipeline has run yet."}</div></div>
       <div class="w"><div class="w-k">Open pull requests</div>
         <div class="w-big"><span class="w-n">${openPr}</span><span class="w-u">awaiting review</span></div>
         <div class="w-f">${openPr? "Nothing merges into main without one." : "main is quiet."}</div></div>
       <div class="w"><div class="w-k">Active work items</div>
         <div class="w-big"><span class="w-n">${active}</span><span class="w-u">of ${s.workItems.length}</span></div>
-        <div class="w-f">${s.sprint.name} Â· ${s.sprint.start}â€“${s.sprint.end}</div></div>
+        <div class="w-f">${s.sprint.name} · ${s.sprint.start}–${s.sprint.end}</div></div>
       <div class="w"><div class="w-k">Production</div>
         <div class="w-big">${glyph(dep?"succeeded":"pending",22)}<span class="w-n">${s.envs.prod.deploys.length}</span><span class="w-u">deploys</span></div>
         <div class="w-f">${dep? "Last approved by "+dep.approvedBy : "Never shipped. The gate is still closed."}</div></div>
@@ -2818,15 +2818,15 @@ function SummaryView(s, act){
         <div class="panel-h">README.md</div>
         <div style="padding:13px;font-size:13px;color:var(--ink-2)">
           <div style="font-weight:600;color:var(--ink);font-size:15px">taskapi</div>
-          <p style="margin:7px 0">A Task API, built one step at a time to learn Spring Boot â€” and the delivery machinery around it.</p>
+          <p style="margin:7px 0">A Task API, built one step at a time to learn Spring Boot — and the delivery machinery around it.</p>
           <div class="minirow"><span class="mono sm" style="min-width:120px">Java</span><span class="sm dim">21</span></div>
           <div class="minirow"><span class="mono sm" style="min-width:120px">Spring Boot</span><span class="sm dim">4.1.1</span></div>
           <div class="minirow"><span class="mono sm" style="min-width:120px">Runs on</span><span class="sm dim">localhost:8081</span></div>
-          <div class="minirow"><span class="mono sm" style="min-width:120px">Build</span><span class="sm dim">Maven Â· azure-pipelines.yml</span></div>
+          <div class="minirow"><span class="mono sm" style="min-width:120px">Build</span><span class="sm dim">Maven · azure-pipelines.yml</span></div>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-h">Traceability â€” the chain an auditor reads</div>
+        <div class="panel-h">Traceability — the chain an auditor reads</div>
         <div style="padding:13px">
           ${chain.map(function(x,i){ return html`<div class="checkrow" key=${i} style="border:0;padding:5px 0">
             ${glyph(x.ok?"succeeded":"pending",15)}
@@ -2853,7 +2853,7 @@ function DashView(s, act){
       <div class="w"><div class="w-k">Build success rate</div>
         <div class="w-big"><span class="w-n">${rate}<span class="w-u">%</span></span></div>
         <div class="spark">${runs.length? runs.map(function(r,i){ return html`<i key=${i} class=${r.status==="succeeded"?"ok":r.status==="failed"?"no":""} style=${{height:(12+i%4*6)+"px"}}></i>`; }) : html`<span class="sm dim">no runs yet</span>`}</div>
-        <div class="w-f">${passed} passed Â· ${failed} failed</div></div>
+        <div class="w-f">${passed} passed · ${failed} failed</div></div>
 
       <div class="w"><div class="w-k">Sprint burndown</div>
         <div class="spark" style="height:52px">${b.map(function(v,i){ return html`<i key=${i} style=${{height:Math.max(3,v/maxb*50)+"px",background:"var(--azure)"}}></i>`; })}</div>
@@ -2875,8 +2875,8 @@ function DashView(s, act){
         <div class="w-f">${s.workItems.length} items in ${s.sprint.name}</div></div>
 
       <div class="w span2"><div class="w-k">Recent activity</div>
-        ${(s.runs.slice(0,4).map(function(r){ return html`<div class="minirow" key=${"r"+r.id}>${glyph(r.status,15)}<span class="sm">Run #${r.id} â€” ${r.name}</span><span class="sm dim mono" style="margin-left:auto">${r.branch}</span></div>`; }))}
-        ${s.prs.slice(0,3).map(function(p){ return html`<div class="minirow" key=${"p"+p.id}>${glyph(p.status==="completed"?"succeeded":"active",15)}<span class="sm">PR !${p.id} â€” ${p.title}</span><span class="sm dim mono" style="margin-left:auto">${p.status}</span></div>`; })}
+        ${(s.runs.slice(0,4).map(function(r){ return html`<div class="minirow" key=${"r"+r.id}>${glyph(r.status,15)}<span class="sm">Run #${r.id} — ${r.name}</span><span class="sm dim mono" style="margin-left:auto">${r.branch}</span></div>`; }))}
+        ${s.prs.slice(0,3).map(function(p){ return html`<div class="minirow" key=${"p"+p.id}>${glyph(p.status==="completed"?"succeeded":"active",15)}<span class="sm">PR !${p.id} — ${p.title}</span><span class="sm dim mono" style="margin-left:auto">${p.status}</span></div>`; })}
         ${(!s.runs.length&&!s.prs.length)? html`<div class="sm dim">Nothing has happened yet. Use the terminal below.</div>`:null}
       </div>
     </div>
@@ -2887,7 +2887,7 @@ function DashView(s, act){
 function WikiView(s, act){
   var page = s.wiki.filter(function(p){return p.path===(s.openWiki||"Home");})[0] || s.wiki[0];
   return html`<div class="stack">
-    ${pageHead("Wiki","Where the knowledge that isn't code lives â€” runbooks, onboarding, decisions. Underneath, it's a git repo of markdown.")}
+    ${pageHead("Wiki","Where the knowledge that isn't code lives — runbooks, onboarding, decisions. Underneath, it's a git repo of markdown.")}
     <div class="panel"><div class="fx">
       <div class="fx-tree">
         ${s.wiki.map(function(p){ return html`<button class=${"fx-row"+(page.path===p.path?" on":"")} key=${p.path} onClick=${function(){act({t:"open_wiki",p:p.path});}}>
@@ -2903,7 +2903,7 @@ function WikiView(s, act){
               if(/^# /.test(ln)) return html`<h2 key=${i} style="font-size:19px;margin:0 0 9px">${ln.slice(2)}</h2>`;
               if(/^## /.test(ln)) return html`<h3 key=${i} style="font-size:14px;margin:15px 0 6px">${ln.slice(3)}</h3>`;
               if(/^\d+\. /.test(ln)) return html`<div key=${i} style="font-size:13px;color:var(--ink-2);padding:2px 0 2px 16px">${ln}</div>`;
-              if(/^- /.test(ln)) return html`<div key=${i} style="font-size:13px;color:var(--ink-2);padding:2px 0 2px 16px">â€¢ ${ln.slice(2)}</div>`;
+              if(/^- /.test(ln)) return html`<div key=${i} style="font-size:13px;color:var(--ink-2);padding:2px 0 2px 16px">• ${ln.slice(2)}</div>`;
               if(!ln.trim()) return html`<div key=${i} style="height:8px"></div>`;
               return html`<div key=${i} style="font-size:13px;color:var(--ink-2);line-height:1.6">${ln}</div>`;
             })}
@@ -2931,7 +2931,7 @@ function WorkItemsView(s, act){
             <span class="mono sm num" style="color:var(--azure);min-width:42px">#${w.id}</span>
             <span class="sm" style="min-width:78px;color:var(--ink-3)">${w.type}</span>
             <div style="flex:1;min-width:0"><div class="sm">${w.title}</div>
-              ${linked.length? html`<div class="sm dim mono">â†’ PR !${linked[0].id} (${linked[0].status})</div>`:null}</div>
+              ${linked.length? html`<div class="sm dim mono">→ PR !${linked[0].id} (${linked[0].status})</div>`:null}</div>
             <span style="min-width:76px">${html`<span class=${"pill "+(w.state==="Closed"?"p-ok":w.state==="Active"?"p-run":w.state==="Resolved"?"p-wait":"p-idle")}>${w.state}</span>`}</span>
             <span class="sm dim" style="min-width:104px">${w.who}</span>
             <span class="sm num" style="min-width:28px">${w.pts}</span>
@@ -2951,7 +2951,7 @@ function WorkItemsView(s, act){
 function KanbanView(s, act){
   var cols=["New","Active","Resolved","Closed"];
   return html`<div class="stack">
-    ${pageHead("Board","The kanban wall. Columns are work item states â€” dragging a card is just editing a field.")}
+    ${pageHead("Board","The kanban wall. Columns are work item states — dragging a card is just editing a field.")}
     <div style="display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:12px;align-items:start;overflow-x:auto">
       ${cols.map(function(c){
         var items=s.workItems.filter(function(w){return w.state===c;});
@@ -2978,7 +2978,7 @@ function BacklogView(s, act){
   var items=s.workItems.slice().sort(function(a,b){ return a.pri-b.pri || a.id-b.id; });
   var total=items.reduce(function(n,w){return n+w.pts;},0);
   return html`<div class="stack">
-    ${pageHead("Backlogs","Ordered by priority, top to bottom. The order itself is the plan â€” the top of this list is what gets built next.")}
+    ${pageHead("Backlogs","Ordered by priority, top to bottom. The order itself is the plan — the top of this list is what gets built next.")}
     <div class="panel">
       <div class="panel-h">Product backlog<span class="r num">${total} points</span></div>
       <div class="rows">
@@ -3005,13 +3005,13 @@ function SprintView(s, act){
     <div class="wgrid">
       <div class="w"><div class="w-k">${s.sprint.name}</div>
         <div class="w-big"><span class="w-n">${done}</span><span class="w-u">of ${total} points done</span></div>
-        <div class="w-f">${s.sprint.start} â€“ ${s.sprint.end}</div></div>
+        <div class="w-f">${s.sprint.start} – ${s.sprint.end}</div></div>
       <div class="w"><div class="w-k">Capacity</div>
         <div class="w-big"><span class="w-n">${s.sprint.capacity}</span><span class="w-u">hours</span></div>
-        <div class="w-f">2 people Â· 10 working days</div></div>
+        <div class="w-f">2 people · 10 working days</div></div>
       <div class="w span2"><div class="w-k">Burndown</div>
         <div class="spark" style="height:60px">${b.map(function(v,i){ return html`<i key=${i} style=${{height:Math.max(3,v/maxb*56)+"px",background:i===b.length-1?"var(--azure)":"var(--border-strong)"}}></i>`; })}</div>
-        <div class="w-f">${b[b.length-1]} points remaining Â· trending to finish</div></div>
+        <div class="w-f">${b[b.length-1]} points remaining · trending to finish</div></div>
     </div>
     <div class="panel">
       <div class="panel-h">Sprint backlog<span class="r num">${inSprint.length} open</span></div>
@@ -3028,7 +3028,7 @@ function SprintView(s, act){
 /* ---------- Boards > Queries ---------- */
 function QueriesView(s, act){
   return html`<div class="stack">
-    ${pageHead("Queries","Saved filters over work items, written in WIQL. Teams live off these â€” 'my active work' is opened a hundred times a day.")}
+    ${pageHead("Queries","Saved filters over work items, written in WIQL. Teams live off these — 'my active work' is opened a hundred times a day.")}
     <div class="panel">
       <div class="panel-h">Shared queries<span class="r">${s.queries.length}</span></div>
       <div class="rows">${s.queries.map(function(q){ return html`<div class="row" key=${q.name}>
@@ -3050,7 +3050,7 @@ function CommitsView(s, act){
       <div class="rows">${cs.map(function(c){ return html`<div class="row" key=${c.sha}>
         <span class="avatar">${c.author.split(" ").map(function(x){return x[0];}).join("")}</span>
         <div style="flex:1;min-width:0"><div class="sm">${c.msg}</div>
-          <div class="sm dim mono">${c.author}${(c.files&&c.files.length)? " Â· "+c.files.length+" file"+(c.files.length>1?"s":""):""}</div></div>
+          <div class="sm dim mono">${c.author}${(c.files&&c.files.length)? " · "+c.files.length+" file"+(c.files.length>1?"s":""):""}</div></div>
         ${c.broken? html`<span class="pill p-fail"><i class="dot"></i>breaks build</span>`:null}
         <span class="sha">${c.sha}</span></div>`; })}</div>
     </div>
@@ -3066,7 +3066,7 @@ function PushesView(s, act){
       ${s.pushes.length? html`<div class="rows">${s.pushes.map(function(p,i){ return html`<div class="row" key=${i}>
         <span class="avatar">CS</span>
         <div style="flex:1;min-width:0"><div class="sm">${USER} pushed to <span class="mono" style="color:var(--azure)">${p.branch}</span></div>
-          <div class="sm dim mono">${p.n} commit${p.n>1?"s":""} Â· ${p.sha}</div></div>
+          <div class="sm dim mono">${p.n} commit${p.n>1?"s":""} · ${p.sha}</div></div>
         <span class=${"pill "+(p.rejected?"p-fail":"p-ok")}><i class="dot"></i>${p.rejected?"rejected by policy":"accepted"}</span>
       </div>`; })}</div>` : html`<div class="empty">Nothing pushed yet. Try <code>git push -u origin feature/x</code></div>`}
     </div>
@@ -3087,7 +3087,7 @@ function BranchesView(s, act){
           <span class="mono sm" style=${{color:b===s.repo.head?"var(--azure)":"var(--ink)",fontWeight:b===s.repo.head?600:400,flex:1}}>${b}${b===s.repo.head?"  (current)":""}</span>
           ${b==="main"? html`<span class="pill p-wait"><i class="dot"></i>protected</span>`:null}
           <span class="sha">${s.repo.branches[b]}</span>
-          ${!pushed? html`<span class="ahead">local only</span>` : n>0? html`<span class="ahead">â†‘${n} ahead</span>` : html`<span class="sm dim">in sync</span>`}
+          ${!pushed? html`<span class="ahead">local only</span>` : n>0? html`<span class="ahead">↑${n} ahead</span>` : html`<span class="sm dim">in sync</span>`}
         </div>`; })}</div>
     </div>
     <div class="panel">
@@ -3121,12 +3121,12 @@ function TagsView(s, act){
 function ReleasesView(s, act){
   var rel=s.runs.filter(function(r){return r.stages.length>1;});
   return html`<div class="stack">
-    ${pageHead("Releases","Runs that carry deploy stages. Same artifact, promoted environment by environment â€” dev first, prod only after someone says yes.")}
+    ${pageHead("Releases","Runs that carry deploy stages. Same artifact, promoted environment by environment — dev first, prod only after someone says yes.")}
     ${rel.length? rel.map(function(r){ return html`<div class="panel" key=${r.id}>
       <div class="panel-h">${glyph(r.status,16)}Release from run #${r.id}<span class="r mono">${r.commitMsg||r.branch}</span></div>
       <div style="padding:13px;display:flex;gap:10px;flex-wrap:wrap;align-items:stretch">
         ${r.stages.map(function(st,i){ return html`<${React.Fragment} key=${i}>
-          ${i>0? html`<span class="arrow">â†’</span>`:null}
+          ${i>0? html`<span class="arrow">→</span>`:null}
           <div class="stage" style="min-width:150px">
             <div class="stage-n">${glyph(st.status,15)}<span>${st.name}</span></div>
             ${st.env? html`<div class="stage-j">env: ${st.env}</div>`:null}
@@ -3157,7 +3157,7 @@ function LibraryView(s, act){
       <div class="panel"><div class="panel-h">Service connections<span class="r num">${s.library.conns.length}</span></div>
         <div class="rows">${s.library.conns.map(function(c){ return html`<div class="row" key=${c.name}>
           ${glyph(c.ok?"succeeded":"failed",15)}
-          <div style="flex:1;min-width:0"><div class="sm mono">${c.name}</div><div class="sm dim">${c.type} Â· ${c.scope}</div></div>
+          <div style="flex:1;min-width:0"><div class="sm mono">${c.name}</div><div class="sm dim">${c.type} · ${c.scope}</div></div>
           ${!c.ok? html`<span class="pill p-fail">token expired</span>`:null}</div>`; })}</div>
         <div style="padding:11px 13px"><div class="sm dim">A service connection is the credential letting a pipeline touch something outside Azure DevOps. Broken ones are the single most common cause of "it worked yesterday".</div></div>
       </div>
@@ -3173,7 +3173,7 @@ function LibraryView(s, act){
 /* ---------- Pipelines > Agent pools ---------- */
 function PoolsView(s, act){
   return html`<div class="stack">
-    ${pageHead("Agent pools","The machines that actually run your pipeline. This is the thing you're waiting 4â€“5 days for a grant on in the real product.")}
+    ${pageHead("Agent pools","The machines that actually run your pipeline. This is the thing you're waiting 4–5 days for a grant on in the real product.")}
     ${s.pools.map(function(p){ return html`<div class="panel" key=${p.name}>
       <div class="panel-h">${p.name}${p.hosted? html`<span class="pill p-run"><i class="dot"></i>Microsoft-hosted</span>`:html`<span class="pill p-ok"><i class="dot"></i>self-hosted</span>`}<span class="r">${p.parallel}</span></div>
       ${p.cap? html`<div style="padding:11px 13px;border-bottom:1px solid var(--border)">
@@ -3195,7 +3195,7 @@ function TestsView(s, act){
   var by=function(o){ return all.filter(function(c){return c.outcome===o;}).length; };
   var m={passed:"succeeded",failed:"failed",blocked:"waiting",notrun:"pending"};
   return html`<div class="stack">
-    ${pageHead("Test Plans","Manual and exploratory test cases â€” the checks a human runs that a pipeline can't. Separate from the automated tests inside your build.")}
+    ${pageHead("Test Plans","Manual and exploratory test cases — the checks a human runs that a pipeline can't. Separate from the automated tests inside your build.")}
     <div class="wgrid">
       <div class="w"><div class="w-k">Passed</div><div class="w-big">${glyph("succeeded",20)}<span class="w-n">${by("passed")}</span></div></div>
       <div class="w"><div class="w-k">Failed</div><div class="w-big">${glyph("failed",20)}<span class="w-n">${by("failed")}</span></div></div>
@@ -3217,7 +3217,7 @@ function TestsView(s, act){
 /* ---------- Project settings ---------- */
 function SettingsView(s, act){
   return html`<div class="stack">
-    ${pageHead("Project settings","Who can do what, and which rules are enforced. Almost every 'why can't Iâ€¦' at work is answered on a screen like this.")}
+    ${pageHead("Project settings","Who can do what, and which rules are enforced. Almost every 'why can't I…' at work is answered on a screen like this.")}
     <div class="grid2">
       <div class="panel"><div class="panel-h">Members & permissions<span class="r num">${s.team.length}</span></div>
         <div class="rows">${s.team.map(function(t){ return html`<div class="row" key=${t.name}>
@@ -3371,8 +3371,8 @@ function App(){
         }
         n.runs.unshift(r); n.openRun=n.nextRun; n.nextRun++;
         n.runDlg=null; n.view="pipelines"; n.flags.ranPipeline=true;
-        n.term.push({k:"cmd",t:"(Run pipeline â€” branch "+br+")"});
-        n.term.push({k:"ok",t:"Queued run #"+r.id+" on "+br+" Â· stages: "+r.stages.map(function(x){return x.name;}).join(", ")});
+        n.term.push({k:"cmd",t:"(Run pipeline — branch "+br+")"});
+        n.term.push({k:"ok",t:"Queued run #"+r.id+" on "+br+" · stages: "+r.stages.map(function(x){return x.name;}).join(", ")});
       }
       if(a.t==="cancel_run"){
         n.runs.forEach(function(r){ if(r.id===a.id && (r.status==="running"||r.status==="waiting")){
@@ -3389,7 +3389,7 @@ function App(){
                               trigger:"Re-run of #"+old.id+" by "+USER, cd:old.stages.length>1, prId:old.prId});
           n.runs.unshift(again); n.openRun=n.nextRun; n.nextRun++;
           if(old.prId) n.prs.forEach(function(p){ if(p.id===old.prId) p.buildRunId=again.id; });
-          n.term.push({k:"ok",t:"Re-running #"+old.id+" as #"+again.id+" â€” same commit, fresh agent."});
+          n.term.push({k:"ok",t:"Re-running #"+old.id+" as #"+again.id+" — same commit, fresh agent."});
           n.term.push({k:"dim",t:"Re-running is the first thing to try on a flaky failure. If it passes now, the test is the bug."});
         }
       }
@@ -3429,7 +3429,7 @@ function App(){
         var id2=sha();
         n.repo.commits[id2]={sha:id2,msg:m,parent:n.repo.remote.main,author:"Priya Raman",branch:"main",files:["pom.xml"]};
         n.repo.remote.main=id2;   // server moves; your laptop does NOT
-        n.teamLog.unshift({who:"Priya Raman",day:n.day,what:"Merged PR to main â€” "+m,tag:"main moved",cls:"p-run"});
+        n.teamLog.unshift({who:"Priya Raman",day:n.day,what:"Merged PR to main — "+m,tag:"main moved",cls:"p-run"});
 
         var mine=n.prs.filter(function(p){return p.status==="active";})[0];
         if(mine){
@@ -3443,7 +3443,7 @@ function App(){
         }
         n.workItems.forEach(function(w){ if(w.who==="unassigned" && w.state==="New"){ w.who=USER; w.state="New"; } });
         n.view="standup";
-        n.term.push({k:"warn",t:"â€” Day "+n.day+" â€”"});
+        n.term.push({k:"warn",t:"— Day "+n.day+" —"});
         n.term.push({k:"info",t:"Priya merged to main while you were away. Your local main is now behind."});
         n.term.push({k:"dim",t:"Run 'git pull' to catch up. This is the first thing you do every morning."});
       }
@@ -3464,7 +3464,7 @@ function App(){
         if(br==="main" && n.policy.requirePR){
           n.term.push({k:"cmd",t:"(Commit to main from the browser)"});
           n.term.push({k:"err",t:"TF402455: Pushes to this branch are not permitted; you must use a pull request."});
-          n.term.push({k:"info",t:"main is protected. Put the change on its own branch instead â€” type a branch name in the box above."});
+          n.term.push({k:"info",t:"main is protected. Put the change on its own branch instead — type a branch name in the box above."});
           n.flags.pushRejected=true; n.view="branches";
           return n;
         }
@@ -3528,13 +3528,13 @@ function App(){
       if(a.t==="approve_gate" && n.gate){
         var r=n.runs.filter(function(x){return x.id===n.gate.runId;})[0];
         if(r){ r.stages[n.gate.stageIdx].approved=true; r.stages[n.gate.stageIdx].status="pending"; r.status="running"; }
-        n.term.push({k:"ok",t:USER+" approved the release to prod. Recorded against the run forever â€” that record is the audit evidence."});
+        n.term.push({k:"ok",t:USER+" approved the release to prod. Recorded against the run forever — that record is the audit evidence."});
         n.gate=null;
       }
       if(a.t==="reject_gate" && n.gate){
         var r2=n.runs.filter(function(x){return x.id===n.gate.runId;})[0];
         if(r2){ r2.stages[n.gate.stageIdx].status="failed"; r2.status="failed"; }
-        n.term.push({k:"warn",t:"Release rejected. The build artifact is untouched â€” you can approve a later run without rebuilding."});
+        n.term.push({k:"warn",t:"Release rejected. The build artifact is untouched — you can approve a later run without rebuilding."});
         n.gate=null;
       }
       return n;
@@ -3599,7 +3599,7 @@ function App(){
         <svg class="glyph" viewBox="0 0 24 24" fill="none"><path d="M3 7.5 9.5 3l5 2.2V3L21 6.2v11.6L15.5 21l-9-3.2v3.1L3 17.2z" fill="var(--azure)"/></svg>
         <span>Flight Sim</span>
       </div>
-      <span class="srvchip" title="Everything on this screen is the shared server. The terminal below is your laptop.">â— SERVER Â· dev.azure.com</span>
+      <span class="srvchip" title="Everything on this screen is the shared server. The terminal below is your laptop.">● SERVER · dev.azure.com</span>
       <div class="crumbs">
         <span>${s.org.name}</span><span>/</span><b>${s.project}</b>
         ${/^(files|commits|pushes|branches|tags|prs|forks|secure|repolist)$/.test(s.view)? html`<span>/</span><span style="color:var(--azure)">${s.activeRepo}</span>`:null}
@@ -3608,7 +3608,7 @@ function App(){
       <div class="spacer"></div>
       ${behind(s,"main") ? html`<span class="pill p-wait"><i class="dot"></i>main is ${behind(s,"main")} behind</span>` : null}
       <span class="sm dim">Day ${s.day}</span>
-      <button class="daybtn" onClick=${function(){ act({t:"end_day"}); }} title="Let your teammates work overnight">End day â­</button>
+      <button class="daybtn" onClick=${function(){ act({t:"end_day"}); }} title="Let your teammates work overnight">End day ⏭</button>
       <button class="tbtn" onClick=${function(){ setGuide(!guide); }}>${guide?"Hide guide":"Show guide"}</button>
       <button class="tbtn" onClick=${function(){ set(initial()); }}>Reset</button>
     </div>
@@ -3634,8 +3634,8 @@ function App(){
           <div class=${"term-grip"+(dragging?" drag":"")} onPointerDown=${startDrag}
                role="separator" aria-label="Resize terminal" title="Drag to resize"></div>
           <div class="term-h">
-            <span class="t" style="color:var(--term-green);font-weight:700">â— LOCAL</span>
-            <span class="t">your machine Â· ~/dev/${s.activeRepo} Â· ${s.repo.head}</span>
+            <span class="t" style="color:var(--term-green);font-weight:700">● LOCAL</span>
+            <span class="t">your machine · ~/dev/${s.activeRepo} · ${s.repo.head}</span>
             ${dirtyN? html`<span class="t" style="color:var(--term-yellow)">${dirtyN} change${dirtyN>1?"s":""} not on the server</span>`:null}
             ${ahead(s,s.repo.head)? html`<span class="t" style="color:var(--term-yellow)">${ahead(s,s.repo.head)} commit${ahead(s,s.repo.head)>1?"s":""} unpushed</span>`:null}
             <span class="sp"></span>
@@ -3653,7 +3653,7 @@ function App(){
           </div>`:null}
           ${!min? html`<form class="term-i" onSubmit=${submit}>
             <span class="ps">${"PS "+s.activeRepo+">"}</span>
-            <input ref=${inputRef} onKeyDown=${onKey} autoFocus spellCheck="false" autoComplete="off" placeholder="type a command â€” 'help' lists them all" aria-label="terminal input" />
+            <input ref=${inputRef} onKeyDown=${onKey} autoFocus spellCheck="false" autoComplete="off" placeholder="type a command — 'help' lists them all" aria-label="terminal input" />
           </form>`:null}
         </div>
       </div>
@@ -3664,7 +3664,7 @@ function App(){
           var done=T.check? T.check(s) : null;
           return html`<${React.Fragment}>
             <div class="lab-h">
-              <div class="lab-k">Step ${tour+1} of ${TOUR.length} Â· ${T.stage}</div>
+              <div class="lab-k">Step ${tour+1} of ${TOUR.length} · ${T.stage}</div>
               <div class="lab-t">${T.title}</div>
             </div>
             <div class="progress">
@@ -3672,23 +3672,23 @@ function App(){
             </div>
             ${T.goto? html`<div style="padding:0 16px 12px">
               <button class="btn" style="width:100%" onClick=${function(){act({t:"view",v:T.goto});}}>
-                Take me to ${LABEL[T.goto]||T.goto} â†’
+                Take me to ${LABEL[T.goto]||T.goto} →
               </button>
             </div>`:null}
             <div class="lab-b">${T.body}</div>
             ${T.check? html`<div class=${"obj"+(done?" done":"")} style="border-bottom:0">
-              <span class="bx">${done?"âœ“":""}</span>
-              <span class="tx">${done? "Done â€” press Next below." : "Not done yet â€” this ticks when you've done it."}</span>
+              <span class="bx">${done?"✓":""}</span>
+              <span class="tx">${done? "Done — press Next below." : "Not done yet — this ticks when you've done it."}</span>
             </div>`:null}
             <div class="concept">
               <div class="k">${T.concept.k}</div>
               <div class="v">${T.concept.v}</div>
             </div>
             <div class="labnav">
-              <button class="btn ghost" onClick=${function(){ setTour(Math.max(0,tour-1)); }} disabled=${tour===0}>â—‚ Back</button>
+              <button class="btn ghost" onClick=${function(){ setTour(Math.max(0,tour-1)); }} disabled=${tour===0}>◂ Back</button>
               <button class=${"btn"+(done===false?" ghost":"")} style="flex:1"
                 onClick=${function(){ setTour(Math.min(TOUR.length-1,tour+1)); }} disabled=${tour===TOUR.length-1}>
-                ${tour===TOUR.length-1? "That's the tour" : "Next â–¸"}
+                ${tour===TOUR.length-1? "That's the tour" : "Next ▸"}
               </button>
             </div>
           <//>`;

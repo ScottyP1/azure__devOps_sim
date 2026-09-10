@@ -192,6 +192,8 @@ select.fld{cursor:pointer}
 .daybtn:hover{background:var(--azure-ink)}
 .behind-warn{background:var(--wait-soft);border:1px solid var(--wait);border-radius:5px;padding:10px 13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .srvchip{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--azure);background:var(--azure-soft);border:1px solid var(--azure);border-radius:11px;padding:1px 9px;white-space:nowrap}
+.userchip{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--border);border-radius:14px;padding:2px 10px 2px 3px;cursor:pointer;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.userchip:hover{background:var(--surface-2);color:var(--ink);border-color:var(--border-strong)}
 .split{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
 .split-side{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
 .split-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:6px}
@@ -427,15 +429,24 @@ var useState = React.useState, useEffect = React.useEffect, useRef = React.useRe
    1. THE MODEL  — a tiny git + Azure DevOps state machine
    ============================================================ */
 
+/* Whoever opens this becomes the developer in the story. Asked for on first
+   run, remembered per browser, used everywhere a name appears. */
+var NAME_KEY = "adosim.user";
+function loadUser(){ try{ var n=localStorage.getItem(NAME_KEY); return (n&&n.trim())? n.trim() : null; }catch(e){ return null; } }
+function saveUser(n){ try{ localStorage.setItem(NAME_KEY, n); }catch(e){} }
+function initialsOf(n){
+  return String(n||"?").trim().split(/\s+/).map(function(x){return x[0]||"";}).join("").slice(0,2).toUpperCase() || "?";
+}
 var USER = "Cody Scott";
-var ORG  = "https://dev.azure.com/cody/taskapi/_git/taskapi";
+USER = loadUser() || USER;
+var ORG  = "https://dev.azure.com/contoso/taskapi/_git/taskapi";
 
 var FILES = [
   "pom.xml",
   "README.md",
   "azure-pipelines.yml",
-  "src/main/java/com/cody/taskapi/TaskapiApplication.java",
-  "src/main/java/com/cody/taskapi/web/TaskController.java",
+  "src/main/java/com/contoso/taskapi/TaskapiApplication.java",
+  "src/main/java/com/contoso/taskapi/web/TaskController.java",
   "src/main/resources/application.properties"
 ];
 
@@ -465,13 +476,13 @@ function initial(){
     policy:{ requirePR:true, minReviewers:1, buildValidation:true, requireWorkItem:true },
     prs:[], runs:[], artifacts:[], pushes:[],
     workItems:[
-      {id:41,type:"User Story",title:"Expose tasks over HTTP",state:"Closed",pts:3,who:"Cody Scott",pri:2},
-      {id:42,type:"User Story",title:"Add GET /api/tasks endpoint",state:"Active",pts:5,who:"Cody Scott",pri:1},
+      {id:41,type:"User Story",title:"Expose tasks over HTTP",state:"Closed",pts:3,who:USER,pri:2},
+      {id:42,type:"User Story",title:"Add GET /api/tasks endpoint",state:"Active",pts:5,who:USER,pri:1},
       {id:43,type:"Bug",title:"Health endpoint returns 404 on 8081",state:"New",pts:2,who:"Priya Raman",pri:1},
-      {id:44,type:"Task",title:"Write azure-pipelines.yml",state:"Resolved",pts:3,who:"Cody Scott",pri:2},
+      {id:44,type:"Task",title:"Write azure-pipelines.yml",state:"Resolved",pts:3,who:USER,pri:2},
       {id:45,type:"User Story",title:"POST /api/tasks creates a task",state:"New",pts:8,who:"unassigned",pri:2},
       {id:46,type:"Bug",title:"Reviewer votes survive a force push",state:"New",pts:1,who:"unassigned",pri:3},
-      {id:47,type:"Task",title:"Add build validation policy to main",state:"Closed",pts:1,who:"Cody Scott",pri:1}
+      {id:47,type:"Task",title:"Add build validation policy to main",state:"Closed",pts:1,who:USER,pri:1}
     ],
     nextWi:48,
     sprint:{name:"Sprint 4",start:"1 Sep",end:"14 Sep",capacity:60,burn:[21,20,18,15,13,13,9,7,5,5,3]},
@@ -494,7 +505,7 @@ function initial(){
       ],
       conns:[
         {name:"azure-sub-prod",type:"Azure Resource Manager",scope:"Subscription · Visual Studio Enterprise",ok:true},
-        {name:"github-cody",type:"GitHub",scope:"cody/taskapi",ok:true},
+        {name:"github-contoso",type:"GitHub",scope:"contoso/taskapi",ok:true},
         {name:"acr-taskapi",type:"Docker Registry",scope:"taskapi.azurecr.io",ok:false}
       ],
       files:[{name:"taskapi-signing.jks",size:"3.2 KB"}]
@@ -503,7 +514,7 @@ function initial(){
       {name:"Azure Pipelines",hosted:true,parallel:"1 free parallel job",used:412,cap:1800,
        agents:[{name:"Hosted Ubuntu 22.04",online:true,caps:"java 21, maven 3.9.6, docker"},{name:"Hosted Windows 2022",online:true,caps:"msbuild, dotnet 8"}]},
       {name:"Default",hosted:false,parallel:"unlimited",used:null,cap:null,
-       agents:[{name:"CODY-DESKTOP",online:true,caps:"java=21, maven=3.9.6, Agent.OS=Windows_NT"}]}
+       agents:[{name:"DEV-LAPTOP-01",online:true,caps:"java=21, maven=3.9.6, Agent.OS=Windows_NT"}]}
     ],
     testPlan:{name:"taskapi — Sprint 4",suites:[
       {name:"API smoke",cases:[
@@ -517,7 +528,7 @@ function initial(){
         {id:112,title:"Port 8081 configurable via env var",outcome:"notrun"}]}
     ]},
     team:[
-      {name:"Cody Scott",initials:"CS",role:"Project Administrator",perms:"Full control"},
+      {name:USER,initials:"CS",role:"Project Administrator",perms:"Full control"},
       {name:"Priya Raman",initials:"PR",role:"Contributor",role2:"Required reviewer on main"},
       {name:"Build Service",initials:"BS",role:"Build Service account",perms:"Read, create PR status"}
     ],
@@ -529,7 +540,7 @@ function initial(){
       "taskapi-infra":   mkRepoState("taskapi-infra","Add App Service module"),
       "shared-java-libs":mkRepoState("shared-java-libs","Add ApiError record")
     },
-    org:{name:"cody",url:"dev.azure.com/cody",region:"Central US",owner:USER,created:"12 Aug 2026",plan:"Basic"},
+    org:{name:"contoso",url:"dev.azure.com/contoso",region:"Central US",owner:USER,created:"12 Aug 2026",plan:"Basic"},
     project:"taskapi",
     projects:[
       {name:"taskapi",desc:"Learning project — Spring Boot Task API",vis:"Private",process:"Agile",repos:4,members:3,updated:"today"},
@@ -537,7 +548,7 @@ function initial(){
       {name:"Platform",desc:"Shared infrastructure, pipelines and tooling",vis:"Private",process:"Basic",repos:6,members:9,updated:"yesterday"}
     ],
     orgUsers:[
-      {name:"Cody Scott",mail:"cody@example.com",access:"Basic",added:"12 Aug 2026",last:"now"},
+      {name:USER,mail:USER.toLowerCase().replace(/[^a-z]+/g,".")+"@example.com",access:"Basic",added:"12 Aug 2026",last:"now"},
       {name:"Priya Raman",mail:"priya@example.com",access:"Basic",added:"14 Aug 2026",last:"3 hours ago"},
       {name:"Sam Okoye",mail:"sam@example.com",access:"Stakeholder",added:"2 Sep 2026",last:"yesterday"},
       {name:"Build Service",mail:"—",access:"Service account",added:"12 Aug 2026",last:"now"}
@@ -572,7 +583,7 @@ function initial(){
       {name:"self-hosted-agent",scope:"Agent Pools (read, manage)",exp:"expires in 9 days",ok:true},
       {name:"old-ci-token",scope:"Full access",exp:"expired 3 days ago",ok:false}
     ],
-    sshKeys:[{name:"CODY-DESKTOP",fp:"SHA256:8Xk2…qP4m",added:"14 Aug 2026"}],
+    sshKeys:[{name:"DEV-LAPTOP-01",fp:"SHA256:8Xk2…qP4m",added:"14 Aug 2026"}],
     alerts:[
       {sev:"High",type:"Dependency",title:"CVE-2026-1841 in jackson-databind 2.15.0",repo:"taskapi",state:"Open"},
       {sev:"Medium",type:"Code",title:"Possible SQL string concatenation in TaskRepository",repo:"taskapi",state:"Open"},
@@ -581,8 +592,8 @@ function initial(){
     ],
     feeds:[
       {name:"taskapi-feed",scope:"Project",pkgs:[
-        {name:"com.cody:shared-java-libs",ver:"1.2.0",type:"Maven",dl:41},
-        {name:"com.cody:taskapi-client",ver:"0.4.1",type:"Maven",dl:12}],
+        {name:"com.contoso:shared-java-libs",ver:"1.2.0",type:"Maven",dl:41},
+        {name:"com.contoso:taskapi-client",ver:"0.4.1",type:"Maven",dl:12}],
        upstreams:["Maven Central","npmjs"]}
     ],
     taskGroups:[
@@ -601,7 +612,7 @@ function initial(){
     ],
     notifications:[
       {event:"A pull request is created in taskapi",to:"Team members",on:true},
-      {event:"A build fails on main",to:"Cody Scott",on:true},
+      {event:"A build fails on main",to:USER,on:true},
       {event:"A release needs my approval",to:"Approvers",on:true},
       {event:"A work item is assigned to me",to:"Assignee",on:false}
     ],
@@ -613,7 +624,7 @@ function initial(){
     day:1,               // the working day — teammates act between days
     teamLog:[],          // what happened while you weren't looking
     view:"connect",
-    openFile:"src/main/java/com/cody/taskapi/web/TaskController.java",
+    openFile:"src/main/java/com/contoso/taskapi/web/TaskController.java",
     openWiki:"Home",
     openPr:null,
     openRun:null,
@@ -1152,35 +1163,47 @@ var TOUR = [
   { stage:"Look around", title:"The two halves", goto:"connect",
     body: html`<p><b>What this is.</b> The whole app is two things pretending to be two machines.</p>
       <p>The <b style="color:var(--ok)">terminal at the bottom</b> is your laptop. The <b style="color:var(--azure)">screen above it</b> is the Azure DevOps server your team shares.</p>
-      <p><b>Do this.</b> Look at the green LOCAL label on the terminal bar, then the blue SERVER chip in the top bar. Everything you learn here is about code moving between those two.</p>`,
+      <p><b>Do this.</b> Look at the green LOCAL label on the terminal bar, then the blue SERVER chip in the top bar. Then type <code>git remote -v</code> in the terminal to see the server address your machine is pointed at.</p>`,
+    check:function(s){return s.flags.ranRemote;},
+    need:"Run git remote -v in the terminal.",
     concept:{k:"Why it matters", v:html`Beginners think <b>commit</b> and <b>push</b> are the same action. They aren't: commit saves on the left, push moves it to the right where other people and the rules live.`} },
 
   { stage:"Look around", title:"Repositories — where code lives", goto:"repolist",
     body: html`<p><b>You'll see.</b> Four repos in one project: the Java API, a React front end, Bicep infrastructure, and a shared library.</p>
       <p><b>Do this.</b> Click any row to switch to it. Notice the terminal's prompt changes with you — it follows whichever repo you're in.</p>
       <p><b>Why.</b> A project holds <i>many</i> repos. Real work spans them: a feature can need a change in the API and the front end at once.</p>`,
+    check:function(s){return s.flags.switchedRepo;},
+    need:"Switch to a different repository (click any row, then come back if you like).",
     concept:{k:"The hierarchy", v:html`<b>organization</b> → <b>project</b> → <b>repo</b>. Billing sits on the org, boards and pipelines on the project, branch policies on the repo. Knowing which level a setting lives on answers most "why can't I…" questions.`} },
 
   { stage:"Look around", title:"Files — the server's copy", goto:"files",
     body: html`<p><b>You'll see.</b> The file tree, and the contents of whichever file you click. This is what the <i>server</i> holds — what a teammate would get if they cloned right now.</p>
-      <p><b>Do this.</b> Click <code>azure-pipelines.yml</code> and read it. That file <i>is</i> the build; you'll watch it execute later.</p>`,
+      <p><b>Do this.</b> Click <code>azure-pipelines.yml</code> in the tree and read it. That file <i>is</i> the build; you'll watch it execute later.</p>`,
+    check:function(s){return s.flags.sawYaml;},
+    need:"Open azure-pipelines.yml in the file tree.",
     concept:{k:"Worth knowing", v:html`The pipeline definition lives <i>in the repo</i>, so changing the build is reviewed like any other code change. Search <b>pipeline as code</b>.`} },
 
   { stage:"Look around", title:"Branches — and the one you can't touch", goto:"branches",
     body: html`<p><b>You'll see.</b> Every branch, whether the server has it, and a <b>protected</b> badge on <code>main</code>.</p>
       <p><b>Do this.</b> Read the five policies listed underneath. Those are the rules that will refuse your push in a few steps' time.</p>`,
+    check:function(s){return s.flags.sawBranches;},
+    need:"Open the Branches screen.",
     concept:{k:"Terms", v:html`<b>Branch policy</b>, <b>protected branch</b>. Set once by an admin, enforced by the server on everyone. This is the biggest difference between a personal repo and a job.`} },
 
   { stage:"Look around", title:"Boards — the work itself", goto:["witems","kanban","sprints"],
     body: html`<p><b>You'll see.</b> Work items: stories, bugs and tasks, each with a state, an assignee and a points estimate.</p>
       <p><b>Do this.</b> On <b>Work items</b>, look for <b>#42 — Add GET /api/tasks endpoint</b>. It's <i>Active</i> and assigned to Cody Scott — that's you. You'll come back to it in a few steps.</p>
       <p>Use the two buttons above to see the <i>same</i> items as a kanban wall (<b>Board</b>) and as a burndown (<b>Sprints</b>). One set of data, three ways of looking at it.</p>`,
+    check:function(s){return s.flags.sawBoards&&s.flags.sawKanban&&s.flags.sawSprints;},
+    need:"Visit all three: Work items, Board and Sprints.",
     concept:{k:"Why it matters", v:html`Nothing should reach production without one of these numbers attached. It's the "why was this change allowed" record — and in stand-ups people talk about these numbers, not about branches.`} },
 
   { stage:"Look around", title:"The machines, the secrets, the gates", goto:["pools","library","envs"],
     body: html`<p><b>Agent pools</b> — the actual computers that run your build. One Microsoft-hosted pool with a free-minutes meter, and a self-hosted agent running on someone's desktop.</p>
       <p><b>Library</b> — where configuration and credentials live so they're never hardcoded. Note the service connection marked red: its token has expired.</p>
       <p><b>Environments</b> — the deploy targets. <code>dev</code> ships itself; <code>prod</code> is gated on a human. That gate is the whole point of the last third of this tour.</p>`,
+    check:function(s){return s.flags.sawPools&&s.flags.sawLibrary&&s.flags.sawEnvs;},
+    need:"Visit all three: Agent pools, Library and Environments.",
     concept:{k:"Real-world", v:html`An expired <b>service connection</b> or <b>PAT</b> is the single most common cause of "the pipeline worked yesterday". Both live on these screens.`} },
 
   { stage:"Your morning", title:"Time passes — teammates work", goto:"standup",
@@ -1252,7 +1275,7 @@ var TOUR = [
     concept:{k:"Terms", v:html`<b>Traceability</b>, <b>audit trail</b>, <b>segregation of duties</b>, <b>SOX</b>, <b>DORA metrics</b>.`} },
 
   { stage:"Ship it", title:"Now break it on purpose", goto:"files",
-    body: html`<p><b>Do this.</b> In the terminal: <code>edit src/main/java/com/cody/taskapi/web/TaskController.java --bug</code>, then commit it to a new branch and open a PR.</p>
+    body: html`<p><b>Do this.</b> In the terminal: <code>edit src/main/java/com/contoso/taskapi/web/TaskController.java --bug</code>, then commit it to a new branch and open a PR.</p>
       <p><b>What happens.</b> The build goes red and the PR is blocked before a human wastes a minute on it. Open the failed step to read the compiler error, then try <b>↻ Re-run</b>.</p>`,
     check:function(s){return s.flags.sawRedBuild;},
     concept:{k:"Terms", v:html`<b>Fail fast</b>, <b>change failure rate</b>, <b>forward-fix vs rollback</b>. A machine saying no is cheap; production saying no is not.`} }
@@ -1467,7 +1490,7 @@ var CONTENT = {
     <artifactId>spring-boot-starter-parent</artifactId>\n\
     <version>4.1.1</version>\n\
   </parent>\n\
-  <groupId>com.cody</groupId>\n\
+  <groupId>com.contoso</groupId>\n\
   <artifactId>taskapi</artifactId>\n\
   <version>0.0.1-SNAPSHOT</version>\n\
   <properties>\n\
@@ -1538,8 +1561,8 @@ stages:\n\
           - download: current\n\
             artifact: drop',
 
-"src/main/java/com/cody/taskapi/TaskapiApplication.java":
-'package com.cody.taskapi;\n\
+"src/main/java/com/contoso/taskapi/TaskapiApplication.java":
+'package com.contoso.taskapi;\n\
 \n\
 import org.springframework.boot.SpringApplication;\n\
 import org.springframework.boot.autoconfigure.SpringBootApplication;\n\
@@ -1552,8 +1575,8 @@ public class TaskapiApplication {\n\
     }\n\
 }',
 
-"src/main/java/com/cody/taskapi/web/TaskController.java":
-'package com.cody.taskapi.web;\n\
+"src/main/java/com/contoso/taskapi/web/TaskController.java":
+'package com.contoso.taskapi.web;\n\
 \n\
 import org.springframework.web.bind.annotation.GetMapping;\n\
 import org.springframework.web.bind.annotation.RequestMapping;\n\
@@ -1598,7 +1621,7 @@ var REPO_FILES = {
   "taskapi": FILES,
   "taskapi-web": ["package.json","README.md","azure-pipelines.yml","src/App.jsx","src/api/tasks.js"],
   "taskapi-infra": ["README.md","azure-pipelines.yml","main.bicep","modules/appservice.bicep"],
-  "shared-java-libs": ["pom.xml","README.md","src/main/java/com/cody/common/ApiError.java"]
+  "shared-java-libs": ["pom.xml","README.md","src/main/java/com/contoso/common/ApiError.java"]
 };
 
 var REPO_META = {
@@ -1730,7 +1753,7 @@ resource site \'Microsoft.Web/sites@2023-01-01\' = {\n\
 '<?xml version="1.0" encoding="UTF-8"?>\n\
 <project xmlns="http://maven.apache.org/POM/4.0.0">\n\
   <modelVersion>4.0.0</modelVersion>\n\
-  <groupId>com.cody</groupId>\n\
+  <groupId>com.contoso</groupId>\n\
   <artifactId>shared-java-libs</artifactId>\n\
   <version>1.2.0</version>\n\
   <!-- Published to the Azure Artifacts feed, not Maven Central -->\n\
@@ -1739,12 +1762,12 @@ resource site \'Microsoft.Web/sites@2023-01-01\' = {\n\
 '# shared-java-libs\n\n\
 Consumed from the `taskapi-feed` Azure Artifacts feed.\n\n\
     <dependency>\n\
-      <groupId>com.cody</groupId>\n\
+      <groupId>com.contoso</groupId>\n\
       <artifactId>shared-java-libs</artifactId>\n\
       <version>1.2.0</version>\n\
     </dependency>',
-"shared-java-libs:src/main/java/com/cody/common/ApiError.java":
-'package com.cody.common;\n\
+"shared-java-libs:src/main/java/com/contoso/common/ApiError.java":
+'package com.contoso.common;\n\
 \n\
 import java.time.Instant;\n\
 \n\
@@ -2345,7 +2368,7 @@ function pageHead(t, sub){
 
 /* ---------- Connect: how your machine talks to Azure Repos ---------- */
 function ConnectView(s, act){
-  var url = "https://dev.azure.com/cody/taskapi/_git/" + s.activeRepo;
+  var url = "https://dev.azure.com/contoso/taskapi/_git/" + s.activeRepo;
   return html`<div class="stack">
     ${pageHead("Clone to your machine","The only thing that differs from GitHub is this URL and how you authenticate to it. Everything after the clone is identical.")}
 
@@ -2362,7 +2385,7 @@ function ConnectView(s, act){
       <div class="split-side">
         <div class="split-k" style="color:var(--azure)">● SERVER — Azure DevOps</div>
         <div class="sm" style="color:var(--ink-2)">Everything <b>above the terminal</b> is the server. Shared with your team. Policies live here, and they can refuse your push.</div>
-        <div class="sm mono dim" style="margin-top:7px">dev.azure.com/cody/taskapi</div>
+        <div class="sm mono dim" style="margin-top:7px">dev.azure.com/contoso/taskapi</div>
       </div>
     </div>
     <div class="sm dim">Both halves are simulated inside this page, so you can watch code cross the line. Cloning was already done for you — the commands below are what produced the local side.</div>
@@ -2373,7 +2396,7 @@ function ConnectView(s, act){
         <div class="w-k" style="margin-bottom:6px">HTTPS</div>
         <div class="cmdline"><span class="mono">${url}</span></div>
         <div class="w-k" style="margin:13px 0 6px">SSH</div>
-        <div class="cmdline"><span class="mono">git@ssh.dev.azure.com:v3/cody/taskapi/${s.activeRepo}</span></div>
+        <div class="cmdline"><span class="mono">git@ssh.dev.azure.com:v3/contoso/taskapi/${s.activeRepo}</span></div>
         <div class="sm dim" style="margin-top:11px">In the real product this sits behind the <b>Clone</b> button at the top-right of Files. The shape is
           <span class="mono">https://dev.azure.com/&lt;org&gt;/&lt;project&gt;/_git/&lt;repo&gt;</span> — that's the part worth memorising.</div>
       </div>
@@ -2498,8 +2521,8 @@ function RepoListView(s, act){
     <div class="panel">
       <div class="panel-h">Clone URLs</div>
       <div style="padding:13px">
-        <div class="minirow"><span class="sm" style="min-width:52px">HTTPS</span><span class="mono sm dim">https://dev.azure.com/cody/taskapi/_git/${s.activeRepo}</span></div>
-        <div class="minirow"><span class="sm" style="min-width:52px">SSH</span><span class="mono sm dim">git@ssh.dev.azure.com:v3/cody/taskapi/${s.activeRepo}</span></div>
+        <div class="minirow"><span class="sm" style="min-width:52px">HTTPS</span><span class="mono sm dim">https://dev.azure.com/contoso/taskapi/_git/${s.activeRepo}</span></div>
+        <div class="minirow"><span class="sm" style="min-width:52px">SSH</span><span class="mono sm dim">git@ssh.dev.azure.com:v3/contoso/taskapi/${s.activeRepo}</span></div>
         <div class="sm dim" style="margin-top:9px">Switch which repo the terminal targets with <span class="mono">az repos select &lt;name&gt;</span>, or just click a row above.</div>
       </div>
     </div>
@@ -2536,7 +2559,7 @@ function SecurityView(s, act){
 /* ---------- Repos > Code search ---------- */
 function SearchView(s, act){
   var hits=[
-    {repo:"taskapi",path:"src/main/java/com/cody/taskapi/web/TaskController.java",line:11,txt:'    @GetMapping'},
+    {repo:"taskapi",path:"src/main/java/com/contoso/taskapi/web/TaskController.java",line:11,txt:'    @GetMapping'},
     {repo:"taskapi",path:"src/main/resources/application.properties",line:3,txt:'server.port=8081'},
     {repo:"taskapi-web",path:"src/api/tasks.js",line:4,txt:'  const res = await fetch(`${BASE}/api/tasks`);'},
     {repo:"taskapi-infra",path:"main.bicep",line:8,txt:"    appName: 'taskapi-${env}'"}
@@ -3273,6 +3296,27 @@ function App(){
   var readIdx=useState(null), reading=readIdx[0], setReading=readIdx[1];
   var tourS=useState(function(){ var v=loadState(); return (v&&typeof v.tour==="number")? v.tour : 0; });
   var tour=tourS[0], setTour=tourS[1];
+  var userS=useState(loadUser);            // null until they tell us who they are
+  var user=userS[0], setUser=userS[1];
+  var askS=useState(false), asking=askS[0], setAsking=askS[1];
+  var nameRef=useRef(null);
+
+  function applyName(){
+    var n=(nameRef.current && nameRef.current.value || "").trim().replace(/\s+/g," ").slice(0,40);
+    if(!n) return;
+    var first = !user;
+    saveUser(n); USER = n; setUser(n); setAsking(false);
+    if(first){ clearSaved(); setTour(0); set(initial()); }   // seed the story with their name
+    else set(function(p){                                     // just re-label an in-progress sandbox
+      var q=JSON.parse(JSON.stringify(p));
+      q.org.owner=n;
+      q.team.forEach(function(t,i){ if(i===0) t.name=n; });
+      q.orgUsers.forEach(function(u,i){ if(i===0){ u.name=n; u.mail=n.toLowerCase().replace(/[^a-z]+/g,".")+"@example.com"; } });
+      q.envs.prod.approvers=[n];
+      q.term.push({k:"ok",t:"You're now signed in as "+n+"."});
+      return q;
+    });
+  }
 
   /* persist where you are, debounced so a running pipeline doesn't thrash it */
   useEffect(function(){
@@ -3370,11 +3414,15 @@ function App(){
       var n=JSON.parse(JSON.stringify(p));
       if(a.t==="view"){
         n.view=a.v;
-        if(a.v==="chain"||a.v==="witems"||a.v==="kanban") n.flags.sawBoards=true;
-        if(a.v==="connect") n.flags.sawConnect=true;
-        if(a.v==="standup") n.flags.sawStandup=true;
+        var seen={chain:"sawBoards",witems:"sawBoards",kanban:"sawKanban",sprints:"sawSprints",
+                  connect:"sawConnect",standup:"sawStandup",branches:"sawBranches",repolist:"sawRepoList",
+                  pools:"sawPools",library:"sawLibrary",envs:"sawEnvs",pipelines:"sawPipelines",files:"sawFiles"};
+        if(seen[a.v]) n.flags[seen[a.v]]=true;
       }
-      if(a.t==="open_file") n.openFile=a.p;
+      if(a.t==="open_file"){
+        n.openFile=a.p;
+        if(/azure-pipelines\.yml$/.test(a.p||"")) n.flags.sawYaml=true;
+      }
       if(a.t==="draft") n[a.k]=a.v;
 
       /* ---- the Run pipeline panel ---- */
@@ -3461,7 +3509,7 @@ function App(){
         if(mine){
           mine.threads=mine.threads||[];
           if(!mine.threads.length){
-            mine.threads.push({id:1,by:"Priya Raman",file:"src/main/java/com/cody/taskapi/web/TaskController.java",line:12,
+            mine.threads.push({id:1,by:"Priya Raman",file:"src/main/java/com/contoso/taskapi/web/TaskController.java",line:12,
               text:"Can this return a typed record rather than a String? We have ApiError in shared-java-libs for exactly this."});
             n.teamLog.unshift({who:"Priya Raman",day:n.day,what:"Left a comment on PR !"+mine.id,tag:"needs you",cls:"p-fail"});
           }
@@ -3517,6 +3565,7 @@ function App(){
       if(a.t==="open_wiki") n.openWiki=a.p;
       if(a.t==="switch_repo"){
         if(a.name!==n.activeRepo && REPO_META[a.name]){
+          n.flags.switchedRepo=true;
           n.repoStore[n.activeRepo]=n.repo;
           n.repo=n.repoStore[a.name];
           delete n.repoStore[a.name];
@@ -3618,8 +3667,30 @@ function App(){
   ];
   var LABEL={}; NAV.forEach(function(gr){ gr.items.forEach(function(it){ LABEL[it[0]]=gr.g+" / "+it[1]; }); });
 
+  var nameGate = (!user || asking) ? html`<div class="modal-bg">
+    <div class="modal" style="width:min(420px,100%)" role="dialog" aria-label="Who are you?">
+      <div class="modal-h">${user? "Change your name" : "Welcome — who are you?"}</div>
+      <div class="modal-b">
+        <p class="sm" style="color:var(--ink-2);margin:0 0 12px">
+          ${user
+            ? html`This name is used across the sandbox — commits, approvals, the team list and the audit log.`
+            : html`This is a sandbox where you play a developer at a fictional company. Tell it your name and it'll use yours throughout — commits, pull requests, approvals and the audit trail.`}
+        </p>
+        <input class="fld" style="width:100%" ref=${nameRef} defaultValue=${user||""} maxLength="40"
+               placeholder="e.g. Alex Morgan" aria-label="Your name" autoFocus
+               onKeyDown=${function(e){ if(e.key==="Enter") applyName(); }} />
+        <p class="sm dim" style="margin:10px 0 0">Stored only in this browser. Nothing is sent anywhere.</p>
+      </div>
+      <div class="modal-f">
+        ${user? html`<button class="btn ghost" onClick=${function(){ setAsking(false); }}>Cancel</button>`:null}
+        <button class="btn" onClick=${applyName}>${user? "Save" : "Start"}</button>
+      </div>
+    </div>
+  </div>` : null;
+
   return html`
   <div id="app">
+    ${nameGate}
     <div class="topbar">
       <div class="brand">
         <svg class="glyph" viewBox="0 0 24 24" fill="none"><path d="M3 7.5 9.5 3l5 2.2V3L21 6.2v11.6L15.5 21l-9-3.2v3.1L3 17.2z" fill="var(--azure)"/></svg>
@@ -3637,6 +3708,10 @@ function App(){
       <button class="daybtn" onClick=${function(){ act({t:"end_day"}); }} title="Let your teammates work overnight">End day ⏭</button>
       <button class="tbtn" onClick=${function(){ setGuide(!guide); }}>${guide?"Hide guide":"Show guide"}</button>
       <button class="tbtn" onClick=${function(){ clearSaved(); setTour(0); set(initial()); }} title="Wipe the sandbox and restart the tour">Start over</button>
+      <button class="userchip" onClick=${function(){ setAsking(true); }} title="Change your name">
+        <span class="avatar" style="width:19px;height:19px;font-size:9px">${initialsOf(user||USER)}</span>
+        <span>${user||USER}</span>
+      </button>
     </div>
 
     <div class="body">
@@ -3687,7 +3762,7 @@ function App(){
       <aside class="lab" style=${guide?null:{display:"none"}}>
         ${(function(){
           var T=TOUR[Math.min(tour,TOUR.length-1)];
-          var done=T.check? T.check(s) : null;
+          var done=T.check? !!T.check(s) : null;   // checks may return undefined; normalise
           return html`<${React.Fragment}>
             <div class="lab-h">
               <div class="lab-k">Step ${tour+1} of ${TOUR.length} · ${T.stage}</div>
@@ -3711,11 +3786,11 @@ function App(){
             <div class="lab-b">${T.body}</div>
             ${T.check? html`<div class=${"obj"+(done?" done":"")} style="border-bottom:0">
               <span class="bx">${done?"✓":""}</span>
-              <span class="tx">${done? "Done — press Next below." : "This ticks green once you've done it."}</span>
+              <span class="tx">${done? "Done — press Next below." : (T.need||"Complete this step to continue.")}</span>
             </div>`
             : html`<div class="obj" style="border-bottom:0">
               <span class="bx" style="border-style:dashed"></span>
-              <span class="tx dim">Nothing to complete here — have a look around, then press <b>Next</b>.</span>
+              <span class="tx dim">Have a look around, then press <b>Next</b>.</span>
             </div>`}
             <div class="concept">
               <div class="k">${T.concept.k}</div>
@@ -3724,8 +3799,10 @@ function App(){
             <div class="labnav">
               <button class="btn ghost" onClick=${function(){ setTour(Math.max(0,tour-1)); }} disabled=${tour===0}>◂ Back</button>
               <button class=${"btn"+(done===false?" ghost":"")} style="flex:1"
-                onClick=${function(){ setTour(Math.min(TOUR.length-1,tour+1)); }} disabled=${tour===TOUR.length-1}>
-                ${tour===TOUR.length-1? "That's the tour" : "Next ▸"}
+                title=${done===false? (T.need||"Finish this step first") : ""}
+                onClick=${function(){ setTour(Math.min(TOUR.length-1,tour+1)); }}
+                disabled=${tour===TOUR.length-1 || done===false}>
+                ${tour===TOUR.length-1? "That's the tour" : done===false? "Finish the step" : "Next ▸"}
               </button>
             </div>
           <//>`;

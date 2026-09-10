@@ -1,0 +1,3127 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Azure DevOps Flight Sim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --azure:#0B78D0;
+  --azure-soft:#E4F0FB;
+  --azure-ink:#08529A;
+  --ground:#F4F6F9;
+  --surface:#FFFFFF;
+  --surface-2:#EDF0F5;
+  --border:#D8DEE8;
+  --border-strong:#B9C2D0;
+  --ink:#151A22;
+  --ink-2:#4A5566;
+  --ink-3:#7A8598;
+  --ok:#107C41;
+  --ok-soft:#E2F2E8;
+  --fail:#C4314B;
+  --fail-soft:#FBE6EA;
+  --wait:#9A6C00;
+  --wait-soft:#FBF0D8;
+  --run:#0B78D0;
+  --run-soft:#E4F0FB;
+  --term-bg:#0E1420;
+  --term-ink:#C9D6E8;
+  --term-dim:#68788F;
+  --term-green:#5CD68A;
+  --term-red:#FF7A8F;
+  --term-yellow:#F0C674;
+  --term-blue:#6FB6F0;
+  --shadow:0 1px 2px rgba(20,30,50,.09),0 6px 18px rgba(20,30,50,.07);
+  --ui:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"Cascadia Mono","Consolas",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --azure:#3FA0EC;
+    --azure-soft:#16283A;
+    --azure-ink:#8FCBF7;
+    --ground:#101419;
+    --surface:#171C24;
+    --surface-2:#1F2630;
+    --border:#2B333F;
+    --border-strong:#3C4655;
+    --ink:#E6EBF2;
+    --ink-2:#A6B2C2;
+    --ink-3:#75828F;
+    --ok:#4FBE7C;
+    --ok-soft:#14291D;
+    --fail:#F2718A;
+    --fail-soft:#2E171C;
+    --wait:#DFAE45;
+    --wait-soft:#2C2413;
+    --run:#3FA0EC;
+    --run-soft:#16283A;
+    --term-bg:#0A0E16;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --azure:#3FA0EC;
+  --azure-soft:#16283A;
+  --azure-ink:#8FCBF7;
+  --ground:#101419;
+  --surface:#171C24;
+  --surface-2:#1F2630;
+  --border:#2B333F;
+  --border-strong:#3C4655;
+  --ink:#E6EBF2;
+  --ink-2:#A6B2C2;
+  --ink-3:#75828F;
+  --ok:#4FBE7C;
+  --ok-soft:#14291D;
+  --fail:#F2718A;
+  --fail-soft:#2E171C;
+  --wait:#DFAE45;
+  --wait-soft:#2C2413;
+  --run:#3FA0EC;
+  --run-soft:#16283A;
+  --term-bg:#0A0E16;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--azure);outline-offset:2px;border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+/* ---------- shell ---------- */
+#app{display:flex;flex-direction:column;height:100vh;min-height:520px}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 14px;height:46px;background:var(--surface);border-bottom:1px solid var(--border);flex:none}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;letter-spacing:-.01em}
+.glyph{width:22px;height:22px;flex:none}
+.crumbs{display:flex;align-items:center;gap:7px;color:var(--ink-3);font-size:12.5px;font-family:var(--mono)}
+.crumbs b{color:var(--ink-2);font-weight:500}
+.topbar .spacer{flex:1}
+.tbtn{background:transparent;border:1px solid var(--border);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12.5px;color:var(--ink-2)}
+.tbtn:hover{background:var(--surface-2);color:var(--ink)}
+
+.body{display:flex;flex:1;min-height:0}
+.rail{width:186px;flex:none;background:var(--surface);border-right:1px solid var(--border);padding:8px 0;overflow-y:auto}
+.rail .grp{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding:12px 16px 6px}
+.navitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-left:3px solid transparent;padding:7px 14px 7px 13px;cursor:pointer;color:var(--ink-2)}
+.navitem:hover{background:var(--surface-2);color:var(--ink)}
+.navitem.on{background:var(--azure-soft);border-left-color:var(--azure);color:var(--ink);font-weight:600}
+/* every inline icon must be sized here â€” an unsized <svg> expands to fill its box */
+.ico{width:16px;height:16px;flex:none;opacity:.85}
+.ci{width:13px;height:13px;flex:none}
+svg{max-width:100%}
+.navitem .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);background:var(--surface-2);border-radius:9px;padding:0 6px}
+.navitem.on .cnt{background:var(--surface)}
+.navgrp{display:flex;align-items:center;gap:10px;padding:11px 14px 4px 13px;font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.01em;border-left:3px solid transparent}
+.navgrp.on{color:var(--ink)}
+.navgrp.on .ico{color:var(--azure);opacity:1}
+.navitem.navsub{padding:5px 14px 5px 39px;font-size:12.5px}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.work{flex:1;overflow:auto;padding:18px 22px 26px}
+.lab{width:330px;flex:none;background:var(--surface);border-left:1px solid var(--border);overflow-y:auto}
+
+/* ---------- generic ---------- */
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.015em}
+.h-title{font-size:19px;font-weight:600}
+.h-sub{color:var(--ink-2);font-size:13px;margin-top:3px;max-width:64ch}
+.head{margin-bottom:16px}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:6px}
+.panel-h{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px}
+.panel-h .r{margin-left:auto;font-weight:400;color:var(--ink-3);font-size:12px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.rows .row:hover{background:var(--surface-2)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;align-items:start}
+.dim{color:var(--ink-3)}
+.sm{font-size:12px}
+.empty{padding:26px 16px;text-align:center;color:var(--ink-3);font-size:13px}
+.empty code{font-family:var(--mono);color:var(--azure)}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:3px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}
+.p-fail{background:var(--fail-soft);color:var(--fail)}
+.p-wait{background:var(--wait-soft);color:var(--wait)}
+.p-run{background:var(--run-soft);color:var(--run)}
+.p-idle{background:var(--surface-2);color:var(--ink-3)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.p-run .dot{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+.btn{background:var(--azure);color:#fff;border:1px solid var(--azure);padding:5px 13px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600}
+.btn:hover{background:var(--azure-ink);border-color:var(--azure-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--border-strong)}
+.btn.ghost:hover{background:var(--surface-2);color:var(--ink)}
+.btn.danger{background:transparent;color:var(--fail);border-color:var(--fail)}
+.btn.danger:hover{background:var(--fail-soft)}
+
+/* ---------- status glyphs ---------- */
+.gl{flex:none;display:block}
+.gl-spin{transform-origin:50% 50%;animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{background:transparent;border:0;border-bottom:2px solid transparent;padding:8px 14px;cursor:pointer;color:var(--ink-2);font-size:13px;margin-bottom:-1px}
+.tab:hover{color:var(--ink);background:var(--surface-2)}
+.tab.on{color:var(--azure);border-bottom-color:var(--azure);font-weight:600}
+
+/* ---------- file explorer ---------- */
+.fx{display:grid;grid-template-columns:minmax(230px,300px) 1fr;min-height:340px}
+.fx-tree{border-right:1px solid var(--border);overflow:auto;padding:5px 0}
+.fx-row{display:flex;align-items:center;gap:7px;width:100%;text-align:left;background:transparent;border:0;padding:3px 12px;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+.fx-row:hover{background:var(--surface-2);color:var(--ink)}
+.fx-row.on{background:var(--azure-soft);color:var(--ink);font-weight:600}
+.fx-row .ci{width:13px;height:13px;flex:none;opacity:.75}
+.fx-row .cx{width:9px;flex:none;color:var(--ink-3);font-size:9px}
+.fx-pane{display:flex;flex-direction:column;min-width:0}
+.fx-head{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.fx-head .fn{font-family:var(--mono);font-size:12.5px;font-weight:600}
+.fx-body{flex:1;overflow:auto;background:var(--surface-2)}
+.fx-body pre{margin:0;padding:11px 0;font-family:var(--mono);font-size:11.5px;line-height:1.65}
+.cl{display:flex;gap:0}
+.cl .n{flex:none;width:42px;text-align:right;padding-right:13px;color:var(--ink-3);user-select:none;font-variant-numeric:tabular-nums}
+.cl .c{white-space:pre;padding-right:16px}
+.k1{color:#0B5FBF}.k2{color:#A3195B}.k3{color:#0F7A4D}.k4{color:#8250DF}
+:root:not([data-theme="light"]) .k1{color:#79C0FF}
+:root:not([data-theme="light"]) .k2{color:#FF7B9C}
+:root:not([data-theme="light"]) .k3{color:#7EE787}
+:root:not([data-theme="light"]) .k4{color:#D2A8FF}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .k1{color:#0B5FBF}}
+:root[data-theme="dark"] .k1{color:#79C0FF}
+:root[data-theme="dark"] .k2{color:#FF7B9C}
+:root[data-theme="dark"] .k3{color:#7EE787}
+:root[data-theme="dark"] .k4{color:#D2A8FF}
+.lastc{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-family:var(--mono)}
+
+/* ---------- dashboard ---------- */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;align-items:stretch}
+.w{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:13px 15px;display:flex;flex-direction:column;gap:9px}
+.w-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.w-big{display:flex;align-items:baseline;gap:8px}
+.w-n{font-size:30px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.w-u{font-size:12px;color:var(--ink-3)}
+.w-f{font-size:12px;color:var(--ink-2);margin-top:auto}
+.w.span2{grid-column:span 2}
+@media (max-width:760px){.w.span2{grid-column:span 1}}
+.spark{display:flex;align-items:flex-end;gap:3px;height:34px}
+.spark i{flex:1;border-radius:1px;min-height:3px;background:var(--border-strong)}
+.spark i.ok{background:var(--ok)}
+.spark i.no{background:var(--fail)}
+.minirow{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--border)}
+.minirow:last-child{border-bottom:0}
+
+/* ---------- repo switcher ---------- */
+.repobar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 12px}
+.repochip{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border);border-radius:14px;padding:3px 11px;cursor:pointer;font-size:12px;font-family:var(--mono);color:var(--ink-2)}
+.repochip:hover{border-color:var(--border-strong);color:var(--ink);background:var(--surface-2)}
+.repochip.on{background:var(--azure);border-color:var(--azure);color:#fff;font-weight:600}
+.projsel{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border);border-radius:4px;padding:3px 9px;cursor:pointer;font-size:12.5px;color:var(--ink-2)}
+.projsel:hover{background:var(--surface-2);color:var(--ink)}
+.projsel b{color:var(--ink);font-weight:600}
+
+/* ---------- repo ---------- */
+.branchline{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px}
+.sha{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);background:var(--surface-2);padding:1px 5px;border-radius:3px}
+.ahead{font-family:var(--mono);font-size:11px;color:var(--wait)}
+.policybox{background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:5px;padding:11px 13px}
+.policybox ul{margin:7px 0 0;padding-left:17px;font-size:12.5px;color:var(--ink-2)}
+.policybox li{margin:3px 0}
+.filerow{display:flex;align-items:center;gap:9px;padding:5px 13px;font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--border)}
+.filerow:last-child{border-bottom:0}
+.tag-m{color:var(--wait);font-weight:700}
+.tag-a{color:var(--ok);font-weight:700}
+.tag-u{color:var(--fail);font-weight:700}
+.graph{font-family:var(--mono);font-size:12px;line-height:1.75;padding:11px 13px;overflow-x:auto}
+.graph .g{color:var(--azure)}
+
+/* ---------- pipeline ---------- */
+.stagestrip{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:13px;gap:8px}
+.stage{min-width:172px;border:1px solid var(--border);border-radius:5px;background:var(--surface);padding:10px 11px;flex:none;position:relative}
+.stage.act{border-color:var(--azure);box-shadow:0 0 0 2px var(--azure-soft)}
+.stage-n{font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.stage-j{font-family:var(--mono);font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px;padding:2px 0}
+.arrow{align-self:center;color:var(--border-strong);flex:none;font-size:15px}
+.gatebar{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--wait-soft);border:1px solid var(--wait);border-radius:5px;margin-bottom:14px;flex-wrap:wrap}
+.gatebar .txt{flex:1;min-width:200px;font-size:13px;color:var(--ink)}
+.gatebar b{color:var(--wait)}
+.steplist{border-top:1px solid var(--border)}
+.step{border-bottom:1px solid var(--border)}
+.step-h{display:flex;align-items:center;gap:9px;padding:7px 13px;cursor:pointer;background:transparent;border:0;width:100%;text-align:left}
+.step-h:hover{background:var(--surface-2)}
+.step-h .nm{font-size:12.5px}
+.step-h .dur{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.logs{background:var(--term-bg);color:var(--term-ink);font-family:var(--mono);font-size:11.5px;line-height:1.6;padding:9px 13px;overflow-x:auto;max-height:230px;overflow-y:auto}
+.logs .ln{white-space:pre;display:flex;gap:12px}
+.logs .no{color:var(--term-dim);flex:none;user-select:none;min-width:22px;text-align:right}
+.logs .er{color:var(--term-red)}
+.logs .wr{color:var(--term-yellow)}
+.logs .gd{color:var(--term-green)}
+
+/* ---------- PR ---------- */
+.checkrow{display:flex;align-items:center;gap:9px;padding:7px 13px;border-bottom:1px solid var(--border);font-size:12.5px}
+.checkrow:last-child{border-bottom:0}
+.checkrow .ck{width:15px;flex:none;font-weight:700;text-align:center}
+.ck-ok{color:var(--ok)}.ck-no{color:var(--fail)}.ck-wt{color:var(--wait)}
+.avatar{width:22px;height:22px;border-radius:50%;background:var(--azure);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700;flex:none}
+
+/* ---------- terminal ---------- */
+.term{flex:none;background:var(--term-bg);border-top:1px solid var(--border);display:flex;flex-direction:column;position:relative}
+.term-grip{height:7px;flex:none;cursor:ns-resize;background:transparent;position:relative;touch-action:none}
+.term-grip::after{content:"";position:absolute;left:50%;top:2px;transform:translateX(-50%);width:38px;height:3px;border-radius:2px;background:var(--border-strong);opacity:.5;transition:opacity .12s,background .12s}
+.term-grip:hover::after,.term-grip.drag::after{opacity:1;background:var(--azure)}
+body.resizing{cursor:ns-resize;user-select:none}
+.term-h{display:flex;align-items:center;gap:9px;padding:0 12px;height:34px;flex:none;border-bottom:1px solid rgba(255,255,255,.07)}
+.term-h .t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.term-h .sp{flex:1}
+.tbtn2{background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--term-dim);padding:2px 9px;border-radius:3px;cursor:pointer;font-size:11px;font-family:var(--mono)}
+.tbtn2:hover{color:var(--term-ink);border-color:rgba(255,255,255,.3)}
+.term-o{flex:1;overflow-y:auto;padding:9px 12px;font-family:var(--mono);font-size:12px;line-height:1.62;color:var(--term-ink)}
+.term-o .l{white-space:pre-wrap;word-break:break-word}
+.t-cmd{color:#fff}
+.t-cmd .ps{color:var(--term-green)}
+.t-err{color:var(--term-red)}
+.t-ok{color:var(--term-green)}
+.t-warn{color:var(--term-yellow)}
+.t-info{color:var(--term-blue)}
+.t-dim{color:var(--term-dim)}
+.term-i{display:flex;align-items:center;gap:8px;padding:6px 12px 9px;flex:none}
+.term-i .ps{color:var(--term-green);font-family:var(--mono);font-size:12px;flex:none}
+.term-i input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-family:var(--mono);font-size:12px;padding:2px 0}
+
+/* ---------- lab panel ---------- */
+.lab-h{padding:14px 16px;border-bottom:1px solid var(--border)}
+.lab-k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--azure);font-weight:700}
+.lab-t{font-size:16px;font-weight:600;margin-top:5px}
+.lab-b{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink-2)}
+.lab-b p{margin:0 0 9px}
+.lab-b p:last-child{margin:0}
+.lab-b code,.lab-b kbd{font-family:var(--mono);font-size:11.5px;background:var(--surface-2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--ink);white-space:nowrap}
+.obj{display:flex;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);font-size:12.5px;align-items:flex-start}
+.obj .bx{width:16px;height:16px;flex:none;border:1.5px solid var(--border-strong);border-radius:3px;display:grid;place-items:center;font-size:10px;font-weight:800;margin-top:1px}
+.obj.done .bx{background:var(--ok);border-color:var(--ok);color:#fff}
+.obj.done .tx{color:var(--ink-3);text-decoration:line-through}
+.obj code{font-family:var(--mono);font-size:11.5px;background:var(--surface-2);padding:1px 4px;border-radius:3px;border:1px solid var(--border)}
+.concept{margin:14px 16px;background:var(--azure-soft);border-left:3px solid var(--azure);border-radius:0 5px 5px 0;padding:11px 13px}
+.concept .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--azure-ink);font-weight:700}
+.concept .v{font-size:12.5px;color:var(--ink);margin-top:5px}
+.concept .v b{font-weight:600}
+/* the lifecycle spine */
+.flow{list-style:none;margin:0;padding:6px 16px 18px;position:relative}
+.fl-stage{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);padding:14px 0 5px;font-weight:700}
+.fl-stage:first-child{padding-top:4px}
+.fl{position:relative;padding-left:22px}
+.fl::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:1.5px;background:var(--border)}
+.fl.done::before{background:var(--ok)}
+.fl:last-child::before{bottom:auto;height:15px}
+.fl-b{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;background:transparent;border:0;padding:5px 0;cursor:pointer;color:var(--ink-2)}
+.fl-b:hover .fl-t{color:var(--ink)}
+.fl-m{position:absolute;left:0;width:13px;height:13px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border-strong);color:transparent;display:grid;place-items:center;font-size:8px;font-weight:800;margin-top:4px;line-height:1}
+.fl.done .fl-m{background:var(--ok);border-color:var(--ok);color:#fff}
+.fl.here .fl-m{border-color:var(--azure);color:var(--azure);box-shadow:0 0 0 3px var(--azure-soft)}
+.fl.done.here .fl-m{background:var(--ok);border-color:var(--ok);color:#fff;box-shadow:0 0 0 3px var(--ok-soft)}
+.fl-t{flex:1;font-size:13px;line-height:1.35}
+.fl.here .fl-t{font-weight:600;color:var(--ink)}
+.fl.locked .fl-t{color:var(--ink-3)}
+.fl-c{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);flex:none;margin-top:2px}
+.fl.done .fl-c{color:var(--ok)}
+.fl-body{padding:2px 0 12px}
+.labnav{display:flex;gap:8px;padding:0 16px 16px}
+.progress{display:flex;gap:3px;padding:0 16px 14px}
+.progress i{height:3px;flex:1;background:var(--border);border-radius:2px}
+.progress i.d{background:var(--ok)}
+.progress i.c{background:var(--azure)}
+.done-banner{margin:14px 16px;padding:11px 13px;background:var(--ok-soft);border:1px solid var(--ok);border-radius:5px;color:var(--ok);font-size:12.5px;font-weight:600}
+
+@media (max-width:1180px){.lab{width:290px}}
+@media (max-width:980px){
+  .body{flex-direction:column}
+  .rail{width:100%;display:flex;overflow-x:auto;padding:0;border-right:0;border-bottom:1px solid var(--border)}
+  .rail .grp{display:none}
+  .navitem{width:auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:9px 13px}
+  .navitem.on{border-left:0;border-bottom-color:var(--azure)}
+  .lab{width:100%;border-left:0;border-top:1px solid var(--border);max-height:none}
+  #app{height:auto;min-height:100vh}
+  .work{max-height:none}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/htm/3.1.1/htm.umd.js"></script>
+<script>
+(function(){
+"use strict";
+var htmFn = (typeof htm === "function") ? htm : (htm && htm.default);
+
+/* htm writes plain HTML attributes (class="x", style="a:b"). React wants
+   className and a style OBJECT â€” a string style is a hard throw. Translate
+   on the way into createElement so the markup below can stay HTML-shaped. */
+function styleObj(str){
+  var o = {};
+  String(str).split(";").forEach(function(decl){
+    var i = decl.indexOf(":");
+    if(i < 0) return;
+    var k = decl.slice(0, i).trim(), v = decl.slice(i+1).trim();
+    if(!k || !v) return;
+    if(k.indexOf("--") !== 0) k = k.replace(/-([a-z])/g, function(_, c){ return c.toUpperCase(); });
+    o[k] = v;
+  });
+  return o;
+}
+var ATTR = {class:"className", "for":"htmlFor", readonly:"readOnly", tabindex:"tabIndex", colspan:"colSpan", rowspan:"rowSpan", maxlength:"maxLength", autofocus:"autoFocus", autocomplete:"autoComplete", spellcheck:"spellCheck"};
+function ce(type, props){
+  var rest = Array.prototype.slice.call(arguments, 2);
+  if(props){
+    var p = {};
+    for(var k in props){
+      if(!Object.prototype.hasOwnProperty.call(props, k)) continue;
+      var v = props[k];
+      if(k === "style" && typeof v === "string") p.style = styleObj(v);
+      else if(ATTR[k]) p[ATTR[k]] = v;
+      else p[k] = v;
+    }
+    props = p;
+  }
+  return React.createElement.apply(null, [type, props].concat(rest));
+}
+var html = htmFn.bind(ce);
+var useState = React.useState, useEffect = React.useEffect, useRef = React.useRef;
+
+/* ============================================================
+   1. THE MODEL  â€” a tiny git + Azure DevOps state machine
+   ============================================================ */
+
+var USER = "Cody Scott";
+var ORG  = "https://dev.azure.com/cody/taskapi/_git/taskapi";
+
+var FILES = [
+  "pom.xml",
+  "README.md",
+  "azure-pipelines.yml",
+  "src/main/java/com/cody/taskapi/TaskapiApplication.java",
+  "src/main/java/com/cody/taskapi/web/TaskController.java",
+  "src/main/resources/application.properties"
+];
+
+function sha(){ var c="0123456789abcdef", s=""; for(var i=0;i<7;i++) s+=c[Math.floor(Math.random()*16)]; return s; }
+
+/* a fresh git state machine for any repo in the project */
+function mkRepoState(name, msg){
+  var root=sha(), c={};
+  c[root]={sha:root,msg:msg,parent:null,author:USER,branch:"main",files:REPO_FILES[name]};
+  return {commits:c,branches:{main:root},remote:{main:root},head:"main",
+          tracked:REPO_FILES[name].slice(),workdir:{},index:{},broken:{}};
+}
+
+function initial(){
+  var root = "a1b2c3d";
+  return {
+    repo:{
+      commits:{ "a1b2c3d":{sha:root,msg:"Step 0: Spring Boot scaffold",parent:null,author:USER,branch:"main",files:["pom.xml"]} },
+      branches:{ main:root },
+      remote:{ main:root },
+      head:"main",
+      tracked:FILES.slice(),  // what's actually committed into the repo
+      workdir:{},   // path -> "modified" | "untracked"
+      index:{},     // path -> status
+      broken:{}     // path -> true  (introduces a build failure)
+    },
+    policy:{ requirePR:true, minReviewers:1, buildValidation:true, requireWorkItem:true },
+    prs:[], runs:[], artifacts:[], pushes:[],
+    workItems:[
+      {id:41,type:"User Story",title:"Expose tasks over HTTP",state:"Closed",pts:3,who:"Cody Scott",pri:2},
+      {id:42,type:"User Story",title:"Add GET /api/tasks endpoint",state:"Active",pts:5,who:"Cody Scott",pri:1},
+      {id:43,type:"Bug",title:"Health endpoint returns 404 on 8081",state:"New",pts:2,who:"Priya Raman",pri:1},
+      {id:44,type:"Task",title:"Write azure-pipelines.yml",state:"Resolved",pts:3,who:"Cody Scott",pri:2},
+      {id:45,type:"User Story",title:"POST /api/tasks creates a task",state:"New",pts:8,who:"unassigned",pri:2},
+      {id:46,type:"Bug",title:"Reviewer votes survive a force push",state:"New",pts:1,who:"unassigned",pri:3},
+      {id:47,type:"Task",title:"Add build validation policy to main",state:"Closed",pts:1,who:"Cody Scott",pri:1}
+    ],
+    nextWi:48,
+    sprint:{name:"Sprint 4",start:"1 Sep",end:"14 Sep",capacity:60,burn:[21,20,18,15,13,13,9,7,5,5,3]},
+    wiki:[
+      {path:"Home",body:"# taskapi\n\nA Task API, built to learn Spring Boot and the delivery process around it.\n\n- Runs on **8081** (8080 is taken on Cody's machine)\n- Boot 4.1.1 â€” note the starter renames vs 3.x\n\nSee [Onboarding] and [Runbook: prod deploy]."},
+      {path:"Onboarding",body:"# Onboarding\n\n1. Clone the repo from Azure Repos\n2. `.\\mvnw.cmd spring-boot:run`\n3. Hit http://localhost:8081/actuator/health\n\n## Branching\n\nBranch from `main` as `feature/<thing>`. `main` is protected â€”\nyou cannot push to it directly, and you should not want to."},
+      {path:"Runbook: prod deploy",body:"# Runbook: prod deploy\n\n1. Merge the PR to `main`\n2. Pipeline builds ONE artifact named `drop`\n3. `dev` deploys automatically\n4. `prod` waits for approval â€” this is our change gate\n5. Approver checks: tests green, work item linked, no active incident\n\n## Rollback\n\nRe-run the last known-good run and approve it. Do NOT rebuild â€”\nthe artifact from that run is still stored."}
+    ],
+    queries:[
+      {name:"My active work",wiql:"[Assigned To] = @Me AND [State] = 'Active'",n:1},
+      {name:"Bugs, unresolved",wiql:"[Work Item Type] = 'Bug' AND [State] <> 'Closed'",n:2},
+      {name:"Sprint 4 committed",wiql:"[Iteration Path] = 'taskapi\\Sprint 4'",n:7},
+      {name:"Blocked on review",wiql:"[Tags] CONTAINS 'blocked'",n:0}
+    ],
+    tags:[{name:"v0.1.0",sha:"a1b2c3d",msg:"First deployable scaffold",who:USER}],
+    library:{
+      groups:[
+        {name:"taskapi-common",kv:null,linked:"CI, CD",vars:[{k:"JAVA_VERSION",v:"21"},{k:"MAVEN_OPTS",v:"-Xmx1024m"},{k:"ARTIFACT_NAME",v:"drop"}]},
+        {name:"taskapi-prod",kv:"Azure Key Vault: taskapi-kv",linked:"CD",vars:[{k:"APP_NAME",v:"taskapi-prod"},{k:"DB_PASSWORD",v:"â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢",secret:true},{k:"APPINSIGHTS_KEY",v:"â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢",secret:true}]}
+      ],
+      conns:[
+        {name:"azure-sub-prod",type:"Azure Resource Manager",scope:"Subscription Â· Visual Studio Enterprise",ok:true},
+        {name:"github-cody",type:"GitHub",scope:"cody/taskapi",ok:true},
+        {name:"acr-taskapi",type:"Docker Registry",scope:"taskapi.azurecr.io",ok:false}
+      ],
+      files:[{name:"taskapi-signing.jks",size:"3.2 KB"}]
+    },
+    pools:[
+      {name:"Azure Pipelines",hosted:true,parallel:"1 free parallel job",used:412,cap:1800,
+       agents:[{name:"Hosted Ubuntu 22.04",online:true,caps:"java 21, maven 3.9.6, docker"},{name:"Hosted Windows 2022",online:true,caps:"msbuild, dotnet 8"}]},
+      {name:"Default",hosted:false,parallel:"unlimited",used:null,cap:null,
+       agents:[{name:"CODY-DESKTOP",online:true,caps:"java=21, maven=3.9.6, Agent.OS=Windows_NT"}]}
+    ],
+    testPlan:{name:"taskapi â€” Sprint 4",suites:[
+      {name:"API smoke",cases:[
+        {id:101,title:"GET /api/tasks returns 200",outcome:"passed"},
+        {id:102,title:"GET /api/tasks returns a JSON array",outcome:"passed"},
+        {id:103,title:"POST /api/tasks creates a task",outcome:"failed"},
+        {id:104,title:"Actuator health responds on 8081",outcome:"notrun"}]},
+      {name:"Regression",cases:[
+        {id:110,title:"H2 console reachable in dev only",outcome:"passed"},
+        {id:111,title:"App starts with ddl-auto=update",outcome:"blocked"},
+        {id:112,title:"Port 8081 configurable via env var",outcome:"notrun"}]}
+    ]},
+    team:[
+      {name:"Cody Scott",initials:"CS",role:"Project Administrator",perms:"Full control"},
+      {name:"Priya Raman",initials:"PR",role:"Contributor",role2:"Required reviewer on main"},
+      {name:"Build Service",initials:"BS",role:"Build Service account",perms:"Read, create PR status"}
+    ],
+
+    /* ---- the org / project / repo hierarchy ---- */
+    activeRepo:"taskapi",
+    repoStore:{
+      "taskapi-web":     mkRepoState("taskapi-web","Wire the task list to the API"),
+      "taskapi-infra":   mkRepoState("taskapi-infra","Add App Service module"),
+      "shared-java-libs":mkRepoState("shared-java-libs","Add ApiError record")
+    },
+    org:{name:"cody",url:"dev.azure.com/cody",region:"Central US",owner:USER,created:"12 Aug 2026",plan:"Basic"},
+    project:"taskapi",
+    projects:[
+      {name:"taskapi",desc:"Learning project â€” Spring Boot Task API",vis:"Private",process:"Agile",repos:4,members:3,updated:"today"},
+      {name:"Contoso Payments",desc:"Payment orchestration platform",vis:"Private",process:"Scrum",repos:11,members:24,updated:"2 hours ago"},
+      {name:"Platform",desc:"Shared infrastructure, pipelines and tooling",vis:"Private",process:"Basic",repos:6,members:9,updated:"yesterday"}
+    ],
+    orgUsers:[
+      {name:"Cody Scott",mail:"cody@example.com",access:"Basic",added:"12 Aug 2026",last:"now"},
+      {name:"Priya Raman",mail:"priya@example.com",access:"Basic",added:"14 Aug 2026",last:"3 hours ago"},
+      {name:"Sam Okoye",mail:"sam@example.com",access:"Stakeholder",added:"2 Sep 2026",last:"yesterday"},
+      {name:"Build Service",mail:"â€”",access:"Service account",added:"12 Aug 2026",last:"now"}
+    ],
+    billing:{plan:"Basic",users:3,free:5,paid:0,cost:"$0.00",hosted:"1 free parallel job",extra:"$40 / extra parallel job / month"},
+    usage:[
+      {k:"Pipeline minutes (hosted)",v:"412 / 1,800",pct:23},
+      {k:"Artifacts storage",v:"1.1 GB / 2 GB free",pct:55},
+      {k:"Repos storage",v:"2.4 GB / 250 GB",pct:1},
+      {k:"Test Plans licences",v:"0 / 0",pct:0}
+    ],
+    extensions:[
+      {name:"SonarQube",pub:"SonarSource",state:"Installed",desc:"Static analysis gate on pull requests"},
+      {name:"Slack integration",pub:"Microsoft",state:"Installed",desc:"Posts build and release events to a channel"},
+      {name:"WhiteSource Bolt",pub:"Mend",state:"Available",desc:"Open-source dependency vulnerability scanning"},
+      {name:"Delivery Plans",pub:"Microsoft",state:"Installed",desc:"Cross-team roadmap view"}
+    ],
+    audit:[
+      {who:USER,what:"Branch policy updated on taskapi/main",area:"Repos",when:"today 09:12"},
+      {who:USER,what:"Environment 'prod' approval added",area:"Pipelines",when:"today 09:05"},
+      {who:"Priya Raman",what:"Signed in from a new device",area:"Security",when:"yesterday 16:40"},
+      {who:USER,what:"Project 'taskapi' created",area:"Organization",when:"12 Aug 2026"}
+    ],
+    hooks:[
+      {event:"Build completed",target:"Slack â€” #taskapi-builds",ok:true},
+      {event:"Pull request created",target:"Microsoft Teams â€” Dev",ok:true},
+      {event:"Release deployment approval pending",target:"Slack â€” #oncall",ok:true},
+      {event:"Work item created",target:"https://hooks.example.com/wi",ok:false}
+    ],
+    pats:[
+      {name:"laptop-cli",scope:"Code (read, write), Build (read, execute)",exp:"expires in 62 days",ok:true},
+      {name:"self-hosted-agent",scope:"Agent Pools (read, manage)",exp:"expires in 9 days",ok:true},
+      {name:"old-ci-token",scope:"Full access",exp:"expired 3 days ago",ok:false}
+    ],
+    sshKeys:[{name:"CODY-DESKTOP",fp:"SHA256:8Xk2â€¦qP4m",added:"14 Aug 2026"}],
+    alerts:[
+      {sev:"High",type:"Dependency",title:"CVE-2026-1841 in jackson-databind 2.15.0",repo:"taskapi",state:"Open"},
+      {sev:"Medium",type:"Code",title:"Possible SQL string concatenation in TaskRepository",repo:"taskapi",state:"Open"},
+      {sev:"Critical",type:"Secret",title:"Azure Storage key committed in appsettings.dev.json",repo:"taskapi-web",state:"Fixed"},
+      {sev:"Low",type:"Code",title:"Unpinned GitHub Action version",repo:"taskapi-infra",state:"Dismissed"}
+    ],
+    feeds:[
+      {name:"taskapi-feed",scope:"Project",pkgs:[
+        {name:"com.cody:shared-java-libs",ver:"1.2.0",type:"Maven",dl:41},
+        {name:"com.cody:taskapi-client",ver:"0.4.1",type:"Maven",dl:12}],
+       upstreams:["Maven Central","npmjs"]}
+    ],
+    taskGroups:[
+      {name:"Deploy to App Service",steps:4,used:"3 pipelines",desc:"Download artifact, stop slot, deploy, swap"},
+      {name:"Java build + test",steps:3,used:"2 pipelines",desc:"Maven package with cached ~/.m2"}
+    ],
+    deployGroups:[
+      {name:"onprem-legacy",targets:2,online:1,desc:"Two Windows VMs still running the old scheduler"}
+    ],
+    plans:[
+      {name:"Q3 delivery",teams:"taskapi, Platform",items:14,window:"Jul â€“ Sep 2026"}
+    ],
+    testRuns:[
+      {id:2041,plan:"taskapi â€” Sprint 4",by:"Priya Raman",passed:3,failed:1,when:"today 10:02"},
+      {id:2038,plan:"taskapi â€” Sprint 3",by:USER,passed:6,failed:0,when:"28 Aug 2026"}
+    ],
+    notifications:[
+      {event:"A pull request is created in taskapi",to:"Team members",on:true},
+      {event:"A build fails on main",to:"Cody Scott",on:true},
+      {event:"A release needs my approval",to:"Approvers",on:true},
+      {event:"A work item is assigned to me",to:"Assignee",on:false}
+    ],
+    envs:{
+      dev:{ name:"dev",  gated:false, approvers:[],     deploys:[] },
+      prod:{ name:"prod", gated:true,  approvers:[USER], deploys:[] }
+    },
+    gate:null,           // {runId, stageIdx}
+    view:"summary",
+    openFile:"src/main/java/com/cody/taskapi/web/TaskController.java",
+    openWiki:"Home",
+    openPr:null,
+    openRun:null,
+    openSteps:{},
+    nextPr:1, nextRun:1,
+    flags:{},
+    term:[
+      {k:"info", t:"Azure DevOps Flight Sim â€” a sandbox. Nothing here touches a real service."},
+      {k:"dim",  t:"Repo 'taskapi' cloned to C:\\Users\\cody.scott\\dev\\taskapi"},
+      {k:"dim",  t:"Type 'help' for the command list, or follow the flow on the right."},
+      {k:"dim",  t:""}
+    ]
+  };
+}
+
+/* ---------- derived helpers ---------- */
+function headSha(s){ return s.repo.branches[s.repo.head]; }
+function log(s, branch){
+  var out=[], cur=s.repo.branches[branch||s.repo.head];
+  while(cur){ var c=s.repo.commits[cur]; if(!c) break; out.push(c); cur=c.parent; }
+  return out;
+}
+function ahead(s, branch){
+  var local=s.repo.branches[branch], rem=s.repo.remote[branch];
+  if(local===rem) return 0;
+  var n=0, cur=local;
+  while(cur && cur!==rem){ n++; cur=(s.repo.commits[cur]||{}).parent; }
+  return n;
+}
+function dirty(s){ return Object.keys(s.repo.workdir).length>0 || Object.keys(s.repo.index).length>0; }
+function openPRs(s){ return s.prs.filter(function(p){return p.status==="active";}); }
+function buildBroken(s, branch){
+  // a commit on this branch touched a file marked broken
+  var cs = log(s, branch);
+  for(var i=0;i<cs.length;i++){
+    for(var j=0;j<(cs[i].files||[]).length;j++){
+      if(cs[i].broken) return true;
+    }
+  }
+  return false;
+}
+
+/* ============================================================
+   2. PIPELINES â€” stage / job / step templates + a tick runner
+   ============================================================ */
+
+function ciStages(commitSha, msg, broken){
+  return [{
+    name:"Build", env:null, status:"pending",
+    jobs:[{ name:"BuildJob", pool:"ubuntu-latest", status:"pending", steps:[
+      { name:"Checkout taskapi@"+commitSha, ticks:2, status:"pending", logs:[
+        "Syncing repository: taskapi (Git)",
+        "git clone "+ORG,
+        "git checkout --progress --force "+commitSha,
+        "HEAD is now at "+commitSha+" "+msg ]},
+      { name:"Maven: package", ticks:4, status:"pending",
+        fails: broken,
+        logs: broken ? [
+          "[INFO] Scanning for projects...",
+          "[INFO] Building taskapi 0.0.1-SNAPSHOT",
+          "[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---",
+          "!ERR [ERROR] TaskController.java:[18,9] cannot find symbol",
+          "!ERR [ERROR]   symbol:   method listAll()",
+          "!ERR [ERROR] BUILD FAILURE",
+          "!ERR ##[error]Maven exited with code 1." ] : [
+          "[INFO] Scanning for projects...",
+          "[INFO] Building taskapi 0.0.1-SNAPSHOT",
+          "[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---",
+          "[INFO] --- maven-surefire-plugin:3.2.5:test ---",
+          "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0",
+          "!OK [INFO] BUILD SUCCESS" ]},
+      { name:"Publish artifact: drop", ticks:2, status:"pending", logs:[
+        "Uploading target/taskapi-0.0.1-SNAPSHOT.jar (24.8 MB)",
+        "!OK Artifact 'drop' published. This exact jar is what every environment gets." ]}
+    ]}]
+  }];
+}
+
+function cdStages(){
+  return [
+    { name:"Deploy_Dev", env:"dev", status:"pending",
+      jobs:[{ name:"DeployJob", pool:"ubuntu-latest", status:"pending", steps:[
+        { name:"Download artifact: drop", ticks:2, status:"pending", logs:[
+          "Downloading artifact 'drop' from run",
+          "!OK No rebuild. Same jar the Build stage produced." ]},
+        { name:"Azure App Service deploy: taskapi-dev", ticks:3, status:"pending", logs:[
+          "Deploying package to App Service 'taskapi-dev'",
+          "Restarting app...",
+          "!OK App Service application URL: https://taskapi-dev.azurewebsites.net" ]}
+      ]}]},
+    { name:"Deploy_Prod", env:"prod", status:"pending",
+      jobs:[{ name:"DeployJob", pool:"ubuntu-latest", status:"pending", steps:[
+        { name:"Download artifact: drop", ticks:2, status:"pending", logs:[
+          "Downloading artifact 'drop' from run",
+          "!OK Byte-for-byte the jar that passed dev." ]},
+        { name:"Azure App Service deploy: taskapi-prod", ticks:3, status:"pending", logs:[
+          "Deploying package to App Service 'taskapi-prod'",
+          "!OK App Service application URL: https://taskapi.azurewebsites.net" ]}
+      ]}]}
+  ];
+}
+
+function newRun(s, opts){
+  var c = s.repo.commits[opts.commit] || {};
+  var st = ciStages(opts.commit, c.msg||"", !!c.broken);
+  if(opts.cd) st = st.concat(cdStages());
+  return {
+    id: s.nextRun, name: opts.name || "taskapi CI",
+    trigger: opts.trigger, branch: opts.branch, commit: opts.commit,
+    commitMsg: c.msg || "", prId: opts.prId || null,
+    status:"running", stages: st, cursor:{st:0,jb:0,sp:0}, tick:0, elapsed:0
+  };
+}
+
+/* advance every running run by one tick; returns [runs, events] */
+function advance(state){
+  var events=[];
+  var runs = state.runs.map(function(r){
+    if(r.status!=="running") return r;
+    r = JSON.parse(JSON.stringify(r));
+    r.elapsed++;
+    var c=r.cursor, stage=r.stages[c.st];
+    if(!stage){ r.status="succeeded"; return r; }
+
+    // entering a gated stage that has not been approved yet
+    if(stage.status==="pending" && stage.env && state.envs[stage.env] && state.envs[stage.env].gated && !stage.approved){
+      stage.status="waiting"; r.status="waiting";
+      events.push({type:"gate", runId:r.id, stageIdx:c.st, env:stage.env});
+      return r;
+    }
+    if(stage.status==="pending") stage.status="running";
+    var job=stage.jobs[c.jb];
+    if(job.status==="pending") job.status="running";
+    var step=job.steps[c.sp];
+    if(step.status==="pending"){ step.status="running"; step.shown=0; }
+
+    step.shown = Math.min((step.shown||0)+Math.ceil(step.logs.length/step.ticks), step.logs.length);
+    step.tick=(step.tick||0)+1;
+
+    if(step.tick>=step.ticks){
+      step.shown=step.logs.length;
+      step.duration=(step.ticks*0.7).toFixed(1)+"s";
+      if(step.fails){
+        step.status="failed"; job.status="failed"; stage.status="failed"; r.status="failed";
+        events.push({type:"failed", runId:r.id, prId:r.prId});
+        return r;
+      }
+      step.status="succeeded";
+      c.sp++;
+      if(c.sp>=job.steps.length){
+        job.status="succeeded"; c.sp=0; c.jb++;
+        if(c.jb>=stage.jobs.length){
+          stage.status="succeeded"; c.jb=0; c.st++;
+          events.push({type:"stagedone", runId:r.id, stage:stage.name, env:stage.env});
+          if(c.st>=r.stages.length){
+            r.status="succeeded";
+            events.push({type:"done", runId:r.id, prId:r.prId});
+          }
+        }
+      }
+    }
+    return r;
+  });
+  return [runs, events];
+}
+
+/* ============================================================
+   3. THE TERMINAL â€” command parsing
+   ============================================================ */
+
+var HELP = [
+  ["git status",                    "what's changed in the working tree"],
+  ["git log [--oneline]",           "commit history of the current branch"],
+  ["git branch",                    "list branches"],
+  ["git checkout -b <name>",        "create a branch and switch to it"],
+  ["git checkout <name>",           "switch branches"],
+  ["git add . | <file>",            "stage changes"],
+  ["git commit -m \"msg\"",           "commit what's staged"],
+  ["git push [-u origin <br>]",     "push the current branch to Azure Repos"],
+  ["git merge <branch>",            "merge a branch into the current one"],
+  ["git remote -v",                 "show where 'origin' points"],
+  ["edit <file> [--bug]",           "modify a file (--bug plants a compile error)"],
+  ["fix <file>",                    "repair a file you broke"],
+  ["az repos list",                 "list the repositories in this project"],
+  ["az repos select <name>",        "point the terminal at a different repo"],
+  ["az boards work-item create --title \"t\"", "create a work item on the board"],
+  ["az repos pr create --title \"t\" [--work-item 42]", "open a pull request"],
+  ["az pipelines run [--cd]",       "queue a pipeline manually (--cd adds deploy stages)"],
+  ["clear",                         "clear the terminal"],
+  ["reset",                         "wipe the sandbox back to Step 0"]
+];
+
+function tokenize(line){
+  var out=[], re=/"([^"]*)"|'([^']*)'|(\S+)/g, m;
+  while((m=re.exec(line))) out.push(m[1]!==undefined?m[1]:(m[2]!==undefined?m[2]:m[3]));
+  return out;
+}
+function flagVal(a,name){ var i=a.indexOf(name); return i>=0 ? a[i+1] : null; }
+
+/* Each handler returns {state, out:[{k,t}]} */
+function runCommand(s, line){
+  var out=[], a=tokenize(line.trim());
+  if(!a.length) return {state:s, out:out};
+  var st = JSON.parse(JSON.stringify(s));
+  var say=function(k,t){ out.push({k:k,t:t}); };
+  var F=st.flags;
+
+  function notFound(){ say("err","'"+a[0]+"' is not recognized. Type 'help' for the command list."); }
+
+  /* ---- help / misc ---- */
+  if(a[0]==="help"){
+    say("info","Commands available in this sandbox:");
+    HELP.forEach(function(h){ say("dim","  "+h[0]+new Array(Math.max(2,44-h[0].length)).join(" ")+h[1]); });
+    return {state:st,out:out};
+  }
+  if(a[0]==="clear"){ st.term=[]; return {state:st,out:[]}; }
+  if(a[0]==="reset"){ var f=initial(); f.term=[{k:"warn",t:"Sandbox reset to Step 0."}]; return {state:f,out:[]}; }
+
+  /* ---- edit / fix ---- */
+  if(a[0]==="edit"||a[0]==="touch"){
+    var p=a[1];
+    if(!p){ say("err","usage: edit <file> [--bug]"); return {state:st,out:out}; }
+    var known = FILES.indexOf(p)>=0;
+    st.repo.workdir[p]= known ? "modified" : "untracked";
+    st.view="files"; st.openFile=p;
+    if(a.indexOf("--bug")>=0){ st.repo.broken[p]=true; say("warn","Planted a compile error in "+p+". The next build will fail â€” that's the point."); }
+    else say("ok",(known?"Modified ":"Created ")+p);
+    say("dim","Look at Files above â€” it's marked "+(known?"modified":"new")+", and it exists only on your laptop.");
+    F.edited=true;
+    return {state:st,out:out};
+  }
+  if(a[0]==="fix"){
+    var fp=a[1];
+    if(!fp||!st.repo.broken[fp]){ say("err","Nothing broken at "+(fp||"<file>")); return {state:st,out:out}; }
+    delete st.repo.broken[fp];
+    st.repo.workdir[fp]="modified";
+    say("ok","Repaired "+fp+". Commit and push it to re-trigger validation.");
+    F.fixed=true;
+    return {state:st,out:out};
+  }
+
+  /* ---- git ---- */
+  if(a[0]==="git"){
+    var sub=a[1];
+
+    if(sub==="status"){
+      F.ranStatus=true;
+      say("plain","On branch "+st.repo.head);
+      var ah=ahead(st, st.repo.head);
+      if(st.repo.remote[st.repo.head]===undefined) say("warn","No upstream branch. Use: git push -u origin "+st.repo.head);
+      else if(ah>0) say("plain","Your branch is ahead of 'origin/"+st.repo.head+"' by "+ah+" commit"+(ah>1?"s":"")+".");
+      else say("plain","Your branch is up to date with 'origin/"+st.repo.head+"'.");
+      var idx=Object.keys(st.repo.index), wd=Object.keys(st.repo.workdir);
+      if(idx.length){ say("plain",""); say("plain","Changes to be committed:"); idx.forEach(function(p){ say("ok","        "+st.repo.index[p]+":   "+p); }); }
+      if(wd.length){ say("plain",""); say("plain","Changes not staged for commit:"); wd.forEach(function(p){ say("err","        "+st.repo.workdir[p]+":   "+p); }); }
+      if(!idx.length && !wd.length) say("plain","nothing to commit, working tree clean");
+      return {state:st,out:out};
+    }
+
+    if(sub==="log"){
+      F.ranLog=true;
+      var cs=log(st);
+      if(a.indexOf("--oneline")>=0) cs.forEach(function(c){ say("plain", c.sha+" "+c.msg); });
+      else cs.forEach(function(c){ say("warn","commit "+c.sha); say("plain","Author: "+c.author); say("plain",""); say("plain","    "+c.msg); say("plain",""); });
+      return {state:st,out:out};
+    }
+
+    if(sub==="branch"){
+      Object.keys(st.repo.branches).forEach(function(b){ say(b===st.repo.head?"ok":"plain",(b===st.repo.head?"* ":"  ")+b); });
+      return {state:st,out:out};
+    }
+
+    if(sub==="remote"){
+      F.ranRemote=true;
+      say("plain","origin  "+ORG+" (fetch)");
+      say("plain","origin  "+ORG+" (push)");
+      say("dim","This URL is the ONLY thing that would differ if you hosted on GitHub instead.");
+      return {state:st,out:out};
+    }
+
+    if(sub==="checkout"||sub==="switch"){
+      var mk = a.indexOf("-b")>=0 || a.indexOf("-c")>=0;
+      var name = a[a.length-1];
+      if(mk){
+        if(st.repo.branches[name]){ say("err","fatal: a branch named '"+name+"' already exists"); return {state:st,out:out}; }
+        st.repo.branches[name]=st.repo.branches[st.repo.head];
+        st.repo.head=name;
+        say("ok","Switched to a new branch '"+name+"'");
+        F.createdBranch=true;
+        if(/^(feature|bugfix|hotfix|users)\//.test(name)) F.namedWell=true;
+      } else {
+        if(!st.repo.branches[name]){ say("err","error: pathspec '"+name+"' did not match any known branch"); return {state:st,out:out}; }
+        st.repo.head=name;
+        say("plain","Switched to branch '"+name+"'");
+      }
+      return {state:st,out:out};
+    }
+
+    if(sub==="add"){
+      var target=a[2];
+      if(!target){ say("err","Nothing specified, nothing added."); return {state:st,out:out}; }
+      var keys=Object.keys(st.repo.workdir);
+      if(!keys.length){ say("dim","No changes to stage."); return {state:st,out:out}; }
+      if(target==="."||target==="-A"||target==="*"){
+        keys.forEach(function(p){ st.repo.index[p]=st.repo.workdir[p]; delete st.repo.workdir[p]; });
+        say("ok","Staged "+keys.length+" file"+(keys.length>1?"s":"")+".");
+      } else if(st.repo.workdir[target]){
+        st.repo.index[target]=st.repo.workdir[target]; delete st.repo.workdir[target];
+        say("ok","Staged "+target);
+      } else say("err","pathspec '"+target+"' did not match any files");
+      st.view="files";
+      F.staged=true;
+      return {state:st,out:out};
+    }
+
+    if(sub==="commit"){
+      var msg=flagVal(a,"-m")||flagVal(a,"--message");
+      var staged=Object.keys(st.repo.index);
+      if(!msg){ say("err","Aborting commit: use  git commit -m \"your message\""); return {state:st,out:out}; }
+      if(!staged.length){ say("err","nothing to commit â€” stage something first with: git add ."); return {state:st,out:out}; }
+      var id=sha();
+      var isBroken = staged.some(function(p){ return st.repo.broken[p]; });
+      st.repo.commits[id]={sha:id,msg:msg,parent:st.repo.branches[st.repo.head],author:USER,branch:st.repo.head,files:staged,broken:isBroken};
+      st.repo.branches[st.repo.head]=id;
+      staged.forEach(function(p){ if(st.repo.tracked.indexOf(p)<0) st.repo.tracked.push(p); });
+      st.repo.index={};
+      st.view="commits";
+      say("plain","["+st.repo.head+" "+id+"] "+msg);
+      say("dim"," "+staged.length+" file"+(staged.length>1?"s":"")+" changed");
+      F.committed=true;
+      // pushing a new commit to a PR branch resets votes + re-runs validation
+      var pr=st.prs.filter(function(p){return p.status==="active"&&p.source===st.repo.head;})[0];
+      if(pr) say("dim","Branch "+st.repo.head+" has an open PR â€” push to re-trigger its build validation.");
+      return {state:st,out:out};
+    }
+
+    if(sub==="push"){
+      var br=st.repo.head;
+      var isProtected = (br==="main" && st.policy.requirePR);
+      if(isProtected){
+        say("plain","Enumerating objects: 5, done.");
+        say("err","remote: TF402455: Pushes to this branch are not permitted; you must use a pull request to update this branch.");
+        say("err","To "+ORG);
+        say("err"," ! [remote rejected]   main -> main (pre-receive hook declined)");
+        say("err","error: failed to push some refs to '"+ORG+"'");
+        say("dim","");
+        say("info","That is a BRANCH POLICY, enforced server-side. Your local git is fine â€” the server said no.");
+        say("info","Make a branch instead:  git checkout -b feature/tasks-endpoint");
+        st.pushes.unshift({branch:br,n:ahead(st,br)||1,sha:st.repo.branches[br],rejected:true});
+        st.view="branches";
+        F.pushRejected=true;
+        return {state:st,out:out};
+      }
+      var n=ahead(st,br);
+      if(st.repo.remote[br]!==undefined && n===0){ say("dim","Everything up-to-date"); return {state:st,out:out}; }
+      var fresh = st.repo.remote[br]===undefined;
+      st.repo.remote[br]=st.repo.branches[br];
+      say("plain","Enumerating objects: "+(n*3+2)+", done.");
+      say("plain","To "+ORG);
+      say("ok"," * ["+(fresh?"new branch":"updated")+"]      "+br+" -> "+br);
+      say("dim","Your files are on the server now. The banner in Files above just flipped to 'in sync'.");
+      st.pushes.unshift({branch:br,n:n||1,sha:st.repo.branches[br],rejected:false});
+      st.view="files";
+      F.pushedBranch=true;
+      if(fresh) say("info","remote: Create a pull request for '"+br+"':  az repos pr create --title \"...\"");
+      // re-trigger PR validation build
+      var pr2=st.prs.filter(function(p){return p.status==="active"&&p.source===br;})[0];
+      if(pr2){
+        pr2.reviewers.forEach(function(rv){ rv.vote=0; });
+        pr2.buildRunId=st.nextRun;
+        st.runs.unshift(newRun(st,{commit:st.repo.branches[br],branch:br,trigger:"PR validation for !"+pr2.id,name:"taskapi CI (PR validation)",prId:pr2.id}));
+        st.nextRun++;
+        say("info","Build validation re-queued for PR !"+pr2.id+"; reviewer votes were reset.");
+      }
+      return {state:st,out:out};
+    }
+
+    if(sub==="merge"){
+      var src=a[2];
+      if(!st.repo.branches[src]){ say("err","merge: "+src+" - not something we can merge"); return {state:st,out:out}; }
+      say("warn","This sandbox wants you to merge through a pull request, the way the policy requires.");
+      say("info","Try:  az repos pr create --title \"Add tasks endpoint\" --work-item 42");
+      return {state:st,out:out};
+    }
+
+    if(sub==="pull"){ say("plain","Already up to date."); return {state:st,out:out}; }
+    say("err","git: '"+sub+"' is not supported in this sandbox. Type 'help'.");
+    return {state:st,out:out};
+  }
+
+  /* ---- az cli ---- */
+  if(a[0]==="az"){
+    if(a[1]==="repos"&&a[2]==="pr"&&a[3]==="create"){
+      var title=flagVal(a,"--title")||flagVal(a,"-t");
+      var wi=flagVal(a,"--work-item")||flagVal(a,"-w");
+      var srcb=st.repo.head;
+      if(srcb==="main"){ say("err","A pull request needs a source branch other than 'main'."); return {state:st,out:out}; }
+      if(st.repo.remote[srcb]===undefined){ say("err","Branch '"+srcb+"' does not exist on the server yet. Run:  git push -u origin "+srcb); return {state:st,out:out}; }
+      if(!title){ say("err","usage: az repos pr create --title \"your title\" [--work-item 42]"); return {state:st,out:out}; }
+      if(st.prs.some(function(p){return p.status==="active"&&p.source===srcb;})){ say("err","An active pull request already exists for '"+srcb+"'."); return {state:st,out:out}; }
+      var pr={
+        id:st.nextPr, title:title, source:srcb, target:"main", status:"active",
+        author:USER, workItem: wi?parseInt(wi,10):null,
+        reviewers:[{name:"Priya Raman",initials:"PR",vote:0,required:true}],
+        buildRunId:st.nextRun, threads:[]
+      };
+      st.prs.unshift(pr);
+      st.runs.unshift(newRun(st,{commit:st.repo.branches[srcb],branch:srcb,trigger:"PR validation for !"+pr.id,name:"taskapi CI (PR validation)",prId:pr.id}));
+      st.nextPr++; st.nextRun++;
+      st.view="prs"; st.openPr=pr.id;
+      say("ok","Pull request !"+pr.id+" created: "+srcb+" -> main");
+      say("info","Branch policy queued a validation build automatically. Watch it in Pipelines.");
+      if(!wi) say("warn","No work item linked. The policy requires one â€” link it in the PR view.");
+      F.openedPR=true;
+      return {state:st,out:out};
+    }
+    if(a[1]==="repos"&&a[2]==="list"){
+      say("info","Repositories in project '"+st.project+"':");
+      Object.keys(REPO_META).forEach(function(n){
+        say(n===st.activeRepo?"ok":"plain","  "+(n===st.activeRepo?"* ":"  ")+n+new Array(Math.max(2,20-n.length)).join(" ")+REPO_META[n].lang+"  "+REPO_META[n].desc);
+      });
+      st.view="repolist";
+      return {state:st,out:out};
+    }
+    if(a[1]==="repos"&&a[2]==="select"){
+      var rn=a[3];
+      if(!REPO_META[rn]){ say("err","No repository named '"+(rn||"")+"'. Try:  az repos list"); return {state:st,out:out}; }
+      if(rn===st.activeRepo){ say("dim","Already on '"+rn+"'."); return {state:st,out:out}; }
+      st.repoStore[st.activeRepo]=st.repo;
+      st.repo=st.repoStore[rn];
+      delete st.repoStore[rn];
+      st.activeRepo=rn;
+      st.openFile=(st.repo.tracked||[])[0];
+      st.view="files";
+      say("ok","Switched to repository '"+rn+"'.");
+      say("dim","git status, git log and everything else now operate on this repo.");
+      return {state:st,out:out};
+    }
+    if(a[1]==="boards"&&a[2]==="work-item"&&a[3]==="create"){
+      var wt=flagVal(a,"--title")||flagVal(a,"-t");
+      var wtype=flagVal(a,"--type")||"User Story";
+      if(!wt){ say("err","usage: az boards work-item create --title \"...\" [--type Bug|Task]"); return {state:st,out:out}; }
+      st.workItems.push({id:st.nextWi,type:wtype,title:wt,state:"New",pts:3,who:"unassigned",pri:2});
+      say("ok","Created work item #"+st.nextWi+" â€” "+wt);
+      say("dim","It's on the board now. Link it to a PR later with --work-item "+st.nextWi);
+      st.nextWi++; st.view="witems"; F.madeWi=true;
+      return {state:st,out:out};
+    }
+    if(a[1]==="pipelines"&&a[2]==="run"){
+      var cd=a.indexOf("--cd")>=0;
+      st.runs.unshift(newRun(st,{commit:headSha(st),branch:st.repo.head,trigger:"Manually queued by "+USER,name:cd?"taskapi CI/CD":"taskapi CI",cd:cd}));
+      st.nextRun++; st.view="pipelines"; st.openRun=st.nextRun-1;
+      say("ok","Queued run #"+(st.nextRun-1)+" on "+st.repo.head+(cd?" (with deploy stages)":""));
+      F.ranPipeline=true;
+      return {state:st,out:out};
+    }
+    say("err","az: unsupported command in this sandbox. Type 'help'.");
+    return {state:st,out:out};
+  }
+
+  notFound();
+  return {state:st,out:out};
+}
+
+/* ============================================================
+   4. LABS
+   ============================================================ */
+
+/* One continuous change lifecycle. Each phase unlocks the next the moment its
+   objectives are satisfied â€” you never pick a lab, you just keep moving forward,
+   the same way a real change moves through a real system. */
+var FLOW = [
+  {
+    stage:"Plan",
+    title:"Get your bearings",
+    brief: html`<p>Everything on this screen sits on top of plain <b>Git</b>. Azure Repos is a server holding a copy of your repo, with rules bolted on.</p><p>The terminal is at the bottom. Click it and look around.</p>`,
+    objectives:[
+      {t:html`Run <code>git status</code>`, check:function(s){return s.flags.ranStatus;}},
+      {t:html`Run <code>git log --oneline</code>`, check:function(s){return s.flags.ranLog;}},
+      {t:html`Run <code>git remote -v</code>`, check:function(s){return s.flags.ranRemote;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Git</b> is the version control tool. <b>Azure Repos</b> is the service hosting it. Moving to GitHub would change only that <b>remote URL</b>.`}
+  },
+  {
+    stage:"Plan",
+    title:"Pick up the work",
+    brief: html`<p>Nothing starts with code. It starts with a <b>work item</b> â€” the ticket that says why this change is allowed to exist.</p><p>Open <b>Boards</b> and find <b>#42, "Add GET /api/tasks endpoint"</b>. That ID follows you all the way to production.</p>`,
+    objectives:[
+      {t:html`Open <b>Boards</b> and find work item <b>#42</b>`, check:function(s){return s.flags.sawBoards;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Work item</b>, <b>backlog</b>, <b>sprint</b>, <b>Azure Boards</b>. Every later artifact points back here â€” that's what makes the chain auditable.`}
+  },
+  {
+    stage:"Code",
+    title:"Try the obvious thing first",
+    brief: html`<p>You know Git. So do the natural thing: change the file, commit it on <code>main</code>, push.</p><p>It's going to fail. The failure is the whole point of this phase â€” don't skip past it.</p>`,
+    objectives:[
+      {t:html`<code>edit src/main/java/com/cody/taskapi/web/TaskController.java</code>`, check:function(s){return s.flags.edited;}},
+      {t:html`Stage it: <code>git add .</code>`, check:function(s){return s.flags.staged;}},
+      {t:html`Commit: <code>git commit -m "Add tasks endpoint"</code>`, check:function(s){return s.flags.committed;}},
+      {t:html`Push it: <code>git push</code> â€” and read the rejection`, check:function(s){return s.flags.pushRejected;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Branch policy</b>, <b>protected branch</b>, <b>pre-receive hook</b>. <b>TF402455</b> is the real Azure DevOps error code. The <i>server</i> refused you â€” your laptop was happy.`}
+  },
+  {
+    stage:"Code",
+    title:"Take the sanctioned path",
+    brief: html`<p>Your commit already exists locally â€” it's just sitting on a branch the server won't accept. Move it onto a branch of its own and publish that instead.</p><p>Naming matters at work: <code>feature/</code>, <code>bugfix/</code>, <code>hotfix/</code>.</p>`,
+    objectives:[
+      {t:html`<code>git checkout -b feature/tasks-endpoint</code>`, check:function(s){return s.flags.createdBranch;}},
+      {t:html`<code>git push -u origin feature/tasks-endpoint</code>`, check:function(s){return s.flags.pushedBranch;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Topic branch</b>, <b>upstream branch</b>, <b>trunk-based development</b>, <b>GitFlow</b>, <b>Release Flow</b>. Short-lived branches are the modern default â€” long ones rot.`}
+  },
+  {
+    stage:"Review",
+    title:"Open the pull request",
+    brief: html`<p>The pull request is the unit of change at nearly every company. It's a request to move your branch into <code>main</code>, plus everything needed to judge it.</p><p>Link the work item as you open it â€” the policy requires one anyway.</p>`,
+    objectives:[
+      {t:html`<code>az repos pr create --title "Add tasks endpoint" --work-item 42</code>`, check:function(s){return s.flags.openedPR;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Pull request</b>, <b>merge request</b> (GitLab's name for it), <b>reviewer</b>, <b>CODEOWNERS</b>. Opening a PR is what fires build validation automatically.`}
+  },
+  {
+    stage:"Review",
+    title:"Watch the machine check you",
+    brief: html`<p>Opening the PR queued a build with no human involved. That's <b>CI</b>, and its verdict is a policy check on the PR itself.</p><p>Open <b>Pipelines</b> and expand a step to read its log â€” pipelines are just stages â†’ jobs â†’ steps.</p>`,
+    objectives:[
+      {t:html`Open <b>Pipelines</b> and expand any step's logs`, check:function(s){return s.flags.openedLogs;}},
+      {t:html`Wait for build validation to go green`, check:function(s){return s.runs.some(function(r){return r.prId&&r.status==="succeeded";});}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Continuous integration</b>, <b>build validation policy</b>, <b>agent</b>, <b>agent pool</b>, <b>stages / jobs / steps</b>. Learn that hierarchy and YAML pipelines stop being mysterious.`}
+  },
+  {
+    stage:"Review",
+    title:"Get approved, then merge",
+    brief: html`<p>Go to <b>Pull requests</b>. Complete stays greyed out until every policy check is green â€” that checklist <i>is</i> the gate.</p><p>Approve as your reviewer, then complete the merge.</p>`,
+    objectives:[
+      {t:html`Approve the PR as the required reviewer`, check:function(s){return s.prs.some(function(p){return p.reviewers.some(function(r){return r.vote>0;});});}},
+      {t:html`Click <b>Complete merge</b>`, check:function(s){return s.flags.prCompleted;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Required reviewer</b>, <b>squash merge</b>, <b>segregation of duties</b>. Note the votes reset if you push again â€” search <b>reset votes on new push</b>.`}
+  },
+  {
+    stage:"Deploy",
+    title:"Build once, deploy many",
+    brief: html`<p>The merge landed on <code>main</code>. Now the release pipeline runs: it builds <i>one</i> jar, publishes it as an <b>artifact</b>, and every environment gets that same file.</p><p>Queue it, then watch <code>Deploy_Dev</code> go out with nobody's permission.</p>`,
+    objectives:[
+      {t:html`<code>az pipelines run --cd</code>`, check:function(s){return s.flags.ranPipeline;}},
+      {t:html`See the artifact published`, check:function(s){return s.artifacts.length>0;}},
+      {t:html`Watch <code>dev</code> deploy automatically`, check:function(s){return s.envs.dev.deploys.length>0;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Build once, deploy many</b>, <b>artifact promotion</b>, <b>Azure Artifacts</b>, <b>environment promotion</b>. Rebuilding per environment means you never shipped what you tested.`}
+  },
+  {
+    stage:"Deploy",
+    title:"The gate â€” this is your CAB",
+    brief: html`<p><code>Deploy_Prod</code> won't start. It's sitting in <b>waiting</b>, because the <code>prod</code> environment has an approval check on it.</p><p>That pause is a <b>Change Advisory Board</b> after it's been compressed into one button and a permanent record.</p>`,
+    objectives:[
+      {t:html`Watch <code>Deploy_Prod</code> stop and wait`, check:function(s){return s.flags.sawGate;}},
+      {t:html`Approve the release to prod`, check:function(s){return s.envs.prod.deploys.length>0;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Environments</b>, <b>approvals and checks</b>, <b>Change Advisory Board (CAB)</b>, <b>RFC</b>, <b>standard vs normal change</b>, <b>change freeze</b>. Getting a deploy reclassified a <i>standard change</i> is how teams escape the weekly CAB meeting.`}
+  },
+  {
+    stage:"Operate",
+    title:"Read the chain back",
+    brief: html`<p>The change is live. Now prove it was legitimate â€” which is the only thing an auditor ever actually asks.</p><p>Open <b>Boards</b> and read the chain end to end.</p>`,
+    objectives:[
+      {t:html`Complete a PR carrying a work item`, check:function(s){return s.prs.some(function(p){return p.status==="completed"&&p.workItem;});}},
+      {t:html`Ship it to <code>prod</code> through the gate`, check:function(s){return s.envs.prod.deploys.length>0;}},
+      {t:html`Open <b>Boards</b> and read the full chain`, check:function(s){return s.flags.sawBoards;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Traceability</b>, <b>audit trail</b>, <b>SOX compliance</b>, <b>DORA metrics</b>. The chain: work item â†’ commit â†’ PR â†’ build â†’ artifact â†’ approval â†’ deploy.`}
+  },
+  {
+    stage:"Operate",
+    title:"Now break it on purpose",
+    brief: html`<p>You've seen the happy path. The other half of the job is what happens when it goes red.</p><p><code>--bug</code> plants a compile error. Take it through the same flow and watch the policy stop it before a human wastes a minute on it.</p>`,
+    objectives:[
+      {t:html`<code>git checkout -b bugfix/broken-build</code>`, check:function(s){return !!s.repo.branches["bugfix/broken-build"];}},
+      {t:html`<code>edit src/.../web/TaskController.java --bug</code>`, check:function(s){return Object.keys(s.repo.broken).length>0||s.flags.sawRedBuild;}},
+      {t:html`Commit, push, open a PR â€” watch validation fail`, check:function(s){return s.flags.sawRedBuild;}},
+      {t:html`Read the compiler error in the failed step`, check:function(s){return s.flags.openedLogs&&s.flags.sawRedBuild;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Fail fast</b>, <b>red build</b>, <b>forward-fix vs rollback</b>, <b>change failure rate</b>. A machine saying no is cheap; a reviewer saying no is expensive; production saying no is catastrophic.`}
+  }
+];
+
+/* ============================================================
+   5. VIEWS
+   ============================================================ */
+
+function statusPill(s){
+  var m={succeeded:["p-ok","succeeded"],failed:["p-fail","failed"],running:["p-run","running"],waiting:["p-wait","waiting"],pending:["p-idle","queued"],active:["p-run","active"],completed:["p-ok","completed"],abandoned:["p-idle","abandoned"]};
+  var v=m[s]||["p-idle",s];
+  return html`<span class="pill ${v[0]}"><i class="dot"></i>${v[1]}</span>`;
+}
+function icon(d){ return html`<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d=${d}></path></svg>`; }
+var I={
+  boards:"M2 3h12v10H2zM6 3v10M10 3v10",
+  repos:"M4 2h8v12H4zM4 11h8",
+  prs:"M4 3v7a2 2 0 002 2h6M12 3v3M4 2.5a1 1 0 100 2 1 1 0 000-2zM12 2.5a1 1 0 100 2 1 1 0 000-2zM12 11a1 1 0 100 2 1 1 0 000-2z",
+  pipes:"M2 5h5l2 3h5M2 11h5M13 3l2 2-2 2M13 9l2 2-2 2",
+  envs:"M2 4h12v3H2zM2 9h12v3H2M4.5 5.5h.01M4.5 10.5h.01",
+  arts:"M8 2l6 3v6l-6 3-6-3V5zM2 5l6 3 6-3M8 8v6",
+  files:"M9 1.5H4.5A1.5 1.5 0 003 3v10a1.5 1.5 0 001.5 1.5h7A1.5 1.5 0 0013 13V5.5zM9 1.5V5.5H13M5.5 9h5M5.5 11.5h3",
+  over:"M8 1.8l6 3.4v5.6L8 14.2 2 10.8V5.2zM2 5.2L8 8.6l6-3.4M8 8.6v5.6",
+  tests:"M6 1.8v4L2.6 12a1.4 1.4 0 001.2 2.1h8.4a1.4 1.4 0 001.2-2.1L10 5.8v-4M5 1.8h6M4.6 9.6h6.8",
+  set:"M8 10.2a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4zM13 8a5 5 0 00-.1-1l1.3-1-1.4-2.4-1.5.6a5 5 0 00-1.7-1L9.4 1.5H6.6l-.2 1.7a5 5 0 00-1.7 1l-1.5-.6L1.8 6l1.3 1a5 5 0 000 2l-1.3 1 1.4 2.4 1.5-.6a5 5 0 001.7 1l.2 1.7h2.8l.2-1.7a5 5 0 001.7-1l1.5.6 1.4-2.4-1.3-1c.06-.33.1-.66.1-1z"
+};
+
+/* circular status glyph â€” the green tick / red cross Azure DevOps puts everywhere */
+function glyph(status, size){
+  var d = size || 15;
+  var map = {
+    succeeded:["var(--ok)",  "M4.5 8.2l2.4 2.4 4.6-5"],
+    completed:["var(--ok)",  "M4.5 8.2l2.4 2.4 4.6-5"],
+    failed:   ["var(--fail)","M5.4 5.4l5.2 5.2M10.6 5.4l-5.2 5.2"],
+    waiting:  ["var(--wait)","M6.4 5.4v5.2M9.6 5.4v5.2"],
+    running:  ["var(--run)", null],
+    active:   ["var(--run)", null],
+    pending:  ["var(--ink-3)",null]
+  };
+  var m = map[status] || map.pending;
+  if(status==="running"||status==="active"){
+    return html`<svg class="gl" width=${d} height=${d} viewBox="0 0 16 16" aria-label=${status}>
+      <circle cx="8" cy="8" r="6.6" fill="none" stroke="var(--border-strong)" stroke-width="1.8"></circle>
+      <path class="gl-spin" d="M8 1.4a6.6 6.6 0 016.6 6.6" fill="none" stroke=${m[0]} stroke-width="1.8" stroke-linecap="round"></path>
+    </svg>`;
+  }
+  if(status==="pending"){
+    return html`<svg class="gl" width=${d} height=${d} viewBox="0 0 16 16" aria-label="queued">
+      <circle cx="8" cy="8" r="6.6" fill="none" stroke="var(--border-strong)" stroke-width="1.6" stroke-dasharray="2.2 2.4"></circle>
+    </svg>`;
+  }
+  return html`<svg class="gl" width=${d} height=${d} viewBox="0 0 16 16" aria-label=${status}>
+    <circle cx="8" cy="8" r="7" fill=${m[0]}></circle>
+    <path d=${m[1]} fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+  </svg>`;
+}
+
+/* ---------- the actual repo contents ---------- */
+var CONTENT = {
+"pom.xml":
+'<?xml version="1.0" encoding="UTF-8"?>\n\
+<project xmlns="http://maven.apache.org/POM/4.0.0">\n\
+  <modelVersion>4.0.0</modelVersion>\n\
+  <parent>\n\
+    <groupId>org.springframework.boot</groupId>\n\
+    <artifactId>spring-boot-starter-parent</artifactId>\n\
+    <version>4.1.1</version>\n\
+  </parent>\n\
+  <groupId>com.cody</groupId>\n\
+  <artifactId>taskapi</artifactId>\n\
+  <version>0.0.1-SNAPSHOT</version>\n\
+  <properties>\n\
+    <java.version>21</java.version>\n\
+  </properties>\n\
+  <dependencies>\n\
+    <!-- Boot 4.x renamed this. Most tutorials still say -web. -->\n\
+    <dependency>\n\
+      <groupId>org.springframework.boot</groupId>\n\
+      <artifactId>spring-boot-starter-webmvc</artifactId>\n\
+    </dependency>\n\
+    <dependency>\n\
+      <groupId>org.springframework.boot</groupId>\n\
+      <artifactId>spring-boot-starter-data-jpa</artifactId>\n\
+    </dependency>\n\
+    <dependency>\n\
+      <groupId>com.h2database</groupId>\n\
+      <artifactId>h2</artifactId>\n\
+      <scope>runtime</scope>\n\
+    </dependency>\n\
+  </dependencies>\n\
+</project>',
+
+"azure-pipelines.yml":
+'# This file IS the pipeline. Committing it is how the pipeline changes.\n\
+trigger:\n\
+  branches:\n\
+    include: [ main ]\n\
+\n\
+pool:\n\
+  vmImage: ubuntu-latest\n\
+\n\
+stages:\n\
+- stage: Build\n\
+  jobs:\n\
+  - job: BuildJob\n\
+    steps:\n\
+    - checkout: self\n\
+    - task: Maven@4\n\
+      inputs:\n\
+        mavenPomFile: pom.xml\n\
+        goals: package\n\
+    # Publish once. Every environment below reuses THIS jar.\n\
+    - publish: target/taskapi-0.0.1-SNAPSHOT.jar\n\
+      artifact: drop\n\
+\n\
+- stage: Deploy_Dev\n\
+  dependsOn: Build\n\
+  jobs:\n\
+  - deployment: DeployJob\n\
+    environment: dev          # no approval configured -> ships itself\n\
+    strategy:\n\
+      runOnce:\n\
+        deploy:\n\
+          steps:\n\
+          - download: current\n\
+            artifact: drop\n\
+\n\
+- stage: Deploy_Prod\n\
+  dependsOn: Deploy_Dev\n\
+  jobs:\n\
+  - deployment: DeployJob\n\
+    environment: prod         # approval lives on the ENVIRONMENT, not here\n\
+    strategy:\n\
+      runOnce:\n\
+        deploy:\n\
+          steps:\n\
+          - download: current\n\
+            artifact: drop',
+
+"src/main/java/com/cody/taskapi/TaskapiApplication.java":
+'package com.cody.taskapi;\n\
+\n\
+import org.springframework.boot.SpringApplication;\n\
+import org.springframework.boot.autoconfigure.SpringBootApplication;\n\
+\n\
+@SpringBootApplication\n\
+public class TaskapiApplication {\n\
+\n\
+    public static void main(String[] args) {\n\
+        SpringApplication.run(TaskapiApplication.class, args);\n\
+    }\n\
+}',
+
+"src/main/java/com/cody/taskapi/web/TaskController.java":
+'package com.cody.taskapi.web;\n\
+\n\
+import org.springframework.web.bind.annotation.GetMapping;\n\
+import org.springframework.web.bind.annotation.RequestMapping;\n\
+import org.springframework.web.bind.annotation.RestController;\n\
+\n\
+@RestController\n\
+@RequestMapping("/api/tasks")\n\
+public class TaskController {\n\
+\n\
+    @GetMapping\n\
+    public String list() {\n\
+        return "[]";\n\
+    }\n\
+}',
+
+"src/main/resources/application.properties":
+'spring.application.name=taskapi\n\
+# 8080 was taken on this machine, so the app runs on 8081.\n\
+server.port=8081\n\
+\n\
+spring.datasource.url=jdbc:h2:mem:taskdb\n\
+spring.datasource.username=sa\n\
+spring.jpa.hibernate.ddl-auto=update\n\
+spring.h2.console.enabled=true',
+
+"README.md":
+'# taskapi\n\
+\n\
+A Task API, built one step at a time to learn Spring Boot.\n\
+\n\
+- Java 21, Spring Boot 4.1.1, Maven\n\
+- Runs on http://localhost:8081\n\
+\n\
+## Run it\n\
+\n\
+    .\\mvnw.cmd spring-boot:run\n\
+    .\\mvnw.cmd test'
+};
+
+/* ---------- the other repos in this project ---------- */
+var REPO_FILES = {
+  "taskapi": FILES,
+  "taskapi-web": ["package.json","README.md","azure-pipelines.yml","src/App.jsx","src/api/tasks.js"],
+  "taskapi-infra": ["README.md","azure-pipelines.yml","main.bicep","modules/appservice.bicep"],
+  "shared-java-libs": ["pom.xml","README.md","src/main/java/com/cody/common/ApiError.java"]
+};
+
+var REPO_META = {
+  "taskapi":         {lang:"Java",       size:"1.4 MB",  def:"main", desc:"Spring Boot Task API â€” the service itself"},
+  "taskapi-web":     {lang:"JavaScript", size:"820 KB",  def:"main", desc:"React front end that calls the Task API"},
+  "taskapi-infra":   {lang:"Bicep",      size:"46 KB",   def:"main", desc:"Azure infrastructure as code for all environments"},
+  "shared-java-libs":{lang:"Java",       size:"210 KB",  def:"main", desc:"Error shapes and DTOs shared across services"}
+};
+
+var CONTENT2 = {
+"taskapi-web:package.json":
+'{\n\
+  "name": "taskapi-web",\n\
+  "version": "0.1.0",\n\
+  "private": true,\n\
+  "dependencies": {\n\
+    "react": "18.3.1",\n\
+    "react-dom": "18.3.1"\n\
+  },\n\
+  "scripts": {\n\
+    "dev": "vite",\n\
+    "build": "vite build",\n\
+    "test": "vitest run"\n\
+  }\n\
+}',
+"taskapi-web:README.md":
+'# taskapi-web\n\n\
+React front end for the Task API.\n\n\
+The API base URL is injected at build time from a pipeline variable,\n\
+never committed. See the taskapi-common variable group in Library.',
+"taskapi-web:azure-pipelines.yml":
+'trigger:\n\
+  branches:\n\
+    include: [ main ]\n\
+\n\
+variables:\n\
+- group: taskapi-common\n\
+\n\
+steps:\n\
+- task: NodeTool@0\n\
+  inputs:\n\
+    versionSpec: 20.x\n\
+- script: npm ci && npm run build\n\
+- publish: dist\n\
+  artifact: web',
+"taskapi-web:src/App.jsx":
+'import { useEffect, useState } from "react";\n\
+import { fetchTasks } from "./api/tasks";\n\
+\n\
+export default function App() {\n\
+  const [tasks, setTasks] = useState([]);\n\
+\n\
+  useEffect(() => {\n\
+    fetchTasks().then(setTasks);\n\
+  }, []);\n\
+\n\
+  return (\n\
+    <ul>\n\
+      {tasks.map((t) => (\n\
+        <li key={t.id}>{t.title}</li>\n\
+      ))}\n\
+    </ul>\n\
+  );\n\
+}',
+"taskapi-web:src/api/tasks.js":
+'const BASE = import.meta.env.VITE_API_BASE;\n\
+\n\
+export async function fetchTasks() {\n\
+  const res = await fetch(`${BASE}/api/tasks`);\n\
+  if (!res.ok) throw new Error("Failed to load tasks");\n\
+  return res.json();\n\
+}',
+
+"taskapi-infra:README.md":
+'# taskapi-infra\n\n\
+Bicep templates for every environment.\n\n\
+Nothing is created by hand in the portal. If it exists in Azure and\n\
+is not in this repo, it is a bug.',
+"taskapi-infra:azure-pipelines.yml":
+'trigger:\n\
+  branches:\n\
+    include: [ main ]\n\
+\n\
+stages:\n\
+- stage: Validate\n\
+  jobs:\n\
+  - job: WhatIf\n\
+    steps:\n\
+    - task: AzureCLI@2\n\
+      inputs:\n\
+        azureSubscription: azure-sub-prod\n\
+        scriptType: bash\n\
+        inlineScript: |\n\
+          az deployment group what-if \\\n\
+            --resource-group rg-taskapi-prod \\\n\
+            --template-file main.bicep',
+"taskapi-infra:main.bicep":
+'param location string = resourceGroup().location\n\
+param env string\n\
+\n\
+module app \'modules/appservice.bicep\' = {\n\
+  name: \'appservice\'\n\
+  params: {\n\
+    location: location\n\
+    appName: \'taskapi-${env}\'\n\
+  }\n\
+}',
+"taskapi-infra:modules/appservice.bicep":
+'param location string\n\
+param appName string\n\
+\n\
+resource plan \'Microsoft.Web/serverfarms@2023-01-01\' = {\n\
+  name: \'plan-${appName}\'\n\
+  location: location\n\
+  sku: {\n\
+    name: \'B1\'\n\
+  }\n\
+}\n\
+\n\
+resource site \'Microsoft.Web/sites@2023-01-01\' = {\n\
+  name: appName\n\
+  location: location\n\
+  properties: {\n\
+    serverFarmId: plan.id\n\
+  }\n\
+}',
+
+"shared-java-libs:pom.xml":
+'<?xml version="1.0" encoding="UTF-8"?>\n\
+<project xmlns="http://maven.apache.org/POM/4.0.0">\n\
+  <modelVersion>4.0.0</modelVersion>\n\
+  <groupId>com.cody</groupId>\n\
+  <artifactId>shared-java-libs</artifactId>\n\
+  <version>1.2.0</version>\n\
+  <!-- Published to the Azure Artifacts feed, not Maven Central -->\n\
+</project>',
+"shared-java-libs:README.md":
+'# shared-java-libs\n\n\
+Consumed from the `taskapi-feed` Azure Artifacts feed.\n\n\
+    <dependency>\n\
+      <groupId>com.cody</groupId>\n\
+      <artifactId>shared-java-libs</artifactId>\n\
+      <version>1.2.0</version>\n\
+    </dependency>',
+"shared-java-libs:src/main/java/com/cody/common/ApiError.java":
+'package com.cody.common;\n\
+\n\
+import java.time.Instant;\n\
+\n\
+public record ApiError(\n\
+    Instant timestamp,\n\
+    int status,\n\
+    String message,\n\
+    String path\n\
+) {\n\
+    public static ApiError of(int status, String message, String path) {\n\
+        return new ApiError(Instant.now(), status, message, path);\n\
+    }\n\
+}'
+};
+
+function contentFor(repo, path){
+  if(arguments.length===1){ path=repo; repo="taskapi"; }
+  if(repo==="taskapi" && CONTENT[path]) return CONTENT[path];
+  var k = repo+":"+path;
+  if(CONTENT2[k]) return CONTENT2[k];
+  return "// " + path + "\n// Created in this sandbox. Nothing real behind it yet.";
+}
+
+/* crude highlighter â€” enough to make a file read like code, not a wall of grey */
+function hl(line){
+  var parts = line.split(/("(?:[^"\\]|\\.)*"|#[^\n]*$|\/\/[^\n]*$|<!--[\s\S]*?-->|@[A-Za-z]+|\b(?:public|private|static|final|class|void|return|import|package|new|extends|implements)\b)/g);
+  return parts.map(function(t,i){
+    if(!t) return null;
+    var c = null;
+    if(/^"/.test(t)) c="k3";
+    else if(/^(#|\/\/|<!--)/.test(t)) c="dim";
+    else if(/^@/.test(t)) c="k4";
+    else if(/^(public|private|static|final|class|void|return|import|package|new|extends|implements)$/.test(t)) c="k2";
+    else if(/^<\/?[a-zA-Z]/.test(t)) c="k1";
+    return c ? html`<span class=${c} key=${i}>${t}</span>` : t;
+  });
+}
+
+/* nested tree from a flat path list */
+function buildTree(paths){
+  var root = {};
+  paths.slice().sort().forEach(function(p){
+    var parts = p.split("/"), node = root;
+    for(var i=0;i<parts.length;i++){
+      var part = parts[i];
+      if(i === parts.length-1){ node[part] = {__file:p}; }
+      else { if(!node[part] || node[part].__file) node[part] = {}; node = node[part]; }
+    }
+  });
+  return root;
+}
+
+function treeRows(node, depth, s, act, out){
+  out = out || [];
+  var keys = Object.keys(node).sort(function(a,b){
+    var af = !!node[a].__file, bf = !!node[b].__file;
+    if(af !== bf) return af ? 1 : -1;
+    return a.localeCompare(b);
+  });
+  keys.forEach(function(k){
+    var n = node[k];
+    if(n.__file){
+      var p = n.__file;
+      var mark = s.repo.index[p] ? "staged" : (s.repo.workdir[p] || null);
+      out.push(html`<button class=${"fx-row"+(s.openFile===p?" on":"")} key=${p} style=${{paddingLeft:(12+depth*13)+"px"}} onClick=${function(){act({t:"open_file",p:p});}}>
+        <span class="cx"></span>
+        <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 1.5H4.5A1.5 1.5 0 003 3v10a1.5 1.5 0 001.5 1.5h7A1.5 1.5 0 0013 13V5.5zM9 1.5V5.5H13"/></svg>
+        <span>${k}</span>
+        ${mark ? html`<span class=${"lastc "+(mark==="staged"?"tag-a":mark==="untracked"?"tag-u":"tag-m")}>${mark==="staged"?"staged":mark==="untracked"?"new":"modified"}</span>` : null}
+        ${s.repo.broken[p] ? html`<span class="lastc tag-u">breaks build</span>` : null}
+      </button>`);
+    } else {
+      out.push(html`<div class="fx-row" key=${"d"+depth+k} style=${{paddingLeft:(12+depth*13)+"px",cursor:"default"}}>
+        <span class="cx">â–¾</span>
+        <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 4A1.5 1.5 0 013 2.5h3l1.5 2h5A1.5 1.5 0 0114 6v6.5a1 1 0 01-1 1H2.5a1 1 0 01-1-1z"/></svg>
+        <span style="color:var(--ink-2)">${k}</span>
+      </div>`);
+      treeRows(n, depth+1, s, act, out);
+    }
+  });
+  return out;
+}
+
+/* ---------- Files (Repos > Files) ---------- */
+function FilesView(s, act){
+  var tracked = s.repo.tracked || [];
+  var untracked = Object.keys(s.repo.workdir).filter(function(p){ return s.repo.workdir[p]==="untracked" && tracked.indexOf(p)<0; })
+    .concat(Object.keys(s.repo.index).filter(function(p){ return s.repo.index[p]==="untracked" && tracked.indexOf(p)<0; }));
+  var all = tracked.concat(untracked.filter(function(p,i,a){ return a.indexOf(p)===i; }));
+  var tree = buildTree(all);
+  var open = s.openFile && all.indexOf(s.openFile)>=0 ? s.openFile : all[0];
+  var dirtyCount = Object.keys(s.repo.workdir).length + Object.keys(s.repo.index).length;
+  var ah = ahead(s, s.repo.head);
+  var onServer = s.repo.remote[s.repo.head]!==undefined;
+
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Files</h1>
+      <div class="h-sub">This is the server's copy of the repo. Anything you do in the terminal below shows up here the moment it lands.</div>
+    </div>
+
+    ${repoBar(s, act)}
+
+    <div class="panel">
+      <div class="panel-h" style="gap:8px;flex-wrap:wrap">
+        <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.5"><path d="M4 2v8M4 14a2 2 0 100-4 2 2 0 000 4zM4 4a1 1 0 100-2 1 1 0 000 2zM12 4a1 1 0 100-2 1 1 0 000 2zM12 4v3a3 3 0 01-3 3H6"/></svg>
+        <span class="mono" style="color:var(--azure)">${s.repo.head}</span>
+        ${!onServer
+          ? html`<span class="pill p-wait"><i class="dot"></i>local only â€” never pushed</span>`
+          : ah>0
+            ? html`<span class="pill p-wait"><i class="dot"></i>${ah} commit${ah>1?"s":""} not pushed</span>`
+            : html`<span class="pill p-ok"><i class="dot"></i>in sync with origin</span>`}
+        <span class="r mono">${all.length} files</span>
+      </div>
+
+      ${dirtyCount ? html`<div class="row" style="background:var(--wait-soft);border-bottom:1px solid var(--border)">
+        <span class="pill p-wait"><i class="dot"></i>${dirtyCount} uncommitted</span>
+        <span class="sm" style="color:var(--ink-2)">Changes exist on your laptop only. Nobody else can see them until <span class="mono">git commit</span> then <span class="mono">git push</span>.</span>
+      </div>` : null}
+
+      <div class="fx">
+        <div class="fx-tree">${treeRows(tree, 0, Object.assign({}, s, {openFile:open}), act)}</div>
+        <div class="fx-pane">
+          <div class="fx-head">
+            <span class="fn">${open || "no file"}</span>
+            ${open && s.repo.index[open] ? html`<span class="pill p-run"><i class="dot"></i>staged</span>` : null}
+            ${open && s.repo.workdir[open] ? html`<span class="pill p-wait"><i class="dot"></i>${s.repo.workdir[open]==="untracked"?"new, untracked":"modified"}</span>` : null}
+            ${open && s.repo.broken[open] ? html`<span class="pill p-fail"><i class="dot"></i>contains a compile error</span>` : null}
+            ${open && !s.repo.index[open] && !s.repo.workdir[open] ? html`<span class="pill p-ok"><i class="dot"></i>committed</span>` : null}
+          </div>
+          <div class="fx-body">
+            <pre>${(contentFor(s.activeRepo, open)||"").split("\n").map(function(ln,i){
+              return html`<div class="cl" key=${i}><span class="n">${i+1}</span><span class="c">${hl(ln)}</span></div>`;
+            })}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">Try it from the terminal</div>
+      <div style="padding:13px">
+        <div class="sm" style="color:var(--ink-2);margin-bottom:9px">Each of these changes something you can watch happen on this screen:</div>
+        <div class="minirow"><span class="mono sm" style="color:var(--azure);min-width:170px">edit README.md</span><span class="sm dim">file turns "modified" in the tree</span></div>
+        <div class="minirow"><span class="mono sm" style="color:var(--azure);min-width:170px">edit docs/notes.md</span><span class="sm dim">a brand new file appears, marked "new"</span></div>
+        <div class="minirow"><span class="mono sm" style="color:var(--azure);min-width:170px">git add .</span><span class="sm dim">markers flip to "staged"</span></div>
+        <div class="minirow"><span class="mono sm" style="color:var(--azure);min-width:170px">git commit -m "..."</span><span class="sm dim">markers clear; the commit shows in History</span></div>
+        <div class="minirow"><span class="mono sm" style="color:var(--azure);min-width:170px">git push</span><span class="sm dim">the banner above flips to "in sync"</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos ---------- */
+function ReposView(s, act){
+  var wd=Object.keys(s.repo.workdir), idx=Object.keys(s.repo.index);
+  var cs=log(s), ah=ahead(s,s.repo.head);
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Repos</h1>
+      <div class="h-sub">Plain Git underneath. Everything Azure adds sits on the <i>server</i> side â€” policies, pull requests, permissions.</div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-h">Branches<span class="r">${Object.keys(s.repo.branches).length} total</span></div>
+        <div class="rows">
+          ${Object.keys(s.repo.branches).map(function(b){
+            var pushed = s.repo.remote[b]!==undefined;
+            var n = pushed?ahead(s,b):0;
+            return html`<div class="row" key=${b}>
+              <div class="branchline" style="flex:1;min-width:0">
+                <span style=${{color:b===s.repo.head?"var(--azure)":"var(--ink-2)",fontWeight:b===s.repo.head?600:400}}>${b===s.repo.head?"â— ":"  "}${b}</span>
+                ${b==="main" ? html`<span class="pill p-idle">protected</span>` : null}
+              </div>
+              <span class="sha">${s.repo.branches[b].slice(0,7)}</span>
+              ${!pushed ? html`<span class="ahead">local only</span>` : (n>0? html`<span class="ahead">â†‘${n}</span>` : html`<span class="sm dim">in sync</span>`)}
+            </div>`;
+          })}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h">Branch policy on <span class="mono" style="color:var(--azure)">main</span></div>
+        <div style="padding:13px">
+          <div class="policybox">
+            <div class="sm" style="font-weight:600">Why your push gets rejected</div>
+            <ul>
+              <li>Require a pull request â€” direct pushes blocked</li>
+              <li>Minimum ${s.policy.minReviewers} reviewer approval</li>
+              <li>Build validation must succeed</li>
+              <li>Linked work item required</li>
+            </ul>
+          </div>
+          <div class="sm dim" style="margin-top:10px">These are set once by an admin and enforced by the server. They're the single biggest difference between "I have git" and "I work at a company."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">Working tree<span class="r mono">${s.repo.head}</span></div>
+      ${(!wd.length&&!idx.length) ? html`<div class="empty">Clean. Nothing to commit.<br/>Try <code>edit README.md</code> in the terminal.</div>` : html`<div>
+        ${idx.map(function(p){ return html`<div class="filerow" key=${"i"+p}><span class="tag-a">A</span><span>${p}</span><span class="dim" style="margin-left:auto">staged</span></div>`; })}
+        ${wd.map(function(p){ return html`<div class="filerow" key=${"w"+p}><span class=${s.repo.workdir[p]==="untracked"?"tag-u":"tag-m"}>${s.repo.workdir[p]==="untracked"?"?":"M"}</span><span>${p}</span>${s.repo.broken[p]?html`<span class="pill p-fail" style="margin-left:auto">has a bug</span>`:html`<span class="dim" style="margin-left:auto">not staged</span>`}</div>`; })}
+      </div>`}
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">History<span class="r mono">${s.repo.head}${ah>0?" Â· "+ah+" unpushed":""}</span></div>
+      <div class="graph">
+        ${cs.map(function(c,i){
+          return html`<div key=${c.sha}><span class="g">${i===0?"â—":"â”‚"}</span>  <span class="sha">${c.sha}</span>  ${c.msg} ${c.broken?html`<span class="pill p-fail">breaks build</span>`:null}</div>`;
+        })}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Pull requests ---------- */
+function PRsView(s, act){
+  var pr = s.prs.filter(function(p){return p.id===s.openPr;})[0] || s.prs[0];
+  if(!s.prs.length) return html`<div class="stack">
+    <div class="head"><h1 class="h-title">Pull requests</h1><div class="h-sub">The unit of change at almost every company. Nothing lands on <code class="mono">main</code> except through one.</div></div>
+    <div class="panel"><div class="empty">No pull requests yet.<br/>Push a branch, then run <code>az repos pr create --title "Add tasks endpoint" --work-item 42</code></div></div>
+  </div>`;
+
+  var run = s.runs.filter(function(r){return r.id===pr.buildRunId;})[0];
+  var buildOk = run && run.status==="succeeded";
+  var buildBad = run && run.status==="failed";
+  var approvals = pr.reviewers.filter(function(r){return r.vote>0;}).length;
+  var checks=[
+    {ok: buildOk, wait: !run||run.status==="running", label:"Build validation â€” taskapi CI", detail: run? ("run #"+run.id+" Â· "+run.status) : "not queued"},
+    {ok: approvals>=s.policy.minReviewers, wait:false, label:"Required reviewers ("+approvals+"/"+s.policy.minReviewers+")", detail: approvals?"approved":"awaiting review"},
+    {ok: !!pr.workItem, wait:false, label:"Linked work item", detail: pr.workItem? ("#"+pr.workItem) : "none linked"}
+  ];
+  var canComplete = checks.every(function(c){return c.ok;}) && pr.status==="active";
+
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Pull requests</h1>
+      <div class="h-sub">The policy checklist below is the gate. Every box must be green before Complete unlocks.</div>
+    </div>
+
+    ${s.prs.length>1 ? html`<div class="panel"><div class="panel-h">All pull requests</div><div class="rows">
+      ${s.prs.map(function(p){ return html`<div class="row" key=${p.id} style="cursor:pointer" onClick=${function(){act({t:"open_pr",id:p.id});}}>
+        <span class="mono sm" style="color:var(--azure)">!${p.id}</span><span style="flex:1;min-width:0">${p.title}</span>${statusPill(p.status)}
+      </div>`; })}
+    </div></div>` : null}
+
+    <div class="panel">
+      <div class="panel-h">
+        <span class="mono" style="color:var(--azure)">!${pr.id}</span>
+        <span>${pr.title}</span>
+        ${statusPill(pr.status)}
+      </div>
+      <div class="row" style="gap:14px;flex-wrap:wrap">
+        <span class="mono sm">${pr.source}</span><span class="dim">â†’</span><span class="mono sm">${pr.target}</span>
+        <span class="dim sm" style="margin-left:auto">opened by ${pr.author}</span>
+      </div>
+
+      <div style="padding:13px 13px 0"><div class="sm" style="font-weight:600;margin-bottom:7px">Policy checks</div></div>
+      <div style="padding:0 13px 13px"><div class="panel">
+        ${checks.map(function(c,i){ return html`<div class="checkrow" key=${i}>
+          ${glyph(c.ok?"succeeded":c.wait?"running":"failed",15)}
+          <span>${c.label}</span>
+          <span class="dim sm" style="margin-left:auto">${c.detail}</span>
+        </div>`; })}
+      </div></div>
+
+      <div class="row" style="gap:9px;flex-wrap:wrap">
+        ${pr.reviewers.map(function(rv){ return html`<div key=${rv.name} style="display:flex;align-items:center;gap:7px">
+          <span class="avatar">${rv.initials}</span>
+          <span class="sm">${rv.name}</span>
+          ${rv.vote>0? html`<span class="pill p-ok">approved</span>` : html`<span class="pill p-idle">no vote</span>`}
+        </div>`; })}
+      </div>
+
+      ${pr.status==="active" ? html`<div class="row" style="gap:9px;flex-wrap:wrap">
+        <button class="btn ghost" onClick=${function(){act({t:"approve_pr",id:pr.id});}} disabled=${approvals>0}>
+          ${approvals>0?"Approved":"Approve as Priya"}
+        </button>
+        ${!pr.workItem ? html`<button class="btn ghost" onClick=${function(){act({t:"link_wi",id:pr.id,wi:42});}}>Link work item #42</button>` : null}
+        <button class="btn" onClick=${function(){act({t:"complete_pr",id:pr.id});}} disabled=${!canComplete}>Complete merge</button>
+        ${!canComplete? html`<span class="sm dim">Complete stays disabled until all three checks pass â€” that's the policy doing its job.</span>`:null}
+      </div>` : html`<div class="row"><span class="sm dim">This pull request was ${pr.status}. Its merge commit is on <span class="mono">main</span>.</span></div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Pipelines ---------- */
+function PipesView(s, act){
+  var run = s.runs.filter(function(r){return r.id===s.openRun;})[0] || s.runs[0];
+  if(!s.runs.length) return html`<div class="stack">
+    <div class="head"><h1 class="h-title">Pipelines</h1><div class="h-sub">Stages contain jobs; jobs contain steps. Learn that hierarchy and YAML pipelines stop being mysterious.</div></div>
+    <div class="panel"><div class="empty">No runs yet.<br/>Try <code>az pipelines run --cd</code> to queue one with deploy stages.</div></div>
+  </div>`;
+
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Pipelines</h1>
+      <div class="h-sub">One build artifact flows through every environment â€” never rebuilt. Search the phrase <b>build once, deploy many</b>.</div>
+    </div>
+
+    ${s.gate && s.gate.runId===run.id ? html`<div class="gatebar">
+      <div class="txt"><b>Waiting for approval.</b> Stage <span class="mono">${run.stages[s.gate.stageIdx].name}</span> targets environment <span class="mono">${s.gate.env}</span>, which requires a human. Nothing deploys until someone clicks.</div>
+      <button class="btn" onClick=${function(){act({t:"approve_gate"});}}>Approve</button>
+      <button class="btn danger" onClick=${function(){act({t:"reject_gate"});}}>Reject</button>
+    </div>` : null}
+
+    <div class="panel">
+      <div class="panel-h">Recent runs<span class="r">${s.runs.length}</span></div>
+      <div class="rows">
+        ${s.runs.slice(0,6).map(function(r){ return html`<div class="row" key=${r.id} style="cursor:pointer" onClick=${function(){act({t:"open_run",id:r.id});}}>
+          ${glyph(r.status,16)}
+          <span class="mono sm num" style="color:var(--azure);min-width:38px">#${r.id}</span>
+          <div style="flex:1;min-width:0">
+            <div class="sm" style="font-weight:${r.id===run.id?600:400}">${r.name}</div>
+            <div class="sm dim mono">${r.branch} Â· ${r.commit} Â· ${r.trigger}</div>
+          </div>
+          ${statusPill(r.status)}
+        </div>`; })}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">Run #${run.id}<span class="r mono">${run.commitMsg}</span></div>
+      <div class="stagestrip">
+        ${run.stages.map(function(st,i){
+          return html`<div class=${"stage"+(i===run.cursor.st&&run.status==="running"?" act":"")} key=${i}>
+            <div class="stage-n">${glyph(st.status,16)}<span>${st.name}</span></div>
+            ${st.env? html`<div class="stage-j">env: ${st.env}${s.envs[st.env].gated?" Â· gated":""}</div>`:null}
+            ${st.jobs.map(function(j,k){ return html`<div class="stage-j" key=${k}>â–¸ ${j.name} <span class="dim">(${j.pool})</span></div>`; })}
+          </div>`;
+        })}
+      </div>
+      <div class="steplist">
+        ${run.stages.map(function(st,si){
+          return st.jobs.map(function(j,ji){
+            return j.steps.map(function(sp,pi){
+              var key=run.id+"-"+si+"-"+ji+"-"+pi;
+              var open=!!s.openSteps[key];
+              var visible=(sp.logs||[]).slice(0,sp.shown||0);
+              return html`<div class="step" key=${key}>
+                <button class="step-h" onClick=${function(){act({t:"toggle_step",key:key});}}>
+                  ${glyph(sp.status,15)}
+                  <span class="nm">${st.name} / ${sp.name}</span>
+                  <span class="dur">${sp.duration||""}</span>
+                  <span class="dim" style="margin-left:8px">${open?"â–¾":"â–¸"}</span>
+                </button>
+                ${open&&visible.length ? html`<div class="logs">
+                  ${visible.map(function(l,li){
+                    var cls="", txt=l;
+                    if(l.indexOf("!ERR ")===0){cls="er";txt=l.slice(5);}
+                    else if(l.indexOf("!OK ")===0){cls="gd";txt=l.slice(4);}
+                    else if(l.indexOf("!WARN ")===0){cls="wr";txt=l.slice(6);}
+                    return html`<div class="ln" key=${li}><span class="no">${li+1}</span><span class=${cls}>${txt}</span></div>`;
+                  })}
+                </div>`:null}
+              </div>`;
+            });
+          });
+        })}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Environments ---------- */
+function EnvsView(s, act){
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Environments</h1>
+      <div class="h-sub">An environment is a deploy target plus the rules guarding it. This is exactly where a Change Advisory Board plugs into a modern pipeline.</div>
+    </div>
+    <div class="grid2">
+      ${Object.keys(s.envs).map(function(k){
+        var e=s.envs[k];
+        return html`<div class="panel" key=${k}>
+          <div class="panel-h"><span class="mono">${e.name}</span>${e.gated?html`<span class="pill p-wait">approval required</span>`:html`<span class="pill p-ok">automatic</span>`}</div>
+          <div style="padding:13px">
+            <div class="sm" style="color:var(--ink-2)">${e.gated
+              ? html`Deploys pause here until an approver clicks. In ITIL language this is the <b>change approval</b> â€” the CAB, compressed into one button and an audit record.`
+              : html`Deploys run unattended. Low blast radius, so no gate â€” search <b>standard change</b> for the ITIL term that describes this.`}</div>
+            ${e.approvers.length? html`<div class="sm dim" style="margin-top:9px">Approvers: ${e.approvers.join(", ")}</div>`:null}
+          </div>
+          <div class="panel-h" style="border-top:1px solid var(--border)">Deployment history<span class="r num">${e.deploys.length}</span></div>
+          ${e.deploys.length? html`<div class="rows">${e.deploys.map(function(d,i){ return html`<div class="row" key=${i}>
+            <span class="mono sm num" style="color:var(--azure)">#${d.run}</span>
+            <div style="flex:1;min-width:0"><div class="sm">${d.msg}</div><div class="sm dim mono">${d.commit} Â· ${d.approvedBy?("approved by "+d.approvedBy):"no approval needed"}</div></div>
+            <span class="pill p-ok"><i class="dot"></i>deployed</span>
+          </div>`; })}</div>` : html`<div class="empty">Never deployed.</div>`}
+        </div>`;
+      })}
+    </div>
+  </div>`;
+}
+
+/* ---------- Boards ---------- */
+function BoardsView(s, act){
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Traceability</h1>
+      <div class="h-sub">Work items are the front of the traceability chain: <span class="mono sm">work item â†’ commit â†’ PR â†’ build â†’ artifact â†’ approval â†’ deploy</span>.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h">Work items<span class="r">Sprint 4</span></div>
+      <div class="rows">
+        ${s.workItems.map(function(w){
+          var linked=s.prs.filter(function(p){return p.workItem===w.id;});
+          return html`<div class="row" key=${w.id}>
+            <span class="mono sm num" style="color:var(--azure);min-width:34px">#${w.id}</span>
+            <span class="pill p-idle">${w.type}</span>
+            <div style="flex:1;min-width:0">
+              <div class="sm">${w.title}</div>
+              ${linked.length? html`<div class="sm dim mono">linked to PR !${linked[0].id} Â· ${linked[0].status}</div>`:null}
+            </div>
+            <span class=${"pill "+(w.state==="Done"?"p-ok":w.state==="Active"?"p-run":"p-idle")}>${w.state}</span>
+          </div>`;
+        })}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">The chain, as an auditor would read it</div>
+      <div style="padding:13px">
+        ${(function(){
+          var pr=s.prs.filter(function(p){return p.workItem;})[0];
+          var dep=s.envs.prod.deploys[0];
+          var steps=[
+            {l:"Work item", v:pr? ("#"+pr.workItem) : "not linked yet", ok:!!pr},
+            {l:"Commit",    v:pr? s.repo.branches[pr.source] || "â€”" : "â€”", ok:!!pr},
+            {l:"Pull request", v:pr? ("!"+pr.id+" Â· "+pr.status) : "â€”", ok:!!pr&&pr.status==="completed"},
+            {l:"Build + artifact", v:dep? ("run #"+dep.run+" Â· drop") : "â€”", ok:!!dep},
+            {l:"Approval", v:dep&&dep.approvedBy? dep.approvedBy : "â€”", ok:!!(dep&&dep.approvedBy)},
+            {l:"Deploy", v:dep? "prod" : "â€”", ok:!!dep}
+          ];
+          return html`<div style="display:flex;flex-direction:column;gap:0">
+            ${steps.map(function(x,i){ return html`<div class="checkrow" key=${i} style="border:0;padding:6px 0">
+              ${glyph(x.ok?"succeeded":"pending",15)}
+              <span style="min-width:130px;font-weight:${x.ok?600:400}">${x.l}</span>
+              <span class="mono sm dim">${x.v}</span>
+            </div>`; })}
+          </div>`;
+        })()}
+        <div class="sm dim" style="margin-top:11px">Every green row is evidence. Complete the chain and you've satisfied what most compliance regimes actually ask for â€” search <b>segregation of duties</b> and <b>audit trail</b>.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Artifacts ---------- */
+function ArtsView(s){
+  return html`
+  <div class="stack">
+    <div class="head">
+      <h1 class="h-title">Artifacts</h1>
+      <div class="h-sub">The output of a build, stored once and reused by every deploy. If a jar is rebuilt per environment, you are not really testing what ships.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h">Published artifacts<span class="r num">${s.artifacts.length}</span></div>
+      ${s.artifacts.length? html`<div class="rows">${s.artifacts.map(function(a,i){ return html`<div class="row" key=${i}>
+        <span class="mono sm" style="color:var(--azure)">drop</span>
+        <div style="flex:1;min-width:0"><div class="sm mono">taskapi-0.0.1-SNAPSHOT.jar</div><div class="sm dim mono">run #${a.run} Â· ${a.commit} Â· 24.8 MB</div></div>
+        <span class="sm dim">${a.envs.length? "deployed to "+a.envs.join(", ") : "not deployed"}</span>
+      </div>`; })}</div>` : html`<div class="empty">Nothing published yet. A successful Build stage puts a jar here.</div>`}
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   5b. THE REST OF THE PRODUCT
+   ============================================================ */
+
+function pageHead(t, sub){
+  return html`<div class="head"><h1 class="h-title">${t}</h1><div class="h-sub">${sub}</div></div>`;
+}
+
+/* the repo switcher that sits on every Repos page */
+function repoBar(s, act){
+  var names = Object.keys(REPO_META);
+  return html`<div class="repobar">
+    <span class="w-k" style="padding-right:4px">Repository</span>
+    ${names.map(function(n){
+      var on = n===s.activeRepo;
+      return html`<button class=${"repochip"+(on?" on":"")} key=${n} onClick=${function(){act({t:"switch_repo",name:n});}}>
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8v12H4zM4 11h8"/></svg>
+        <span>${n}</span>
+      </button>`;
+    })}
+    <span class="sm dim" style="margin-left:auto">${REPO_META[s.activeRepo].lang} Â· ${REPO_META[s.activeRepo].size}</span>
+  </div>`;
+}
+
+/* ---------- Repos > Repositories ---------- */
+function RepoListView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Repositories","A project holds many repos. This is where they live â€” the thing you actually clone from.")}
+    <div class="panel">
+      <div class="panel-h">Repositories in <span class="mono" style="color:var(--azure)">${s.project}</span><span class="r num">${Object.keys(REPO_META).length}</span></div>
+      <div class="rows">
+        ${Object.keys(REPO_META).map(function(n){
+          var m=REPO_META[n], st = n===s.activeRepo ? s.repo : s.repoStore[n];
+          var bn = st? Object.keys(st.branches).length : 1;
+          return html`<div class="row" key=${n} style="cursor:pointer" onClick=${function(){act({t:"switch_repo",name:n,go:"files"});}}>
+            <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.4"><path d="M4 2h8v12H4zM4 11h8"/></svg>
+            <div style="flex:1;min-width:0">
+              <div class="sm" style="font-weight:${n===s.activeRepo?600:400}">${n}${n===s.activeRepo?"  â† the terminal is pointed here":""}</div>
+              <div class="sm dim">${m.desc}</div>
+            </div>
+            <span class="pill p-idle">${m.lang}</span>
+            <span class="sm dim mono" style="min-width:58px;text-align:right">${bn} branch${bn>1?"es":""}</span>
+            <span class="sm dim mono" style="min-width:56px;text-align:right">${m.size}</span>
+          </div>`;
+        })}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-h">Clone URLs</div>
+      <div style="padding:13px">
+        <div class="minirow"><span class="sm" style="min-width:52px">HTTPS</span><span class="mono sm dim">https://dev.azure.com/cody/taskapi/_git/${s.activeRepo}</span></div>
+        <div class="minirow"><span class="sm" style="min-width:52px">SSH</span><span class="mono sm dim">git@ssh.dev.azure.com:v3/cody/taskapi/${s.activeRepo}</span></div>
+        <div class="sm dim" style="margin-top:9px">Switch which repo the terminal targets with <span class="mono">az repos select &lt;name&gt;</span>, or just click a row above.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Advanced Security ---------- */
+function SecurityView(s, act){
+  var sev={Critical:"p-fail",High:"p-fail",Medium:"p-wait",Low:"p-idle"};
+  return html`<div class="stack">
+    ${pageHead("Advanced Security","Three scanners running against your code: dependencies with known CVEs, risky code patterns, and secrets that got committed by accident.")}
+    <div class="wgrid">
+      ${["Secret","Dependency","Code"].map(function(t){
+        var n=s.alerts.filter(function(a){return a.type===t&&a.state==="Open";}).length;
+        return html`<div class="w" key=${t}><div class="w-k">${t} scanning</div>
+          <div class="w-big">${glyph(n?"failed":"succeeded",20)}<span class="w-n">${n}</span><span class="w-u">open</span></div>
+          <div class="w-f">${t==="Secret"?"Credentials found in commit history":t==="Dependency"?"Known CVEs in your package tree":"Risky patterns in your own code"}</div></div>`;
+      })}
+    </div>
+    <div class="panel">
+      <div class="panel-h">Alerts<span class="r num">${s.alerts.length}</span></div>
+      <div class="rows">${s.alerts.map(function(a,i){ return html`<div class="row" key=${i}>
+        <span class=${"pill "+sev[a.sev]}>${a.sev}</span>
+        <span class="sm dim" style="min-width:82px">${a.type}</span>
+        <span class="sm" style="flex:1">${a.title}</span>
+        <span class="mono sm dim">${a.repo}</span>
+        <span class=${"pill "+(a.state==="Open"?"p-fail":a.state==="Fixed"?"p-ok":"p-idle")}>${a.state}</span>
+      </div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">A secret in git history stays there forever â€” rotating the key is the fix, not deleting the file. Search <b>secret scanning</b> and <b>push protection</b>.</div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Code search ---------- */
+function SearchView(s, act){
+  var hits=[
+    {repo:"taskapi",path:"src/main/java/com/cody/taskapi/web/TaskController.java",line:11,txt:'    @GetMapping'},
+    {repo:"taskapi",path:"src/main/resources/application.properties",line:3,txt:'server.port=8081'},
+    {repo:"taskapi-web",path:"src/api/tasks.js",line:4,txt:'  const res = await fetch(`${BASE}/api/tasks`);'},
+    {repo:"taskapi-infra",path:"main.bicep",line:8,txt:"    appName: 'taskapi-${env}'"}
+  ];
+  return html`<div class="stack">
+    ${pageHead("Code search","One search box across every repo in the org. The first thing you reach for on a codebase you didn't write.")}
+    <div class="panel">
+      <div class="panel-h">
+        <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.5"><path d="M7 12A5 5 0 107 2a5 5 0 000 10zM10.5 10.5L14 14"/></svg>
+        <span class="mono sm">taskapi</span><span class="r">${hits.length} results across 3 repositories</span>
+      </div>
+      <div class="rows">${hits.map(function(h,i){ return html`<div class="row" key=${i}>
+        <div style="flex:1;min-width:0">
+          <div class="sm mono" style="color:var(--azure)">${h.repo} / ${h.path}</div>
+          <div class="mono sm dim" style="margin-top:2px">${h.line}:  ${h.txt}</div>
+        </div></div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">Filters real Azure DevOps supports: <span class="mono">repo:</span> <span class="mono">path:</span> <span class="mono">ext:</span> <span class="mono">class:</span> <span class="mono">func:</span></div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Forks ---------- */
+function ForksView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Forks","A full copy of a repo under someone else's control. How outside contributors propose changes without write access.")}
+    <div class="panel">
+      <div class="panel-h">Forks of <span class="mono" style="color:var(--azure)">${s.activeRepo}</span><span class="r num">1</span></div>
+      <div class="rows"><div class="row">
+        <span class="avatar">SO</span>
+        <div style="flex:1;min-width:0"><div class="sm mono">sam-okoye/taskapi</div><div class="sm dim">1 commit ahead Â· experimenting with pagination</div></div>
+        <span class="pill p-run"><i class="dot"></i>PR open to upstream</span>
+      </div></div>
+      <div style="padding:11px 13px"><div class="sm dim">Inner-source pattern: read access to everyone, write access to no one, contribution via fork and pull request. Search <b>inner source</b>.</div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Organization ---------- */
+function ProjectsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Projects","The level above your repos. An organization holds projects; a project holds repos, boards, pipelines and its own permissions.")}
+    <div class="panel">
+      <div class="panel-h">Projects in <span class="mono" style="color:var(--azure)">${s.org.name}</span><span class="r num">${s.projects.length}</span></div>
+      <div class="rows">${s.projects.map(function(p){ return html`<div class="row" key=${p.name}>
+        <div style=${{width:"30px",height:"30px",borderRadius:"5px",background:p.name===s.project?"var(--azure)":"var(--surface-2)",color:p.name===s.project?"#fff":"var(--ink-3)",display:"grid",placeItems:"center",fontWeight:700,fontSize:"12px",flex:"none"}}>${p.name.slice(0,2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div class="sm" style="font-weight:${p.name===s.project?600:400}">${p.name}${p.name===s.project?"  (current)":""}</div>
+          <div class="sm dim">${p.desc}</div>
+        </div>
+        <span class="pill p-idle">${p.process}</span>
+        <span class="sm dim num" style="min-width:64px;text-align:right">${p.repos} repos</span>
+        <span class="sm dim num" style="min-width:78px;text-align:right">${p.members} members</span>
+        <span class="sm dim" style="min-width:76px;text-align:right">${p.updated}</span>
+      </div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">Only <b>${s.project}</b> is simulated in depth here. The others exist to show the shape â€” in a real org this list is how you find anything.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-h">Organization</div><div style="padding:13px">
+        ${[["Name",s.org.name],["URL",s.org.url],["Region",s.org.region],["Owner",s.org.owner],["Created",s.org.created],["Plan",s.org.plan]].map(function(x,i){
+          return html`<div class="minirow" key=${i}><span class="sm" style="min-width:82px;color:var(--ink-3)">${x[0]}</span><span class="sm mono">${x[1]}</span></div>`; })}
+      </div></div>
+      <div class="panel"><div class="panel-h">The hierarchy</div><div style="padding:13px">
+        <div class="mono sm" style="line-height:1.9">
+          <div style="color:var(--azure)">organization  <span class="dim">â€” ${s.org.url}</span></div>
+          <div style="padding-left:16px">â””â”€ project  <span class="dim">â€” ${s.project}</span></div>
+          <div style="padding-left:36px">â”œâ”€ repos  <span class="dim">â€” ${Object.keys(REPO_META).length} of them</span></div>
+          <div style="padding-left:36px">â”œâ”€ boards  <span class="dim">â€” one backlog per team</span></div>
+          <div style="padding-left:36px">â”œâ”€ pipelines  <span class="dim">â€” shared across repos</span></div>
+          <div style="padding-left:36px">â””â”€ artifacts  <span class="dim">â€” feeds</span></div>
+        </div>
+        <div class="sm dim" style="margin-top:11px">Permissions, policies and billing each attach at a different level of this tree. Knowing which level a setting lives on is most of the battle.</div>
+      </div></div>
+    </div>
+  </div>`;
+}
+
+function OrgUsersView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Users","Access levels are billing, not permissions. Basic costs money past five users; Stakeholder is free but can't see code.")}
+    <div class="panel">
+      <div class="panel-h">Members<span class="r num">${s.orgUsers.length}</span></div>
+      <div class="rows">${s.orgUsers.map(function(u){ return html`<div class="row" key=${u.name}>
+        <span class="avatar">${u.name.split(" ").map(function(x){return x[0];}).join("").slice(0,2)}</span>
+        <div style="flex:1;min-width:0"><div class="sm">${u.name}</div><div class="sm dim mono">${u.mail}</div></div>
+        <span class=${"pill "+(u.access==="Basic"?"p-run":u.access==="Stakeholder"?"p-idle":"p-ok")}>${u.access}</span>
+        <span class="sm dim" style="min-width:96px;text-align:right">added ${u.added}</span>
+        <span class="sm dim" style="min-width:88px;text-align:right">last ${u.last}</span>
+      </div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim"><b>Stakeholder</b> can file work items and see dashboards but not browse repos â€” the usual licence for a product owner.</div></div>
+    </div>
+  </div>`;
+}
+
+function BillingView(s, act){
+  var b=s.billing;
+  return html`<div class="stack">
+    ${pageHead("Billing","What actually costs money in Azure DevOps: users past five, and parallel jobs past the free grant.")}
+    <div class="wgrid">
+      <div class="w"><div class="w-k">Current bill</div><div class="w-big"><span class="w-n">${b.cost}</span><span class="w-u">/ month</span></div><div class="w-f">Plan: ${b.plan}</div></div>
+      <div class="w"><div class="w-k">Users</div><div class="w-big"><span class="w-n">${b.users}</span><span class="w-u">of ${b.free} free</span></div><div class="w-f">Basic users past 5 are billed per user</div></div>
+      <div class="w"><div class="w-k">Parallel jobs</div><div class="w-big"><span class="w-n">1</span><span class="w-u">hosted</span></div><div class="w-f">${b.extra}</div></div>
+      <div class="w"><div class="w-k">Self-hosted</div><div class="w-big"><span class="w-n">âˆž</span></div><div class="w-f">Your own machine is free and unlimited</div></div>
+    </div>
+    <div class="panel"><div class="panel-h">Usage this month</div>
+      <div style="padding:13px">${s.usage.map(function(u,i){ return html`<div key=${i} style="margin-bottom:11px">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${u.k}</span><span class="mono num dim">${u.v}</span></div>
+        <div style="height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden"><div style=${{width:u.pct+"%",height:"100%",background:u.pct>80?"var(--fail)":"var(--azure)"}}></div></div>
+      </div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+function AuditView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Auditing","An immutable log of who changed what. When someone asks 'who turned off that policy', this is the answer.")}
+    <div class="panel"><div class="panel-h">Audit log<span class="r num">${s.audit.length}</span></div>
+      <div class="rows">${s.audit.map(function(a,i){ return html`<div class="row" key=${i}>
+        <span class="avatar">${a.who.split(" ").map(function(x){return x[0];}).join("").slice(0,2)}</span>
+        <div style="flex:1;min-width:0"><div class="sm">${a.what}</div><div class="sm dim">${a.who}</div></div>
+        <span class="pill p-idle">${a.area}</span>
+        <span class="sm dim mono" style="min-width:104px;text-align:right">${a.when}</span>
+      </div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+function ExtensionsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Extensions","Marketplace add-ons. Most real pipelines depend on at least one, which is worth knowing when a build breaks for no apparent reason.")}
+    <div class="panel"><div class="panel-h">Installed & available<span class="r num">${s.extensions.length}</span></div>
+      <div class="rows">${s.extensions.map(function(e){ return html`<div class="row" key=${e.name}>
+        <div style=${{width:"26px",height:"26px",borderRadius:"5px",background:"var(--azure-soft)",color:"var(--azure)",display:"grid",placeItems:"center",fontWeight:700,fontSize:"11px",flex:"none"}}>${e.name.slice(0,1)}</div>
+        <div style="flex:1;min-width:0"><div class="sm">${e.name}</div><div class="sm dim">${e.desc} Â· by ${e.pub}</div></div>
+        <span class=${"pill "+(e.state==="Installed"?"p-ok":"p-idle")}>${e.state}</span>
+      </div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Pipelines extras ---------- */
+function TaskGroupsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Task groups","A reusable sequence of steps, defined once and called from many pipelines. The classic-pipeline ancestor of YAML templates.")}
+    <div class="panel"><div class="panel-h">Task groups<span class="r num">${s.taskGroups.length}</span></div>
+      <div class="rows">${s.taskGroups.map(function(t){ return html`<div class="row" key=${t.name}>
+        <div style="flex:1;min-width:0"><div class="sm">${t.name}</div><div class="sm dim">${t.desc}</div></div>
+        <span class="sm dim num">${t.steps} steps</span><span class="sm dim">${t.used}</span></div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">In YAML pipelines the modern equivalent is a <b>template</b> â€” search <b>pipeline templates</b> and <b>extends</b>.</div></div>
+    </div>
+    <div class="panel"><div class="panel-h">Deployment groups<span class="r num">${s.deployGroups.length}</span></div>
+      <div class="rows">${s.deployGroups.map(function(d){ return html`<div class="row" key=${d.name}>
+        ${glyph(d.online===d.targets?"succeeded":"waiting",15)}
+        <div style="flex:1;min-width:0"><div class="sm mono">${d.name}</div><div class="sm dim">${d.desc}</div></div>
+        <span class="sm dim num">${d.online}/${d.targets} online</span></div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">Deployment groups push to machines you own, rather than a cloud service. Common in enterprises that still run VMs.</div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Boards extras ---------- */
+function PlansView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Delivery Plans","Multiple teams' sprints on one timeline. The view a manager opens to see whether two teams are about to collide.")}
+    <div class="panel"><div class="panel-h">Plans<span class="r num">${s.plans.length}</span></div>
+      <div class="rows">${s.plans.map(function(p){ return html`<div class="row" key=${p.name}>
+        <div style="flex:1;min-width:0"><div class="sm">${p.name}</div><div class="sm dim">Teams: ${p.teams}</div></div>
+        <span class="sm dim num">${p.items} items</span><span class="sm dim">${p.window}</span></div>`; })}</div>
+    </div>
+    <div class="panel"><div class="panel-h">Sprint timeline</div>
+      <div style="padding:13px;overflow-x:auto">
+        ${["Sprint 2","Sprint 3","Sprint 4","Sprint 5"].map(function(sp,i){
+          return html`<div key=${sp} style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+            <span class="mono sm" style="min-width:70px;color:var(--ink-3)">${sp}</span>
+            <div style=${{flex:1,height:"22px",borderRadius:"4px",background:i===2?"var(--azure)":"var(--surface-2)",color:i===2?"#fff":"var(--ink-3)",display:"flex",alignItems:"center",paddingLeft:"10px",fontSize:"11.5px"}}>
+              ${i===2? "current â€” "+s.sprint.name : i<2? "closed" : "planned"}
+            </div></div>`;
+        })}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Test extras ---------- */
+function TestRunsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Runs","Every execution of a test suite, kept as a record. Trends here are what tell you quality is sliding before customers do.")}
+    <div class="panel"><div class="panel-h">Test runs<span class="r num">${s.testRuns.length}</span></div>
+      <div class="rows">${s.testRuns.map(function(r){ return html`<div class="row" key=${r.id}>
+        ${glyph(r.failed?"failed":"succeeded",16)}
+        <span class="mono sm num" style="color:var(--azure);min-width:48px">#${r.id}</span>
+        <div style="flex:1;min-width:0"><div class="sm">${r.plan}</div><div class="sm dim">run by ${r.by}</div></div>
+        <span class="pill p-ok">${r.passed} passed</span>
+        ${r.failed? html`<span class="pill p-fail">${r.failed} failed</span>`:null}
+        <span class="sm dim" style="min-width:98px;text-align:right">${r.when}</span>
+      </div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Artifacts feed ---------- */
+function FeedsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Feeds","A private package registry. Your internal libraries live here so other teams can depend on them without publishing to the public internet.")}
+    ${s.feeds.map(function(f){ return html`<div class="panel" key=${f.name}>
+      <div class="panel-h"><span class="mono" style="color:var(--azure)">${f.name}</span><span class="pill p-idle">${f.scope} scoped</span><span class="r num">${f.pkgs.length} packages</span></div>
+      <div class="rows">${f.pkgs.map(function(p){ return html`<div class="row" key=${p.name}>
+        <span class="pill p-idle">${p.type}</span>
+        <div style="flex:1;min-width:0"><div class="sm mono">${p.name}</div></div>
+        <span class="mono sm">${p.ver}</span>
+        <span class="sm dim num" style="min-width:76px;text-align:right">${p.dl} downloads</span></div>`; })}</div>
+      <div style="padding:11px 13px;border-top:1px solid var(--border)">
+        <div class="sm" style="font-weight:600;margin-bottom:5px">Upstream sources</div>
+        ${f.upstreams.map(function(u){ return html`<div class="minirow" key=${u}>${glyph("succeeded",14)}<span class="sm">${u}</span><span class="sm dim" style="margin-left:auto">cached on first request</span></div>`; })}
+        <div class="sm dim" style="margin-top:8px">An upstream makes this feed a proxy for the public registry too â€” so one URL serves both your packages and Maven Central, and you keep a copy if the internet disappears.</div>
+      </div>
+    </div>`; })}
+    <div class="panel"><div class="panel-h">Build artifacts (from pipeline runs)<span class="r num">${s.artifacts.length}</span></div>
+      ${s.artifacts.length? html`<div class="rows">${s.artifacts.map(function(a,i){ return html`<div class="row" key=${i}>
+        <span class="mono sm" style="color:var(--azure)">drop</span>
+        <div style="flex:1;min-width:0"><div class="sm mono">taskapi-0.0.1-SNAPSHOT.jar</div><div class="sm dim mono">run #${a.run} Â· ${a.commit}</div></div>
+        <span class="sm dim">${a.envs.length? "deployed to "+a.envs.join(", "):"not deployed"}</span></div>`; })}</div>`
+        : html`<div class="empty">No build artifacts yet. A successful Build stage puts a jar here.</div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Service hooks / notifications / tokens ---------- */
+function HooksView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Service hooks","Outbound webhooks. This is how a build failure ends up in a Slack channel thirty seconds later.")}
+    <div class="panel"><div class="panel-h">Subscriptions<span class="r num">${s.hooks.length}</span></div>
+      <div class="rows">${s.hooks.map(function(h,i){ return html`<div class="row" key=${i}>
+        ${glyph(h.ok?"succeeded":"failed",15)}
+        <span class="sm" style="flex:1">${h.event}</span>
+        <span class="sm dim mono">${h.target}</span>
+        ${!h.ok? html`<span class="pill p-fail">last delivery failed</span>`:null}</div>`; })}</div>
+    </div>
+    <div class="panel"><div class="panel-h">Notifications</div>
+      <div class="rows">${s.notifications.map(function(n,i){ return html`<div class="row" key=${i}>
+        <span class="sm" style="flex:1">${n.event}</span>
+        <span class="sm dim">${n.to}</span>
+        <span class=${"pill "+(n.on?"p-ok":"p-idle")}>${n.on?"on":"off"}</span></div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+function TokensView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Personal access tokens","How anything that isn't a browser authenticates â€” a CLI, a script, a self-hosted agent. Scoped and expiring, and the cause of an enormous number of Monday-morning outages.")}
+    <div class="panel"><div class="panel-h">Tokens<span class="r num">${s.pats.length}</span></div>
+      <div class="rows">${s.pats.map(function(p){ return html`<div class="row" key=${p.name}>
+        ${glyph(p.ok?"succeeded":"failed",15)}
+        <div style="flex:1;min-width:0"><div class="sm mono">${p.name}</div><div class="sm dim">${p.scope}</div></div>
+        <span class=${"pill "+(p.ok?"p-ok":"p-fail")}>${p.exp}</span></div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">Least privilege matters here: <span class="mono">old-ci-token</span> has <b>Full access</b> and has expired â€” exactly the token nobody remembers creating and everybody is afraid to delete.</div></div>
+    </div>
+    <div class="panel"><div class="panel-h">SSH public keys<span class="r num">${s.sshKeys.length}</span></div>
+      <div class="rows">${s.sshKeys.map(function(k){ return html`<div class="row" key=${k.name}>
+        <span class="mono sm" style="flex:1">${k.name}</span><span class="mono sm dim">${k.fp}</span><span class="sm dim">${k.added}</span></div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Overview > Summary ---------- */
+function SummaryView(s, act){
+  var lastRun = s.runs[0];
+  var openPr = openPRs(s).length;
+  var active = s.workItems.filter(function(w){return w.state!=="Closed";}).length;
+  var pr = s.prs.filter(function(p){return p.workItem;})[0];
+  var dep = s.envs.prod.deploys[0];
+  var chain=[
+    {l:"Work item",       v:pr? ("#"+pr.workItem):"â€”", ok:!!pr},
+    {l:"Commit",          v:pr? s.repo.branches[pr.source]||"â€”":"â€”", ok:!!pr},
+    {l:"Pull request",    v:pr? ("!"+pr.id+" Â· "+pr.status):"â€”", ok:!!pr&&pr.status==="completed"},
+    {l:"Build + artifact",v:dep? ("run #"+dep.run+" Â· drop"):"â€”", ok:!!dep},
+    {l:"Approval",        v:dep&&dep.approvedBy? dep.approvedBy:"â€”", ok:!!(dep&&dep.approvedBy)},
+    {l:"Deploy",          v:dep? "prod":"â€”", ok:!!dep}
+  ];
+  return html`<div class="stack">
+    ${pageHead("Summary","The project's front page. In a real org this is the first thing a new joiner opens.")}
+    <div class="wgrid">
+      <div class="w"><div class="w-k">Last run</div>
+        <div class="w-big">${lastRun?glyph(lastRun.status,22):null}<span class="w-n">${lastRun?"#"+lastRun.id:"â€”"}</span></div>
+        <div class="w-f">${lastRun? lastRun.name+" on "+lastRun.branch : "No pipeline has run yet."}</div></div>
+      <div class="w"><div class="w-k">Open pull requests</div>
+        <div class="w-big"><span class="w-n">${openPr}</span><span class="w-u">awaiting review</span></div>
+        <div class="w-f">${openPr? "Nothing merges into main without one." : "main is quiet."}</div></div>
+      <div class="w"><div class="w-k">Active work items</div>
+        <div class="w-big"><span class="w-n">${active}</span><span class="w-u">of ${s.workItems.length}</span></div>
+        <div class="w-f">${s.sprint.name} Â· ${s.sprint.start}â€“${s.sprint.end}</div></div>
+      <div class="w"><div class="w-k">Production</div>
+        <div class="w-big">${glyph(dep?"succeeded":"pending",22)}<span class="w-n">${s.envs.prod.deploys.length}</span><span class="w-u">deploys</span></div>
+        <div class="w-f">${dep? "Last approved by "+dep.approvedBy : "Never shipped. The gate is still closed."}</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-h">README.md</div>
+        <div style="padding:13px;font-size:13px;color:var(--ink-2)">
+          <div style="font-weight:600;color:var(--ink);font-size:15px">taskapi</div>
+          <p style="margin:7px 0">A Task API, built one step at a time to learn Spring Boot â€” and the delivery machinery around it.</p>
+          <div class="minirow"><span class="mono sm" style="min-width:120px">Java</span><span class="sm dim">21</span></div>
+          <div class="minirow"><span class="mono sm" style="min-width:120px">Spring Boot</span><span class="sm dim">4.1.1</span></div>
+          <div class="minirow"><span class="mono sm" style="min-width:120px">Runs on</span><span class="sm dim">localhost:8081</span></div>
+          <div class="minirow"><span class="mono sm" style="min-width:120px">Build</span><span class="sm dim">Maven Â· azure-pipelines.yml</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-h">Traceability â€” the chain an auditor reads</div>
+        <div style="padding:13px">
+          ${chain.map(function(x,i){ return html`<div class="checkrow" key=${i} style="border:0;padding:5px 0">
+            ${glyph(x.ok?"succeeded":"pending",15)}
+            <span style=${{minWidth:"128px",fontWeight:x.ok?600:400}}>${x.l}</span>
+            <span class="mono sm dim">${x.v}</span></div>`; })}
+          <div class="sm dim" style="margin-top:9px">Each green row is evidence that production code traces back to an approved request.</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Overview > Dashboards ---------- */
+function DashView(s, act){
+  var runs=s.runs.slice(0,12).reverse();
+  var passed=s.runs.filter(function(r){return r.status==="succeeded";}).length;
+  var failed=s.runs.filter(function(r){return r.status==="failed";}).length;
+  var rate=s.runs.length? Math.round(passed/s.runs.length*100):0;
+  var b=s.sprint.burn;
+  var maxb=Math.max.apply(null,b);
+  return html`<div class="stack">
+    ${pageHead("Dashboards","Widget tiles a team pins to a wall screen. Every number here is computed from what you've actually done in this sandbox.")}
+    <div class="wgrid">
+      <div class="w"><div class="w-k">Build success rate</div>
+        <div class="w-big"><span class="w-n">${rate}<span class="w-u">%</span></span></div>
+        <div class="spark">${runs.length? runs.map(function(r,i){ return html`<i key=${i} class=${r.status==="succeeded"?"ok":r.status==="failed"?"no":""} style=${{height:(12+i%4*6)+"px"}}></i>`; }) : html`<span class="sm dim">no runs yet</span>`}</div>
+        <div class="w-f">${passed} passed Â· ${failed} failed</div></div>
+
+      <div class="w"><div class="w-k">Sprint burndown</div>
+        <div class="spark" style="height:52px">${b.map(function(v,i){ return html`<i key=${i} style=${{height:Math.max(3,v/maxb*50)+"px",background:"var(--azure)"}}></i>`; })}</div>
+        <div class="w-f">${b[b.length-1]} points remaining of ${b[0]}</div></div>
+
+      <div class="w"><div class="w-k">Deployment status</div>
+        ${Object.keys(s.envs).map(function(k){ var e=s.envs[k];
+          return html`<div class="minirow" key=${k}>${glyph(e.deploys.length?"succeeded":"pending",15)}<span class="mono sm">${e.name}</span>
+            <span class="sm dim" style="margin-left:auto">${e.deploys.length? "#"+e.deploys[0].run : "never"}</span></div>`; })}
+        <div class="w-f">prod requires approval; dev does not.</div></div>
+
+      <div class="w"><div class="w-k">Work item states</div>
+        ${["New","Active","Resolved","Closed"].map(function(st){
+          var n=s.workItems.filter(function(w){return w.state===st;}).length;
+          return html`<div class="minirow" key=${st}><span class="sm" style="min-width:70px">${st}</span>
+            <div style="flex:1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden">
+              <div style=${{width:(n/s.workItems.length*100)+"%",height:"100%",background:st==="Closed"?"var(--ok)":st==="Active"?"var(--azure)":"var(--border-strong)"}}></div>
+            </div><span class="sm dim num">${n}</span></div>`; })}
+        <div class="w-f">${s.workItems.length} items in ${s.sprint.name}</div></div>
+
+      <div class="w span2"><div class="w-k">Recent activity</div>
+        ${(s.runs.slice(0,4).map(function(r){ return html`<div class="minirow" key=${"r"+r.id}>${glyph(r.status,15)}<span class="sm">Run #${r.id} â€” ${r.name}</span><span class="sm dim mono" style="margin-left:auto">${r.branch}</span></div>`; }))}
+        ${s.prs.slice(0,3).map(function(p){ return html`<div class="minirow" key=${"p"+p.id}>${glyph(p.status==="completed"?"succeeded":"active",15)}<span class="sm">PR !${p.id} â€” ${p.title}</span><span class="sm dim mono" style="margin-left:auto">${p.status}</span></div>`; })}
+        ${(!s.runs.length&&!s.prs.length)? html`<div class="sm dim">Nothing has happened yet. Use the terminal below.</div>`:null}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Overview > Wiki ---------- */
+function WikiView(s, act){
+  var page = s.wiki.filter(function(p){return p.path===(s.openWiki||"Home");})[0] || s.wiki[0];
+  return html`<div class="stack">
+    ${pageHead("Wiki","Where the knowledge that isn't code lives â€” runbooks, onboarding, decisions. Underneath, it's a git repo of markdown.")}
+    <div class="panel"><div class="fx">
+      <div class="fx-tree">
+        ${s.wiki.map(function(p){ return html`<button class=${"fx-row"+(page.path===p.path?" on":"")} key=${p.path} onClick=${function(){act({t:"open_wiki",p:p.path});}}>
+          <span class="cx"></span>
+          <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 2.5h7l3 3V13a.5.5 0 01-.5.5h-9A.5.5 0 013 13z"/></svg>
+          <span>${p.path}</span></button>`; })}
+      </div>
+      <div class="fx-pane">
+        <div class="fx-head"><span class="fn">${page.path}</span><span class="lastc">last edited by ${USER}</span></div>
+        <div class="fx-body" style="background:var(--surface)">
+          <div style="padding:15px 18px;max-width:66ch">
+            ${page.body.split("\n").map(function(ln,i){
+              if(/^# /.test(ln)) return html`<h2 key=${i} style="font-size:19px;margin:0 0 9px">${ln.slice(2)}</h2>`;
+              if(/^## /.test(ln)) return html`<h3 key=${i} style="font-size:14px;margin:15px 0 6px">${ln.slice(3)}</h3>`;
+              if(/^\d+\. /.test(ln)) return html`<div key=${i} style="font-size:13px;color:var(--ink-2);padding:2px 0 2px 16px">${ln}</div>`;
+              if(/^- /.test(ln)) return html`<div key=${i} style="font-size:13px;color:var(--ink-2);padding:2px 0 2px 16px">â€¢ ${ln.slice(2)}</div>`;
+              if(!ln.trim()) return html`<div key=${i} style="height:8px"></div>`;
+              return html`<div key=${i} style="font-size:13px;color:var(--ink-2);line-height:1.6">${ln}</div>`;
+            })}
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+/* ---------- Boards > Work items ---------- */
+function WorkItemsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Work items","Every change starts as one of these. The ID is what ties code, review, and deploy back to a reason.")}
+    <div class="panel">
+      <div class="panel-h">All work items<span class="r">${s.workItems.length}</span></div>
+      <div class="row" style="background:var(--surface-2);font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)">
+        <span style="min-width:42px">ID</span><span style="min-width:78px">Type</span><span style="flex:1">Title</span>
+        <span style="min-width:76px">State</span><span style="min-width:104px">Assigned</span><span style="min-width:28px">Pts</span>
+      </div>
+      <div class="rows">
+        ${s.workItems.map(function(w){
+          var linked=s.prs.filter(function(p){return p.workItem===w.id;});
+          return html`<div class="row" key=${w.id}>
+            <span class="mono sm num" style="color:var(--azure);min-width:42px">#${w.id}</span>
+            <span class="sm" style="min-width:78px;color:var(--ink-3)">${w.type}</span>
+            <div style="flex:1;min-width:0"><div class="sm">${w.title}</div>
+              ${linked.length? html`<div class="sm dim mono">â†’ PR !${linked[0].id} (${linked[0].status})</div>`:null}</div>
+            <span style="min-width:76px">${html`<span class=${"pill "+(w.state==="Closed"?"p-ok":w.state==="Active"?"p-run":w.state==="Resolved"?"p-wait":"p-idle")}>${w.state}</span>`}</span>
+            <span class="sm dim" style="min-width:104px">${w.who}</span>
+            <span class="sm num" style="min-width:28px">${w.pts}</span>
+          </div>`;
+        })}
+      </div>
+    </div>
+    <div class="panel"><div class="panel-h">Create one from the terminal</div>
+      <div style="padding:13px"><div class="minirow"><span class="mono sm" style="color:var(--azure);min-width:250px">az boards work-item create --title "..."</span><span class="sm dim">adds a row here instantly</span></div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Boards > Board (kanban) ---------- */
+function KanbanView(s, act){
+  var cols=["New","Active","Resolved","Closed"];
+  return html`<div class="stack">
+    ${pageHead("Board","The kanban wall. Columns are work item states â€” dragging a card is just editing a field.")}
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:12px;align-items:start;overflow-x:auto">
+      ${cols.map(function(c){
+        var items=s.workItems.filter(function(w){return w.state===c;});
+        return html`<div class="panel" key=${c}>
+          <div class="panel-h" style="font-size:12px">${c}<span class="r num">${items.length}</span></div>
+          <div style="padding:9px;display:flex;flex-direction:column;gap:8px;min-height:70px">
+            ${items.length? items.map(function(w){
+              return html`<div key=${w.id} style=${{background:"var(--surface-2)",border:"1px solid var(--border)",borderLeft:"3px solid "+(w.type==="Bug"?"var(--fail)":w.type==="Task"?"var(--wait)":"var(--azure)"),borderRadius:"4px",padding:"8px 10px"}}>
+                <div class="mono sm" style="color:var(--azure)">#${w.id}</div>
+                <div class="sm" style="margin:3px 0 6px">${w.title}</div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span class="avatar" style="width:18px;height:18px;font-size:8px">${w.who==="unassigned"?"?":w.who.split(" ").map(function(x){return x[0];}).join("")}</span>
+                  <span class="sm dim">${w.type}</span><span class="sm dim num" style="margin-left:auto">${w.pts} pts</span>
+                </div></div>`;
+            }) : html`<div class="sm dim" style="text-align:center;padding:10px 0">empty</div>`}
+          </div></div>`;
+      })}
+    </div>
+  </div>`;
+}
+
+/* ---------- Boards > Backlogs ---------- */
+function BacklogView(s, act){
+  var items=s.workItems.slice().sort(function(a,b){ return a.pri-b.pri || a.id-b.id; });
+  var total=items.reduce(function(n,w){return n+w.pts;},0);
+  return html`<div class="stack">
+    ${pageHead("Backlogs","Ordered by priority, top to bottom. The order itself is the plan â€” the top of this list is what gets built next.")}
+    <div class="panel">
+      <div class="panel-h">Product backlog<span class="r num">${total} points</span></div>
+      <div class="rows">
+        ${items.map(function(w,i){ return html`<div class="row" key=${w.id}>
+          <span class="mono sm num dim" style="min-width:22px">${i+1}</span>
+          <span class="mono sm num" style="color:var(--azure);min-width:42px">#${w.id}</span>
+          <div style="flex:1;min-width:0"><div class="sm">${w.title}</div></div>
+          <span class=${"pill "+(w.pri===1?"p-fail":w.pri===2?"p-wait":"p-idle")}>P${w.pri}</span>
+          <span class="sm num dim" style="min-width:44px;text-align:right">${w.pts} pts</span>
+        </div>`; })}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Boards > Sprints ---------- */
+function SprintView(s, act){
+  var inSprint=s.workItems.filter(function(w){return w.state!=="Closed";});
+  var done=s.workItems.filter(function(w){return w.state==="Closed";}).reduce(function(n,w){return n+w.pts;},0);
+  var total=s.workItems.reduce(function(n,w){return n+w.pts;},0);
+  var b=s.sprint.burn, maxb=Math.max.apply(null,b);
+  return html`<div class="stack">
+    ${pageHead("Sprints","A fixed time box with a fixed commitment. The burndown is the honest picture of whether it'll land.")}
+    <div class="wgrid">
+      <div class="w"><div class="w-k">${s.sprint.name}</div>
+        <div class="w-big"><span class="w-n">${done}</span><span class="w-u">of ${total} points done</span></div>
+        <div class="w-f">${s.sprint.start} â€“ ${s.sprint.end}</div></div>
+      <div class="w"><div class="w-k">Capacity</div>
+        <div class="w-big"><span class="w-n">${s.sprint.capacity}</span><span class="w-u">hours</span></div>
+        <div class="w-f">2 people Â· 10 working days</div></div>
+      <div class="w span2"><div class="w-k">Burndown</div>
+        <div class="spark" style="height:60px">${b.map(function(v,i){ return html`<i key=${i} style=${{height:Math.max(3,v/maxb*56)+"px",background:i===b.length-1?"var(--azure)":"var(--border-strong)"}}></i>`; })}</div>
+        <div class="w-f">${b[b.length-1]} points remaining Â· trending to finish</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h">Sprint backlog<span class="r num">${inSprint.length} open</span></div>
+      <div class="rows">${inSprint.map(function(w){ return html`<div class="row" key=${w.id}>
+        <span class="mono sm num" style="color:var(--azure);min-width:42px">#${w.id}</span>
+        <span class="sm" style="min-width:78px;color:var(--ink-3)">${w.type}</span>
+        <span class="sm" style="flex:1">${w.title}</span>
+        <span class=${"pill "+(w.state==="Active"?"p-run":w.state==="Resolved"?"p-wait":"p-idle")}>${w.state}</span>
+        <span class="sm num dim">${w.pts} pts</span></div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Boards > Queries ---------- */
+function QueriesView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Queries","Saved filters over work items, written in WIQL. Teams live off these â€” 'my active work' is opened a hundred times a day.")}
+    <div class="panel">
+      <div class="panel-h">Shared queries<span class="r">${s.queries.length}</span></div>
+      <div class="rows">${s.queries.map(function(q){ return html`<div class="row" key=${q.name}>
+        <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.4"><path d="M7 12A5 5 0 107 2a5 5 0 000 10zM10.5 10.5L14 14"/></svg>
+        <div style="flex:1;min-width:0"><div class="sm">${q.name}</div><div class="sm dim mono">${q.wiql}</div></div>
+        <span class="sm num dim">${q.n} result${q.n===1?"":"s"}</span></div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Commits ---------- */
+function CommitsView(s, act){
+  var cs=log(s);
+  return html`<div class="stack">
+    ${pageHead("Commits","Every commit on "+s.repo.head+". This is the raw history the whole audit trail hangs off.")}
+    ${repoBar(s, act)}
+    <div class="panel">
+      <div class="panel-h">History<span class="r mono">${s.repo.head}</span></div>
+      <div class="rows">${cs.map(function(c){ return html`<div class="row" key=${c.sha}>
+        <span class="avatar">${c.author.split(" ").map(function(x){return x[0];}).join("")}</span>
+        <div style="flex:1;min-width:0"><div class="sm">${c.msg}</div>
+          <div class="sm dim mono">${c.author}${(c.files&&c.files.length)? " Â· "+c.files.length+" file"+(c.files.length>1?"s":""):""}</div></div>
+        ${c.broken? html`<span class="pill p-fail"><i class="dot"></i>breaks build</span>`:null}
+        <span class="sha">${c.sha}</span></div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Pushes ---------- */
+function PushesView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Pushes","Every time code left a laptop and reached the server. A push is the moment a change becomes everyone's problem.")}
+    <div class="panel">
+      <div class="panel-h">Push history<span class="r num">${s.pushes.length}</span></div>
+      ${s.pushes.length? html`<div class="rows">${s.pushes.map(function(p,i){ return html`<div class="row" key=${i}>
+        <span class="avatar">CS</span>
+        <div style="flex:1;min-width:0"><div class="sm">${USER} pushed to <span class="mono" style="color:var(--azure)">${p.branch}</span></div>
+          <div class="sm dim mono">${p.n} commit${p.n>1?"s":""} Â· ${p.sha}</div></div>
+        <span class=${"pill "+(p.rejected?"p-fail":"p-ok")}><i class="dot"></i>${p.rejected?"rejected by policy":"accepted"}</span>
+      </div>`; })}</div>` : html`<div class="empty">Nothing pushed yet. Try <code>git push -u origin feature/x</code></div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Branches ---------- */
+function BranchesView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Branches","Which branches exist, whether the server has them, and which ones are protected.")}
+    ${repoBar(s, act)}
+    <div class="panel">
+      <div class="panel-h">Branches<span class="r num">${Object.keys(s.repo.branches).length}</span></div>
+      <div class="rows">${Object.keys(s.repo.branches).map(function(b){
+        var pushed=s.repo.remote[b]!==undefined, n=pushed?ahead(s,b):0;
+        return html`<div class="row" key=${b}>
+          <svg class="ico" viewBox="0 0 16 16" fill="none" stroke=${b===s.repo.head?"var(--azure)":"currentColor"} stroke-width="1.5"><path d="M4 2v8M4 14a2 2 0 100-4 2 2 0 000 4zM4 4a1 1 0 100-2 1 1 0 000 2zM12 4a1 1 0 100-2 1 1 0 000 2zM12 4v3a3 3 0 01-3 3H6"/></svg>
+          <span class="mono sm" style=${{color:b===s.repo.head?"var(--azure)":"var(--ink)",fontWeight:b===s.repo.head?600:400,flex:1}}>${b}${b===s.repo.head?"  (current)":""}</span>
+          ${b==="main"? html`<span class="pill p-wait"><i class="dot"></i>protected</span>`:null}
+          <span class="sha">${s.repo.branches[b]}</span>
+          ${!pushed? html`<span class="ahead">local only</span>` : n>0? html`<span class="ahead">â†‘${n} ahead</span>` : html`<span class="sm dim">in sync</span>`}
+        </div>`; })}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h">Policies on <span class="mono" style="color:var(--azure)">main</span></div>
+      <div style="padding:13px">
+        ${[["Require a pull request","Direct pushes are refused with TF402455"],
+           ["Minimum "+s.policy.minReviewers+" reviewer approval","A second pair of eyes, enforced not requested"],
+           ["Build validation","taskapi CI must succeed on the merge result"],
+           ["Linked work item required","No change without a reason on record"],
+           ["Reset votes on new push","New code invalidates an old approval"]].map(function(x,i){
+          return html`<div class="checkrow" key=${i}>${glyph("succeeded",15)}<span>${x[0]}</span><span class="sm dim" style="margin-left:auto">${x[1]}</span></div>`; })}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Repos > Tags ---------- */
+function TagsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Tags","A permanent name for one commit. This is how you find 'the thing that was in prod last Tuesday' six months later.")}
+    <div class="panel"><div class="panel-h">Tags<span class="r num">${s.tags.length}</span></div>
+      <div class="rows">${s.tags.map(function(t){ return html`<div class="row" key=${t.name}>
+        <span class="pill p-ok"><i class="dot"></i>${t.name}</span>
+        <div style="flex:1;min-width:0"><div class="sm">${t.msg}</div><div class="sm dim mono">tagged by ${t.who}</div></div>
+        <span class="sha">${t.sha}</span></div>`; })}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Pipelines > Releases ---------- */
+function ReleasesView(s, act){
+  var rel=s.runs.filter(function(r){return r.stages.length>1;});
+  return html`<div class="stack">
+    ${pageHead("Releases","Runs that carry deploy stages. Same artifact, promoted environment by environment â€” dev first, prod only after someone says yes.")}
+    ${rel.length? rel.map(function(r){ return html`<div class="panel" key=${r.id}>
+      <div class="panel-h">${glyph(r.status,16)}Release from run #${r.id}<span class="r mono">${r.commitMsg||r.branch}</span></div>
+      <div style="padding:13px;display:flex;gap:10px;flex-wrap:wrap;align-items:stretch">
+        ${r.stages.map(function(st,i){ return html`<${React.Fragment} key=${i}>
+          ${i>0? html`<span class="arrow">â†’</span>`:null}
+          <div class="stage" style="min-width:150px">
+            <div class="stage-n">${glyph(st.status,15)}<span>${st.name}</span></div>
+            ${st.env? html`<div class="stage-j">env: ${st.env}</div>`:null}
+            <div class="stage-j">${st.env&&s.envs[st.env]&&s.envs[st.env].gated? "needs approval":"automatic"}</div>
+          </div><//>`; })}
+      </div></div>`; }) : html`<div class="panel"><div class="empty">No releases yet.<br/>Run <code>az pipelines run --cd</code> to build one with deploy stages.</div></div>`}
+  </div>`;
+}
+
+/* ---------- Pipelines > Library ---------- */
+function LibraryView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Library","Where configuration and credentials live so they're never hardcoded in a repo. Search 'variable group' and 'service connection'.")}
+    <div class="panel">
+      <div class="panel-h">Variable groups<span class="r num">${s.library.groups.length}</span></div>
+      ${s.library.groups.map(function(g){ return html`<div key=${g.name} style="border-bottom:1px solid var(--border)">
+        <div class="row" style="border:0">
+          <span class="mono sm" style="color:var(--azure);flex:1">${g.name}</span>
+          ${g.kv? html`<span class="pill p-ok"><i class="dot"></i>${g.kv}</span>`:null}
+          <span class="sm dim">linked to ${g.linked}</span></div>
+        <div style="padding:0 13px 11px">${g.vars.map(function(v){ return html`<div class="minirow" key=${v.k}>
+          <span class="mono sm" style="min-width:170px">${v.k}</span>
+          <span class="mono sm" style=${{color:v.secret?"var(--ink-3)":"var(--ink-2)"}}>${v.v}</span>
+          ${v.secret? html`<span class="pill p-wait" style="margin-left:auto"><i class="dot"></i>secret</span>`:null}</div>`; })}</div>
+      </div>`; })}
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-h">Service connections<span class="r num">${s.library.conns.length}</span></div>
+        <div class="rows">${s.library.conns.map(function(c){ return html`<div class="row" key=${c.name}>
+          ${glyph(c.ok?"succeeded":"failed",15)}
+          <div style="flex:1;min-width:0"><div class="sm mono">${c.name}</div><div class="sm dim">${c.type} Â· ${c.scope}</div></div>
+          ${!c.ok? html`<span class="pill p-fail">token expired</span>`:null}</div>`; })}</div>
+        <div style="padding:11px 13px"><div class="sm dim">A service connection is the credential letting a pipeline touch something outside Azure DevOps. Broken ones are the single most common cause of "it worked yesterday".</div></div>
+      </div>
+      <div class="panel"><div class="panel-h">Secure files<span class="r num">${s.library.files.length}</span></div>
+        <div class="rows">${s.library.files.map(function(f){ return html`<div class="row" key=${f.name}>
+          <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--wait)" stroke-width="1.4"><path d="M4 7V5a4 4 0 018 0v2M3 7h10v6H3z"/></svg>
+          <span class="mono sm" style="flex:1">${f.name}</span><span class="sm dim">${f.size}</span></div>`; })}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Pipelines > Agent pools ---------- */
+function PoolsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Agent pools","The machines that actually run your pipeline. This is the thing you're waiting 4â€“5 days for a grant on in the real product.")}
+    ${s.pools.map(function(p){ return html`<div class="panel" key=${p.name}>
+      <div class="panel-h">${p.name}${p.hosted? html`<span class="pill p-run"><i class="dot"></i>Microsoft-hosted</span>`:html`<span class="pill p-ok"><i class="dot"></i>self-hosted</span>`}<span class="r">${p.parallel}</span></div>
+      ${p.cap? html`<div style="padding:11px 13px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span class="dim">Free minutes used this month</span><span class="mono num">${p.used} / ${p.cap}</span></div>
+        <div style="height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden"><div style=${{width:(p.used/p.cap*100)+"%",height:"100%",background:"var(--azure)"}}></div></div>
+      </div>`:null}
+      <div class="rows">${p.agents.map(function(a){ return html`<div class="row" key=${a.name}>
+        ${glyph(a.online?"succeeded":"failed",15)}
+        <div style="flex:1;min-width:0"><div class="sm mono">${a.name}</div><div class="sm dim mono">${a.caps}</div></div>
+        <span class="pill p-ok">${a.online?"online":"offline"}</span></div>`; })}</div>
+      ${!p.hosted? html`<div style="padding:11px 13px"><div class="sm dim">A self-hosted agent is just a small service polling for work. Running one on your own laptop is how you skip the hosted-parallelism wait entirely.</div></div>`:null}
+    </div>`; })}
+  </div>`;
+}
+
+/* ---------- Test Plans ---------- */
+function TestsView(s, act){
+  var all=s.testPlan.suites.reduce(function(a,su){return a.concat(su.cases);},[]);
+  var by=function(o){ return all.filter(function(c){return c.outcome===o;}).length; };
+  var m={passed:"succeeded",failed:"failed",blocked:"waiting",notrun:"pending"};
+  return html`<div class="stack">
+    ${pageHead("Test Plans","Manual and exploratory test cases â€” the checks a human runs that a pipeline can't. Separate from the automated tests inside your build.")}
+    <div class="wgrid">
+      <div class="w"><div class="w-k">Passed</div><div class="w-big">${glyph("succeeded",20)}<span class="w-n">${by("passed")}</span></div></div>
+      <div class="w"><div class="w-k">Failed</div><div class="w-big">${glyph("failed",20)}<span class="w-n">${by("failed")}</span></div></div>
+      <div class="w"><div class="w-k">Blocked</div><div class="w-big">${glyph("waiting",20)}<span class="w-n">${by("blocked")}</span></div></div>
+      <div class="w"><div class="w-k">Not run</div><div class="w-big">${glyph("pending",20)}<span class="w-n">${by("notrun")}</span></div></div>
+    </div>
+    ${s.testPlan.suites.map(function(su){ return html`<div class="panel" key=${su.name}>
+      <div class="panel-h">${su.name}<span class="r num">${su.cases.length} cases</span></div>
+      <div class="rows">${su.cases.map(function(c){ return html`<div class="row" key=${c.id}>
+        ${glyph(m[c.outcome],15)}
+        <span class="mono sm num dim" style="min-width:40px">${c.id}</span>
+        <span class="sm" style="flex:1">${c.title}</span>
+        <span class=${"pill "+(c.outcome==="passed"?"p-ok":c.outcome==="failed"?"p-fail":c.outcome==="blocked"?"p-wait":"p-idle")}>${c.outcome==="notrun"?"not run":c.outcome}</span>
+      </div>`; })}</div>
+    </div>`; })}
+  </div>`;
+}
+
+/* ---------- Project settings ---------- */
+function SettingsView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Project settings","Who can do what, and which rules are enforced. Almost every 'why can't Iâ€¦' at work is answered on a screen like this.")}
+    <div class="grid2">
+      <div class="panel"><div class="panel-h">Members & permissions<span class="r num">${s.team.length}</span></div>
+        <div class="rows">${s.team.map(function(t){ return html`<div class="row" key=${t.name}>
+          <span class="avatar">${t.initials}</span>
+          <div style="flex:1;min-width:0"><div class="sm">${t.name}</div><div class="sm dim">${t.role}</div></div>
+          <span class="sm dim">${t.perms||t.role2||""}</span></div>`; })}</div>
+      </div>
+      <div class="panel"><div class="panel-h">Repository policies</div>
+        <div style="padding:13px">
+          ${[["Require pull request on main","on"],["Build validation","on"],["Work item linking","on"],["Comment resolution","on"],["Limit merge types","squash only"],["Case enforcement","on"]].map(function(x,i){
+            return html`<div class="minirow" key=${i}><span class="sm" style="flex:1">${x[0]}</span><span class="pill p-ok"><i class="dot"></i>${x[1]}</span></div>`; })}
+        </div>
+      </div>
+    </div>
+    <div class="panel"><div class="panel-h">Environment approvals</div>
+      <div class="rows">${Object.keys(s.envs).map(function(k){ var e=s.envs[k];
+        return html`<div class="row" key=${k}>
+          ${glyph(e.gated?"waiting":"succeeded",15)}
+          <span class="mono sm" style="min-width:60px">${e.name}</span>
+          <span class="sm" style="flex:1">${e.gated? "Approval required before any deploy":"Deploys without human involvement"}</span>
+          <span class="sm dim">${e.approvers.length? e.approvers.join(", "):"no approvers"}</span></div>`; })}</div>
+      <div style="padding:11px 13px"><div class="sm dim">This single screen is where a Change Advisory Board turns from a weekly meeting into an automated gate. Search <b>approvals and checks</b>.</div></div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   6. APP
+   ============================================================ */
+
+function App(){
+  var st=useState(initial);
+  var s=st[0], set=st[1];
+  var readIdx=useState(null), reading=readIdx[0], setReading=readIdx[1];
+  var guideS=useState(true), guide=guideS[0], setGuide=guideS[1];
+  var thS=useState(236), termH=thS[0], setTermH=thS[1];
+  var dragS=useState(false), dragging=dragS[0], setDragging=dragS[1];
+
+  /* drag the grip to resize the terminal; clamped so neither pane vanishes */
+  function startDrag(e){
+    e.preventDefault();
+    var startY=e.clientY, startH=termH, maxH=Math.max(160, (w0()||700)-170);
+    setDragging(true);
+    try{ document.body.classList.add("resizing"); }catch(_){}
+    function move(ev){
+      var h=Math.min(maxH, Math.max(90, startH + (startY - ev.clientY)));
+      setTermH(h); setMin(false);
+    }
+    function up(){
+      setDragging(false);
+      try{ document.body.classList.remove("resizing"); }catch(_){}
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    }
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  }
+  function w0(){ try{ return window.innerHeight; }catch(_){ return 700; } }
+  var termMin=useState(false), min=termMin[0], setMin=termMin[1];
+  var inputRef=useRef(null), outRef=useRef(null);
+  var hist=useRef([]), histI=useRef(-1);
+
+  /* The flow position is DERIVED, never chosen: you are at the first phase whose
+     objectives aren't all satisfied. Finish one and the next opens by itself. */
+  function phaseDone(p){ return p.objectives.every(function(o){ return o.check(s); }); }
+  var cursor = FLOW.findIndex(function(p){ return !phaseDone(p); });
+  var allDone = cursor === -1;
+  if(allDone) cursor = FLOW.length-1;
+  var active = reading!==null ? reading : cursor;
+
+  /* pipeline clock */
+  useEffect(function(){
+    var t=setInterval(function(){
+      set(function(prev){
+        if(!prev.runs.some(function(r){return r.status==="running";})) return prev;
+        var res=advance(prev), runs=res[0], evs=res[1];
+        var n=Object.assign({},prev,{runs:runs});
+        n.flags=Object.assign({},prev.flags);
+        n.envs=JSON.parse(JSON.stringify(prev.envs));
+        n.artifacts=prev.artifacts.slice();
+        n.term=prev.term.slice();
+
+        evs.forEach(function(e){
+          var run=runs.filter(function(r){return r.id===e.runId;})[0];
+          if(e.type==="gate"){
+            n.gate={runId:e.runId,stageIdx:e.stageIdx,env:e.env};
+            n.flags.sawGate=true;
+            n.view="pipelines"; n.openRun=e.runId;
+            n.term.push({k:"warn",t:"Run #"+e.runId+": stage Deploy_Prod is WAITING for approval on environment 'prod'."});
+            n.term.push({k:"dim",t:"Nothing deploys until a human approves. Go to Pipelines and click Approve."});
+          }
+          if(e.type==="stagedone" && e.env){
+            n.envs[e.env].deploys.unshift({run:e.runId,commit:run.commit,msg:run.commitMsg,approvedBy:(e.env==="prod"?USER:null)});
+            var art=n.artifacts.filter(function(a){return a.run===e.runId;})[0];
+            if(art && art.envs.indexOf(e.env)<0) art.envs.push(e.env);
+            n.term.push({k:"ok",t:"Run #"+e.runId+": deployed to "+e.env+"."});
+          }
+          if(e.type==="stagedone" && e.stage==="Build"){
+            n.artifacts.unshift({run:e.runId,commit:run.commit,envs:[]});
+          }
+          if(e.type==="failed"){
+            n.flags.sawRedBuild=true;
+            n.term.push({k:"err",t:"Run #"+e.runId+" FAILED. Open the failed step's logs to read the compiler error."});
+            if(e.prId) n.term.push({k:"dim",t:"PR !"+e.prId+" is now blocked by its build validation policy."});
+          }
+          if(e.type==="done"){
+            n.term.push({k:"ok",t:"Run #"+e.runId+" succeeded."});
+          }
+        });
+        return n;
+      });
+    },700);
+    return function(){ clearInterval(t); };
+  },[]);
+
+  /* keep terminal scrolled */
+  useEffect(function(){ if(outRef.current) outRef.current.scrollTop=outRef.current.scrollHeight; },[s.term.length]);
+
+  function act(a){
+    set(function(p){
+      var n=JSON.parse(JSON.stringify(p));
+      if(a.t==="view"){ n.view=a.v; if(a.v==="chain"||a.v==="witems"||a.v==="kanban") n.flags.sawBoards=true; }
+      if(a.t==="open_file") n.openFile=a.p;
+      if(a.t==="open_wiki") n.openWiki=a.p;
+      if(a.t==="switch_repo"){
+        if(a.name!==n.activeRepo && REPO_META[a.name]){
+          n.repoStore[n.activeRepo]=n.repo;
+          n.repo=n.repoStore[a.name];
+          delete n.repoStore[a.name];
+          n.activeRepo=a.name;
+          n.openFile=(n.repo.tracked||[])[0];
+          n.term.push({k:"ok",t:"Switched to repository '"+a.name+"'. git commands now target this repo."});
+        }
+        if(a.go) n.view=a.go;
+      }
+      if(a.t==="open_pr") n.openPr=a.id;
+      if(a.t==="open_run") n.openRun=a.id;
+      if(a.t==="toggle_step"){ n.openSteps[a.key]=!n.openSteps[a.key]; if(n.openSteps[a.key]) n.flags.openedLogs=true; }
+      if(a.t==="approve_pr"){
+        n.prs.forEach(function(pr){ if(pr.id===a.id) pr.reviewers.forEach(function(r){ r.vote=10; }); });
+        n.term.push({k:"ok",t:"Priya Raman approved PR !"+a.id+"."});
+      }
+      if(a.t==="link_wi"){
+        n.prs.forEach(function(pr){ if(pr.id===a.id) pr.workItem=a.wi; });
+        n.term.push({k:"ok",t:"Linked work item #"+a.wi+" to PR !"+a.id+". That link is the audit trail."});
+      }
+      if(a.t==="complete_pr"){
+        var pr=n.prs.filter(function(x){return x.id===a.id;})[0];
+        if(pr){
+          pr.status="completed";
+          var id=sha();
+          n.repo.commits[id]={sha:id,msg:"Merged PR !"+pr.id+": "+pr.title,parent:n.repo.branches.main,author:USER,branch:"main",files:[],broken:false};
+          n.repo.branches.main=id; n.repo.remote.main=id;
+          n.repo.head="main";
+          n.flags.prCompleted=true;
+          n.workItems.forEach(function(w){ if(w.id===pr.workItem) w.state="Done"; });
+          n.term.push({k:"ok",t:"PR !"+pr.id+" completed. Merge commit "+id+" is on main."});
+          n.term.push({k:"info",t:"A merge to main is what normally triggers the CI pipeline. Queue the deploy with:  az pipelines run --cd"});
+        }
+      }
+      if(a.t==="approve_gate" && n.gate){
+        var r=n.runs.filter(function(x){return x.id===n.gate.runId;})[0];
+        if(r){ r.stages[n.gate.stageIdx].approved=true; r.stages[n.gate.stageIdx].status="pending"; r.status="running"; }
+        n.term.push({k:"ok",t:USER+" approved the release to prod. Recorded against the run forever â€” that record is the audit evidence."});
+        n.gate=null;
+      }
+      if(a.t==="reject_gate" && n.gate){
+        var r2=n.runs.filter(function(x){return x.id===n.gate.runId;})[0];
+        if(r2){ r2.stages[n.gate.stageIdx].status="failed"; r2.status="failed"; }
+        n.term.push({k:"warn",t:"Release rejected. The build artifact is untouched â€” you can approve a later run without rebuilding."});
+        n.gate=null;
+      }
+      return n;
+    });
+  }
+
+  function submit(e){
+    e.preventDefault();
+    var line=inputRef.current.value;
+    if(!line.trim()) return;
+    hist.current.unshift(line); histI.current=-1;
+    inputRef.current.value="";
+    set(function(p){
+      var res=runCommand(p, line);
+      var n=res.state;
+      n.term=(n.term||[]).concat([{k:"cmd",t:line}]).concat(res.out);
+      return n;
+    });
+  }
+  function onKey(e){
+    if(e.key==="ArrowUp"){ e.preventDefault(); if(histI.current<hist.current.length-1){ histI.current++; inputRef.current.value=hist.current[histI.current]; } }
+    if(e.key==="ArrowDown"){ e.preventDefault(); if(histI.current>0){ histI.current--; inputRef.current.value=hist.current[histI.current]; } else { histI.current=-1; inputRef.current.value=""; } }
+  }
+
+  var L=FLOW[active];
+  var doneCount=L.objectives.filter(function(o){return o.check(s);}).length;
+  var labDone=doneCount===L.objectives.length;
+
+  var views={
+    projects:ProjectsView, orgusers:OrgUsersView, billing:BillingView, audit:AuditView, exts:ExtensionsView,
+    summary:SummaryView, dash:DashView, wiki:WikiView,
+    witems:WorkItemsView, kanban:KanbanView, backlog:BacklogView, sprints:SprintView, queries:QueriesView, plans:PlansView, chain:BoardsView,
+    repolist:RepoListView, files:FilesView, commits:CommitsView, pushes:PushesView, branches:BranchesView, tags:TagsView,
+    prs:PRsView, forks:ForksView, secure:SecurityView, search:SearchView, repos:ReposView,
+    pipelines:PipesView, envs:EnvsView, releases:ReleasesView, library:LibraryView, pools:PoolsView, taskgroups:TaskGroupsView,
+    tests:TestsView, testruns:TestRunsView, arts:FeedsView, feeds:FeedsView,
+    settings:SettingsView, hooks:HooksView, tokens:TokensView
+  };
+  var View=views[s.view]||SummaryView;
+
+  var dirtyN=Object.keys(s.repo.workdir).length+Object.keys(s.repo.index).length;
+  var runN=s.runs.filter(function(r){return r.status==="running"||r.status==="waiting";}).length;
+  var alertN=s.alerts.filter(function(a){return a.state==="Open";}).length;
+  var NAV=[
+    {g:"Organization", ico:I.over, items:[["projects","Projects",s.projects.length],["orgusers","Users"],["billing","Billing"],["audit","Auditing"],["exts","Extensions"],["tokens","Tokens & SSH"]]},
+    {g:"Overview", ico:I.over, items:[["summary","Summary"],["dash","Dashboards"],["wiki","Wiki"]]},
+    {g:"Boards", ico:I.boards, items:[["witems","Work items"],["kanban","Board"],["backlog","Backlogs"],["sprints","Sprints"],["queries","Queries"],["plans","Delivery Plans"],["chain","Traceability"]]},
+    {g:"Repos", ico:I.repos, items:[["repolist","Repositories",Object.keys(REPO_META).length],["files","Files",dirtyN||null],["commits","Commits"],["pushes","Pushes",s.pushes.length||null],["branches","Branches"],["tags","Tags"],["prs","Pull requests",openPRs(s).length||null],["forks","Forks"],["secure","Advanced Security",alertN||null],["search","Code search"]]},
+    {g:"Pipelines", ico:I.pipes, items:[["pipelines","Runs",runN||null],["envs","Environments"],["releases","Releases"],["library","Library"],["taskgroups","Task groups"],["pools","Agent pools"]]},
+    {g:"Test Plans", ico:I.tests, items:[["tests","Test plans"],["testruns","Runs"]]},
+    {g:"Artifacts", ico:I.arts, items:[["feeds","Feeds",s.artifacts.length||null]]},
+    {g:"Project settings", ico:I.set, items:[["settings","Settings"],["hooks","Service hooks"]]}
+  ];
+  var LABEL={}; NAV.forEach(function(gr){ gr.items.forEach(function(it){ LABEL[it[0]]=gr.g+" / "+it[1]; }); });
+
+  return html`
+  <div id="app">
+    <div class="topbar">
+      <div class="brand">
+        <svg class="glyph" viewBox="0 0 24 24" fill="none"><path d="M3 7.5 9.5 3l5 2.2V3L21 6.2v11.6L15.5 21l-9-3.2v3.1L3 17.2z" fill="var(--azure)"/></svg>
+        <span>Flight Sim</span>
+      </div>
+      <div class="crumbs">
+        <span>${s.org.name}</span><span>/</span><b>${s.project}</b>
+        ${/^(files|commits|pushes|branches|tags|prs|forks|secure|repolist)$/.test(s.view)? html`<span>/</span><span style="color:var(--azure)">${s.activeRepo}</span>`:null}
+        <span>/</span><span>${LABEL[s.view]||s.view}</span>
+      </div>
+      <div class="spacer"></div>
+      <span class="sm dim">Sandbox â€” nothing here reaches a real service</span>
+      <button class="tbtn" onClick=${function(){ setGuide(!guide); }}>${guide?"Hide guide":"Show guide"}</button>
+      <button class="tbtn" onClick=${function(){ set(initial()); }}>Reset</button>
+    </div>
+
+    <div class="body">
+      <nav class="rail">
+        <div class="grp">taskapi</div>
+        ${NAV.map(function(gr){
+          var here=gr.items.some(function(it){return it[0]===s.view;});
+          return html`<${React.Fragment} key=${gr.g}>
+            <div class=${"navgrp"+(here?" on":"")}>${icon(gr.ico)}<span>${gr.g}</span></div>
+            ${gr.items.map(function(it){ return html`<button class=${"navitem navsub"+(s.view===it[0]?" on":"")} key=${it[0]} onClick=${function(){act({t:"view",v:it[0]});}}>
+              <span>${it[1]}</span>${it[2]?html`<span class="cnt num">${it[2]}</span>`:null}
+            </button>`; })}
+          <//>`;
+        })}
+      </nav>
+
+      <div class="main">
+        <div class="work">${View(s,act)}</div>
+
+        <div class="term" style=${{height:(min?34:termH)+"px"}}>
+          <div class=${"term-grip"+(dragging?" drag":"")} onPointerDown=${startDrag}
+               role="separator" aria-label="Resize terminal" title="Drag to resize"></div>
+          <div class="term-h">
+            <span class="t">Terminal â€” ${s.activeRepo}</span>
+            <span class="sp"></span>
+            <button class="tbtn2" onClick=${function(){ setTermH(Math.min(760, termH+120)); setMin(false); }} title="Taller">taller</button>
+            <button class="tbtn2" onClick=${function(){ setTermH(Math.max(90, termH-120)); }} title="Shorter">shorter</button>
+            <button class="tbtn2" onClick=${function(){ set(function(p){ return Object.assign({},p,{term:[]}); }); }}>clear</button>
+            <button class="tbtn2" onClick=${function(){ setMin(!min); }}>${min?"expand":"minimize"}</button>
+          </div>
+          ${!min? html`<div class="term-o" ref=${outRef}>
+            ${s.term.map(function(l,i){
+              if(l.k==="cmd") return html`<div class="l t-cmd" key=${i}><span class="ps">${"PS "+s.activeRepo+">"}</span> ${l.t}</div>`;
+              var cls={err:"t-err",ok:"t-ok",warn:"t-warn",info:"t-info",dim:"t-dim"}[l.k]||"";
+              return html`<div class=${"l "+cls} key=${i}>${l.t}</div>`;
+            })}
+          </div>`:null}
+          ${!min? html`<form class="term-i" onSubmit=${submit}>
+            <span class="ps">${"PS "+s.activeRepo+">"}</span>
+            <input ref=${inputRef} onKeyDown=${onKey} autoFocus spellCheck="false" autoComplete="off" placeholder="type a command â€” 'help' lists them all" aria-label="terminal input" />
+          </form>`:null}
+        </div>
+      </div>
+
+      <aside class="lab" style=${guide?null:{display:"none"}}>
+        <div class="lab-h">
+          <div class="lab-k">The life of one change</div>
+          <div class="lab-t">${allDone?"Full circuit flown":"Phase "+(cursor+1)+" of "+FLOW.length}</div>
+          <div class="sm dim" style="margin-top:4px">Finish a phase and the next opens on its own. You can't skip â€” neither can a real change.</div>
+        </div>
+
+        <ol class="flow">
+          ${FLOW.map(function(p,i){
+            var done=p.objectives.every(function(o){return o.check(s);});
+            var here=i===active, isNext=i===cursor;
+            var cls="fl"+(done?" done":"")+(here?" here":"")+(i>cursor&&!done?" locked":"");
+            var newStage = i===0 || FLOW[i-1].stage!==p.stage;
+            return html`<${React.Fragment} key=${i}>
+              ${newStage? html`<li class="fl-stage">${p.stage}</li>`:null}
+              <li class=${cls}>
+                <button class="fl-b" onClick=${function(){ setReading(i===active?null:i); }} aria-expanded=${here}>
+                  <span class="fl-m">${done?"âœ“":isNext?"â—":"â—‹"}</span>
+                  <span class="fl-t">${p.title}</span>
+                  ${!done&&i<cursor?null:null}
+                  <span class="fl-c num">${p.objectives.filter(function(o){return o.check(s);}).length}/${p.objectives.length}</span>
+                </button>
+
+                ${here? html`<div class="fl-body">
+                  <div class="lab-b" style="border:0;padding:2px 0 10px">${p.brief}</div>
+                  ${p.objectives.map(function(o,j){
+                    var d=o.check(s);
+                    return html`<div class=${"obj"+(d?" done":"")} key=${j} style="padding:7px 0;border-bottom:0"><span class="bx">${d?"âœ“":""}</span><span class="tx">${o.t}</span></div>`;
+                  })}
+                  ${done? html`<div class="done-banner" style="margin:10px 0 4px">
+                    ${i<FLOW.length-1? "Done â€” phase "+(i+2)+" is open below." : "That's the entire loop, end to end."}
+                  </div>`:null}
+                  <div class="concept" style="margin:10px 0 4px">
+                    <div class="k">${p.concept.k}</div>
+                    <div class="v">${p.concept.v}</div>
+                  </div>
+                </div>`:null}
+              </li>
+            <//>`;
+          })}
+        </ol>
+
+        ${reading!==null&&reading!==cursor? html`<div class="labnav">
+          <button class="btn ghost" onClick=${function(){ setReading(null); }}>Back to where I am</button>
+        </div>`:null}
+      </aside>
+    </div>
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
+})();
+</script>
+
+</body>
+</html>

@@ -174,6 +174,9 @@ h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.015em}
 .tab{background:transparent;border:0;border-bottom:2px solid transparent;padding:8px 14px;cursor:pointer;color:var(--ink-2);font-size:13px;margin-bottom:-1px}
 .tab:hover{color:var(--ink);background:var(--surface-2)}
 .tab.on{color:var(--azure);border-bottom-color:var(--azure);font-weight:600}
+.fld{font-family:var(--ui);font-size:13px;padding:5px 9px;border:1px solid var(--border-strong);border-radius:4px;background:var(--surface);color:var(--ink)}
+.fld:focus{outline:2px solid var(--azure);outline-offset:-1px;border-color:var(--azure)}
+.fld::placeholder{color:var(--ink-3)}
 
 /* ---------- file explorer ---------- */
 .fx{display:grid;grid-template-columns:minmax(230px,300px) 1fr;min-height:340px}
@@ -808,9 +811,23 @@ function runCommand(s, line){
   if(a[0]==="reset"){ var f=initial(); f.term=[{k:"warn",t:"Sandbox reset to Step 0."}]; return {state:f,out:[]}; }
 
   /* ---- edit / fix ---- */
+  if(a[0]==="ls"||a[0]==="dir"){
+    say("info","Files in "+st.activeRepo+" (copy one of these):");
+    (st.repo.tracked||[]).forEach(function(p){ say("plain","  "+p); });
+    say("dim","Edit one with:  edit <path>     â€” or click it in Files above and press Edit.");
+    st.view="files";
+    return {state:st,out:out};
+  }
   if(a[0]==="edit"||a[0]==="touch"){
     var p=a[1];
-    if(!p){ say("err","usage: edit <file> [--bug]"); return {state:st,out:out}; }
+    if(!p){
+      say("err","usage: edit <file>");
+      say("info","Files you can edit in "+st.activeRepo+":");
+      (st.repo.tracked||[]).forEach(function(f){ say("plain","  edit "+f); });
+      say("dim","Or skip the terminal: open Files, click a file, press Edit.");
+      st.view="files";
+      return {state:st,out:out};
+    }
     var known = FILES.indexOf(p)>=0;
     st.repo.workdir[p]= known ? "modified" : "untracked";
     st.view="files"; st.openFile=p;
@@ -1084,12 +1101,15 @@ var FLOW = [
   {
     stage:"Code",
     title:"Try the obvious thing first",
-    brief: html`<p>You know Git. So do the natural thing: change the file, commit it on <code>main</code>, push.</p><p>It's going to fail. The failure is the whole point of this phase â€” don't skip past it.</p>`,
+    brief: html`<p>Nobody commits straight to <code>main</code> on purpose. What really happens is you forget to branch, do the work, and only find out at push time. Let's make that happen now, on purpose.</p>
+      <p><b>Two ways to do it â€” pick either.</b></p>
+      <p><b>In the UI:</b> go to <b>Repos â†’ Files</b>, click <code>TaskController.java</code> in the tree, press <b>âœŽ Edit</b>, then type a commit message and press <b>Commit</b> with the branch left as <code>main</code>.</p>
+      <p><b>Or in the terminal:</b> run <code>ls</code> to see the file list, then the four commands below.</p>`,
     objectives:[
-      {t:html`<code>edit src/main/java/com/cody/taskapi/web/TaskController.java</code>`, check:function(s){return s.flags.edited;}},
-      {t:html`Stage it: <code>git add .</code>`, check:function(s){return s.flags.staged;}},
-      {t:html`Commit: <code>git commit -m "Add tasks endpoint"</code>`, check:function(s){return s.flags.committed;}},
-      {t:html`Push it: <code>git push</code> â€” and read the rejection`, check:function(s){return s.flags.pushRejected;}}
+      {t:html`Change a file â€” <b>âœŽ Edit</b> in Files, or <code>edit &lt;path&gt;</code> (<code>ls</code> lists them)`, check:function(s){return s.flags.edited;}},
+      {t:html`Stage it: <code>git add .</code> <span class="dim">(the UI does this for you)</span>`, check:function(s){return s.flags.staged;}},
+      {t:html`Commit it: <code>git commit -m "Add tasks endpoint"</code>`, check:function(s){return s.flags.committed;}},
+      {t:html`Try to put it on <code>main</code> â€” and read the rejection`, check:function(s){return s.flags.pushRejected;}}
     ],
     concept:{k:"Terms to look up", v:html`<b>Branch policy</b>, <b>protected branch</b>, <b>pre-receive hook</b>. <b>TF402455</b> is the real Azure DevOps error code. The <i>server</i> refused you â€” your laptop was happy.`}
   },
@@ -1636,9 +1656,24 @@ function FilesView(s, act){
         <span class="r mono">${all.length} files</span>
       </div>
 
-      ${dirtyCount ? html`<div class="row" style="background:var(--wait-soft);border-bottom:1px solid var(--border)">
-        <span class="pill p-wait"><i class="dot"></i>${dirtyCount} uncommitted</span>
-        <span class="sm" style="color:var(--ink-2)">Changes exist on your laptop only. Nobody else can see them until <span class="mono">git commit</span> then <span class="mono">git push</span>.</span>
+      ${dirtyCount ? html`<div style="background:var(--wait-soft);border-bottom:1px solid var(--border);padding:11px 13px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px">
+          <span class="pill p-wait"><i class="dot"></i>${dirtyCount} uncommitted</span>
+          <span class="sm" style="color:var(--ink-2)">Changed on your machine only. Nobody else can see it until you commit and push.</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input class="fld" style="flex:2;min-width:190px" placeholder="Commit message"
+                 value=${s.draftMsg||""} onChange=${function(e){act({t:"draft",k:"draftMsg",v:e.target.value});}} />
+          <span class="sm dim">to branch</span>
+          <input class="fld mono" style="flex:1;min-width:150px" placeholder="main"
+                 value=${s.draftBranch===undefined?"main":s.draftBranch} onChange=${function(e){act({t:"draft",k:"draftBranch",v:e.target.value});}} />
+          <button class="btn" onClick=${function(){act({t:"ui_commit"});}}>Commit</button>
+        </div>
+        ${(s.draftBranch===undefined||s.draftBranch==="main")
+          ? html`<div class="sm" style="color:var(--wait);margin-top:8px">
+              <b>main is protected.</b> Committing here will be refused. Type a new branch name above â€” that's what the real product nudges you to do.</div>`
+          : html`<div class="sm" style="color:var(--ok);margin-top:8px">
+              Will create <span class="mono">${s.draftBranch}</span>, commit to it, and push it to the server.</div>`}
       </div>` : null}
 
       <div class="fx">
@@ -1646,6 +1681,9 @@ function FilesView(s, act){
         <div class="fx-pane">
           <div class="fx-head">
             <span class="fn">${open || "no file"}</span>
+            ${open && !s.repo.workdir[open] && !s.repo.index[open]
+              ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px" onClick=${function(){act({t:"edit_file"});}}>âœŽ Edit</button>`
+              : null}
             ${open && s.repo.index[open] ? html`<span class="pill p-run"><i class="dot"></i>staged</span>` : null}
             ${open && s.repo.workdir[open] ? html`<span class="pill p-wait"><i class="dot"></i>${s.repo.workdir[open]==="untracked"?"new, untracked":"modified"}</span>` : null}
             ${open && s.repo.broken[open] ? html`<span class="pill p-fail"><i class="dot"></i>contains a compile error</span>` : null}
@@ -2907,6 +2945,48 @@ function App(){
       var n=JSON.parse(JSON.stringify(p));
       if(a.t==="view"){ n.view=a.v; if(a.v==="chain"||a.v==="witems"||a.v==="kanban") n.flags.sawBoards=true; }
       if(a.t==="open_file") n.openFile=a.p;
+      if(a.t==="draft") n[a.k]=a.v;
+      if(a.t==="edit_file"){
+        var fp=n.openFile;
+        if(fp){
+          n.repo.workdir[fp]="modified"; n.flags.edited=true;
+          n.term.push({k:"ok",t:"Edited "+fp+" in the browser."});
+          n.term.push({k:"dim",t:"Azure Repos lets you edit without cloning. Same result as 'edit "+fp+"' in the terminal."});
+        }
+      }
+      if(a.t==="ui_commit"){
+        var msg=(n.draftMsg||"").trim();
+        var br=(n.draftBranch===undefined?"main":n.draftBranch).trim();
+        var files=Object.keys(n.repo.workdir).concat(Object.keys(n.repo.index));
+        if(!files.length){ n.term.push({k:"err",t:"Nothing to commit."}); return n; }
+        if(!msg){ n.term.push({k:"err",t:"A commit message is required."}); return n; }
+        if(br==="main" && n.policy.requirePR){
+          n.term.push({k:"cmd",t:"(Commit to main from the browser)"});
+          n.term.push({k:"err",t:"TF402455: Pushes to this branch are not permitted; you must use a pull request."});
+          n.term.push({k:"info",t:"main is protected. Put the change on its own branch instead â€” type a branch name in the box above."});
+          n.flags.pushRejected=true; n.view="branches";
+          return n;
+        }
+        // create the branch if needed, commit everything, push it
+        if(!n.repo.branches[br]){ n.repo.branches[br]=n.repo.branches[n.repo.head]; }
+        n.repo.head=br; n.flags.createdBranch=true;
+        var staged=[];
+        Object.keys(n.repo.workdir).forEach(function(p){ staged.push(p); delete n.repo.workdir[p]; });
+        Object.keys(n.repo.index).forEach(function(p){ if(staged.indexOf(p)<0) staged.push(p); delete n.repo.index[p]; });
+        var id=sha();
+        n.repo.commits[id]={sha:id,msg:msg,parent:n.repo.branches[br],author:USER,branch:br,files:staged,
+                            broken:staged.some(function(p){return n.repo.broken[p];})};
+        n.repo.branches[br]=id;
+        staged.forEach(function(p){ if(n.repo.tracked.indexOf(p)<0) n.repo.tracked.push(p); });
+        n.repo.remote[br]=id;
+        n.pushes.unshift({branch:br,n:1,sha:id,rejected:false});
+        n.flags.committed=true; n.flags.staged=true; n.flags.pushedBranch=true;
+        n.draftMsg=""; n.draftBranch=undefined;
+        n.term.push({k:"cmd",t:"(Commit "+staged.length+" file"+(staged.length>1?"s":"")+" to "+br+")"});
+        n.term.push({k:"ok",t:"["+br+" "+id+"] "+msg});
+        n.term.push({k:"ok",t:"Branch '"+br+"' pushed to the server."});
+        n.term.push({k:"info",t:"Now open a pull request:  az repos pr create --title \""+msg+"\" --work-item 42"});
+      }
       if(a.t==="open_wiki") n.openWiki=a.p;
       if(a.t==="switch_repo"){
         if(a.name!==n.activeRepo && REPO_META[a.name]){

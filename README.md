@@ -1,10 +1,14 @@
 # azure__devOps_sim
 
+### ▶ [Try it live](https://scottyp1.github.io/azure__devOps_sim/)
+
 A sandboxed **Azure DevOps** you drive from a terminal — built to learn the delivery process, not to ship anything.
 
-Type real `git` and `az` commands at the bottom of the screen and watch the service above react: push a file and see it land in the repo, open a pull request and watch build validation gate it, then take a build through to a production approval.
+The screen is the **server**. The terminal at the bottom is **your laptop**. Type real `git` and `az` commands and watch code cross between them: edit a file and see it land in the repo, get your push refused by a branch policy, open a pull request, have a teammate review it overnight, and take a build through to a production approval gate.
 
-Open `index.html` in a browser. No build step, no install, no account.
+It asks your name on first load and uses it throughout — commits, reviews, approvals and the audit trail are yours. Everything is stored in your own browser; nothing is sent anywhere.
+
+No install, no build step, no Azure account. Opening `index.html` locally works too.
 
 ## Why
 
@@ -34,9 +38,15 @@ Four repositories, each with its own git state and real file contents:
 - `taskapi-infra` — Bicep templates
 - `shared-java-libs` — library published to the Artifacts feed
 
+## The guided tour
+
+The panel on the right is a 17-step tour. Each step names the tab, tells you what you'll see and why it matters, and gives you a **Take me there** button so there's no hunting. Steps that require an action won't let you press Next until you've done it.
+
+Six steps of looking around — the two halves, repositories, files, branch policies, boards, and the machines and secrets — then eleven that walk one change from ticket to production.
+
 ## The circuit
 
-The panel on the right tracks one change through its whole life and unlocks each phase as you finish it. In the terminal:
+If you'd rather drive it yourself, this is the whole loop. In the terminal:
 
 ```
 git status
@@ -61,4 +71,13 @@ That pause on `prod` is a Change Advisory Board compressed into one button and a
 
 ## Built with
 
-One HTML file. React 18 + htm from CDN, no build step, no dependencies to install.
+One HTML file. React 18 + htm from a CDN, no build step, no dependencies to install.
+
+`build.js` wraps the source fragment into a standalone document. It reads and writes UTF-8
+explicitly — doing that step with PowerShell's `Get-Content`/`Set-Content` round-trips through
+the ANSI code page and silently double-encodes every non-ASCII character, so the build fails
+loudly if it detects that damage rather than shipping it.
+
+```
+node build.js <path-to-fragment>
+```

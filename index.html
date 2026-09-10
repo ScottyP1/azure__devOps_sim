@@ -177,6 +177,20 @@ h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.015em}
 .fld{font-family:var(--ui);font-size:13px;padding:5px 9px;border:1px solid var(--border-strong);border-radius:4px;background:var(--surface);color:var(--ink)}
 .fld:focus{outline:2px solid var(--azure);outline-offset:-1px;border-color:var(--azure)}
 .fld::placeholder{color:var(--ink-3)}
+select.fld{cursor:pointer}
+.cmdline{background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:7px 10px;font-size:12px;overflow-x:auto;white-space:nowrap}
+.stepno{width:19px;height:19px;flex:none;border-radius:50%;background:var(--azure);color:#fff;display:grid;place-items:center;font-size:10.5px;font-weight:700;margin-top:1px}
+.thread{padding:11px 13px;border-bottom:1px solid var(--border)}
+.thread:last-child{border-bottom:0}
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(10,16,26,.5);display:grid;place-items:center;z-index:60;padding:18px}
+.modal{background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;box-shadow:0 18px 50px rgba(10,20,40,.3);width:min(460px,100%);max-height:86vh;display:flex;flex-direction:column}
+.modal-h{display:flex;align-items:center;gap:9px;padding:12px 15px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px}
+.modal-b{padding:15px;overflow-y:auto}
+.modal-f{display:flex;gap:8px;justify-content:flex-end;padding:12px 15px;border-top:1px solid var(--border)}
+.daybtn{background:var(--azure);color:#fff;border:1px solid var(--azure);padding:4px 11px;border-radius:4px;cursor:pointer;font-size:12.5px;font-weight:600}
+.daybtn:hover{background:var(--azure-ink)}
+.behind-warn{background:var(--wait-soft);border:1px solid var(--wait);border-radius:5px;padding:10px 13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* ---------- file explorer ---------- */
 .fx{display:grid;grid-template-columns:minmax(230px,300px) 1fr;min-height:340px}
@@ -590,7 +604,9 @@ function initial(){
       prod:{ name:"prod", gated:true,  approvers:[USER], deploys:[] }
     },
     gate:null,           // {runId, stageIdx}
-    view:"summary",
+    day:1,               // the working day â€” teammates act between days
+    teamLog:[],          // what happened while you weren't looking
+    view:"connect",
     openFile:"src/main/java/com/cody/taskapi/web/TaskController.java",
     openWiki:"Home",
     openPr:null,
@@ -622,6 +638,19 @@ function ahead(s, branch){
   return n;
 }
 function dirty(s){ return Object.keys(s.repo.workdir).length>0 || Object.keys(s.repo.index).length>0; }
+/* how many commits the SERVER has that your laptop doesn't */
+function behind(s, branch){
+  var local=s.repo.branches[branch], rem=s.repo.remote[branch];
+  if(local===rem || rem===undefined) return 0;
+  var n=0, cur=rem;
+  while(cur && cur!==local){ n++; cur=(s.repo.commits[cur]||{}).parent; }
+  return cur===local ? n : 0;
+}
+function unresolved(s){
+  return s.prs.reduce(function(n,p){
+    return n + (p.threads||[]).filter(function(t){return !t.resolved;}).length;
+  },0);
+}
 function openPRs(s){ return s.prs.filter(function(p){return p.status==="active";}); }
 function buildBroken(s, branch){
   // a commit on this branch touched a file marked broken
@@ -991,7 +1020,24 @@ function runCommand(s, line){
       return {state:st,out:out};
     }
 
-    if(sub==="pull"){ say("plain","Already up to date."); return {state:st,out:out}; }
+    if(sub==="pull"||sub==="fetch"){
+      var b2=st.repo.head, n2=behind(st,b2);
+      if(!n2){ say("plain","Already up to date."); return {state:st,out:out}; }
+      var from=st.repo.branches[b2];
+      var incoming=[], cur2=st.repo.remote[b2];
+      while(cur2 && cur2!==from){ incoming.push(st.repo.commits[cur2]); cur2=(st.repo.commits[cur2]||{}).parent; }
+      say("plain","remote: Enumerating objects: "+(n2*3)+", done.");
+      say("plain","From "+ORG);
+      say("plain","   "+String(from).slice(0,7)+".."+String(st.repo.remote[b2]).slice(0,7)+"  "+b2+" -> origin/"+b2);
+      if(sub==="fetch"){ say("dim","Fetched, but not merged. 'git pull' = fetch + merge."); return {state:st,out:out}; }
+      st.repo.branches[b2]=st.repo.remote[b2];
+      say("ok","Updating "+String(from).slice(0,7)+".."+String(st.repo.branches[b2]).slice(0,7));
+      say("ok","Fast-forward");
+      incoming.reverse().forEach(function(c){ say("plain","   "+c.sha+"  "+c.msg+"   ("+c.author+")"); });
+      say("dim","That's other people's work arriving on your machine. Do this before you start anything.");
+      st.flags.pulled=true; st.view="commits";
+      return {state:st,out:out};
+    }
     say("err","git: '"+sub+"' is not supported in this sandbox. Type 'help'.");
     return {state:st,out:out};
   }
@@ -1079,24 +1125,38 @@ function runCommand(s, line){
    the same way a real change moves through a real system. */
 var FLOW = [
   {
-    stage:"Plan",
-    title:"Get your bearings",
-    brief: html`<p>Everything on this screen sits on top of plain <b>Git</b>. Azure Repos is a server holding a copy of your repo, with rules bolted on.</p><p>The terminal is at the bottom. Click it and look around.</p>`,
+    stage:"Setup",
+    title:"Get the code onto your machine",
+    brief: html`<p>Day one at a new job: you're handed a repo URL. Open <b>My day â†’ Clone / VS Code</b> and read how your laptop talks to Azure Repos.</p>
+      <p>The punchline: it's a normal Git remote. VS Code can't tell the difference between this and GitHub â€” only the URL and the sign-in differ.</p>`,
     objectives:[
-      {t:html`Run <code>git status</code>`, check:function(s){return s.flags.ranStatus;}},
-      {t:html`Run <code>git log --oneline</code>`, check:function(s){return s.flags.ranLog;}},
-      {t:html`Run <code>git remote -v</code>`, check:function(s){return s.flags.ranRemote;}}
+      {t:html`Open <b>Clone / VS Code</b> and read the clone URL`, check:function(s){return s.flags.sawConnect;}},
+      {t:html`Run <code>git remote -v</code> to see where pushes go`, check:function(s){return s.flags.ranRemote;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Git</b> is the version control tool. <b>Azure Repos</b> is the service hosting it. Moving to GitHub would change only that <b>remote URL</b>.`}
+    concept:{k:"Terms to look up", v:html`<b>Git Credential Manager</b>, <b>personal access token</b>, <b>clone URL</b>. GCM is what pops the browser sign-in and then caches it, so you never paste a token by hand.`}
   },
   {
-    stage:"Plan",
-    title:"Pick up the work",
-    brief: html`<p>Nothing starts with code. It starts with a <b>work item</b> â€” the ticket that says why this change is allowed to exist.</p><p>Open <b>Boards</b> and find <b>#42, "Add GET /api/tasks endpoint"</b>. That ID follows you all the way to production.</p>`,
+    stage:"Morning",
+    title:"Start the day: sync and see what moved",
+    brief: html`<p>Press <b>End day â­</b> in the top bar. Your teammates work overnight â€” Priya merges to <code>main</code>.</p>
+      <p>Now you're behind. This is the actual first move of every working morning: pull before you touch anything, or you'll branch off stale code.</p>`,
     objectives:[
-      {t:html`Open <b>Boards</b> and find work item <b>#42</b>`, check:function(s){return s.flags.sawBoards;}}
+      {t:html`Press <b>End day â­</b> and let time pass`, check:function(s){return s.day>1;}},
+      {t:html`Read <b>My day â†’ What changed</b>`, check:function(s){return s.flags.sawStandup;}},
+      {t:html`Catch up with <code>git pull</code>`, check:function(s){return s.flags.pulled;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Work item</b>, <b>backlog</b>, <b>sprint</b>, <b>Azure Boards</b>. Every later artifact points back here â€” that's what makes the chain auditable.`}
+    concept:{k:"Terms to look up", v:html`<b>fetch vs pull</b>, <b>fast-forward</b>, <b>behind/ahead</b>. <span class="mono">git fetch</span> downloads without merging; <span class="mono">git pull</span> does both. Try <span class="mono">git fetch</span> first to see the difference.`}
+  },
+  {
+    stage:"Morning",
+    title:"Pick up your assigned work",
+    brief: html`<p>Work doesn't start with code, it starts with a <b>work item</b>. Go to <b>Boards â†’ Work items</b>, find <b>#42</b>, and press <b>+ Branch</b>.</p>
+      <p>Azure names the branch after the item and links the two, so the PR you open later inherits that link for free.</p>`,
+    objectives:[
+      {t:html`Open <b>Boards â†’ Work items</b>`, check:function(s){return s.flags.sawBoards;}},
+      {t:html`Press <b>+ Branch</b> on a work item`, check:function(s){return s.flags.branchFromWi;}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Work item</b>, <b>branch naming</b>, <b>traceability</b>. Creating the branch from the item is the habit that makes the audit chain build itself.`}
   },
   {
     stage:"Code",
@@ -1144,20 +1204,32 @@ var FLOW = [
   },
   {
     stage:"Review",
+    title:"Feedback comes back at you",
+    brief: html`<p>Press <b>End day â­</b> again. Priya reviews your PR overnight and leaves a comment.</p>
+      <p>An unresolved comment is a <i>blocking policy</i> here â€” Complete stays locked until every thread is dealt with. Read it, then press <b>Resolve</b>.</p>`,
+    objectives:[
+      {t:html`End another day so a review lands`, check:function(s){return s.prs.some(function(p){return (p.threads||[]).length;});}},
+      {t:html`Resolve the comment thread on your PR`, check:function(s){return s.prs.some(function(p){return (p.threads||[]).some(function(t){return t.resolved;});});}}
+    ],
+    concept:{k:"Terms to look up", v:html`<b>Comment resolution policy</b>, <b>blocking vs optional reviewer</b>, <b>suggestions</b>. Reviewers can require changes; that's the point of review, not a formality.`}
+  },
+  {
+    stage:"Review",
     title:"Get approved, then merge",
-    brief: html`<p>Go to <b>Pull requests</b>. Complete stays greyed out until every policy check is green â€” that checklist <i>is</i> the gate.</p><p>Approve as your reviewer, then complete the merge.</p>`,
+    brief: html`<p>Every check green? Approve as the reviewer, then <b>Complete merge</b>.</p><p>If Complete is still greyed out, one of the four checks hasn't passed â€” that checklist <i>is</i> the gate.</p>`,
     objectives:[
       {t:html`Approve the PR as the required reviewer`, check:function(s){return s.prs.some(function(p){return p.reviewers.some(function(r){return r.vote>0;});});}},
       {t:html`Click <b>Complete merge</b>`, check:function(s){return s.flags.prCompleted;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Required reviewer</b>, <b>squash merge</b>, <b>segregation of duties</b>. Note the votes reset if you push again â€” search <b>reset votes on new push</b>.`}
+    concept:{k:"Terms to look up", v:html`<b>Required reviewer</b>, <b>squash merge</b>, <b>segregation of duties</b>. Votes reset if you push again â€” search <b>reset votes on new push</b>.`}
   },
   {
     stage:"Deploy",
     title:"Build once, deploy many",
-    brief: html`<p>The merge landed on <code>main</code>. Now the release pipeline runs: it builds <i>one</i> jar, publishes it as an <b>artifact</b>, and every environment gets that same file.</p><p>Queue it, then watch <code>Deploy_Dev</code> go out with nobody's permission.</p>`,
+    brief: html`<p>The merge landed on <code>main</code>. Go to <b>Pipelines</b> and press <b>â–· Run pipeline</b> â€” the real product's run panel, with a branch selector, typed parameters, and stages you can skip.</p>
+      <p>Pick <code>main</code>, leave both deploy stages ticked, press Run. Then watch <code>Deploy_Dev</code> ship with nobody's permission.</p>`,
     objectives:[
-      {t:html`<code>az pipelines run --cd</code>`, check:function(s){return s.flags.ranPipeline;}},
+      {t:html`Press <b>â–· Run pipeline</b> and run from <code>main</code>`, check:function(s){return s.flags.ranPipeline;}},
       {t:html`See the artifact published`, check:function(s){return s.artifacts.length>0;}},
       {t:html`Watch <code>dev</code> deploy automatically`, check:function(s){return s.envs.dev.deploys.length>0;}}
     ],
@@ -1644,6 +1716,12 @@ function FilesView(s, act){
 
     ${repoBar(s, act)}
 
+    ${behind(s,"main") ? html`<div class="behind-warn">
+      <span class="pill p-wait"><i class="dot"></i>${behind(s,"main")} behind</span>
+      <span class="sm" style="flex:1;min-width:200px">Someone pushed to <span class="mono">main</span> while you were away. Your copy is stale â€” pull before you branch, or you'll build on old code.</span>
+      <span class="mono sm" style="color:var(--azure)">git pull</span>
+    </div>` : null}
+
     <div class="panel">
       <div class="panel-h" style="gap:8px;flex-wrap:wrap">
         <svg class="ico" viewBox="0 0 16 16" fill="none" stroke="var(--azure)" stroke-width="1.5"><path d="M4 2v8M4 14a2 2 0 100-4 2 2 0 000 4zM4 4a1 1 0 100-2 1 1 0 000 2zM12 4a1 1 0 100-2 1 1 0 000 2zM12 4v3a3 3 0 01-3 3H6"/></svg>
@@ -1665,11 +1743,11 @@ function FilesView(s, act){
           <input class="fld" style="flex:2;min-width:190px" placeholder="Commit message"
                  value=${s.draftMsg||""} onChange=${function(e){act({t:"draft",k:"draftMsg",v:e.target.value});}} />
           <span class="sm dim">to branch</span>
-          <input class="fld mono" style="flex:1;min-width:150px" placeholder="main"
-                 value=${s.draftBranch===undefined?"main":s.draftBranch} onChange=${function(e){act({t:"draft",k:"draftBranch",v:e.target.value});}} />
+          <input class="fld mono" style="flex:1;min-width:150px" placeholder=${s.repo.head}
+                 value=${s.draftBranch===undefined?s.repo.head:s.draftBranch} onChange=${function(e){act({t:"draft",k:"draftBranch",v:e.target.value});}} />
           <button class="btn" onClick=${function(){act({t:"ui_commit"});}}>Commit</button>
         </div>
-        ${(s.draftBranch===undefined||s.draftBranch==="main")
+        ${((s.draftBranch===undefined?s.repo.head:s.draftBranch)==="main")
           ? html`<div class="sm" style="color:var(--wait);margin-top:8px">
               <b>main is protected.</b> Committing here will be refused. Type a new branch name above â€” that's what the real product nudges you to do.</div>`
           : html`<div class="sm" style="color:var(--ok);margin-top:8px">
@@ -1790,10 +1868,12 @@ function PRsView(s, act){
   var buildOk = run && run.status==="succeeded";
   var buildBad = run && run.status==="failed";
   var approvals = pr.reviewers.filter(function(r){return r.vote>0;}).length;
+  var open = (pr.threads||[]).filter(function(t){return !t.resolved;}).length;
   var checks=[
     {ok: buildOk, wait: !run||run.status==="running", label:"Build validation â€” taskapi CI", detail: run? ("run #"+run.id+" Â· "+run.status) : "not queued"},
     {ok: approvals>=s.policy.minReviewers, wait:false, label:"Required reviewers ("+approvals+"/"+s.policy.minReviewers+")", detail: approvals?"approved":"awaiting review"},
-    {ok: !!pr.workItem, wait:false, label:"Linked work item", detail: pr.workItem? ("#"+pr.workItem) : "none linked"}
+    {ok: !!pr.workItem, wait:false, label:"Linked work item", detail: pr.workItem? ("#"+pr.workItem) : "none linked"},
+    {ok: open===0, wait:false, label:"All comments resolved", detail: open? (open+" open") : ((pr.threads||[]).length? "all resolved":"no comments")}
   ];
   var canComplete = checks.every(function(c){return c.ok;}) && pr.status==="active";
 
@@ -1838,6 +1918,24 @@ function PRsView(s, act){
         </div>`; })}
       </div>
 
+      ${(pr.threads||[]).length ? html`<div>
+        <div class="panel-h" style="border-top:1px solid var(--border)">Comment threads<span class="r num">${open} open</span></div>
+        ${pr.threads.map(function(t){ return html`<div class="thread" key=${t.id}>
+          <div style="display:flex;gap:9px;align-items:flex-start">
+            <span class="avatar">${t.by.split(" ").map(function(x){return x[0];}).join("").slice(0,2)}</span>
+            <div style="flex:1;min-width:0">
+              <div class="sm mono dim">${t.file}${t.line?":"+t.line:""}</div>
+              <div class="sm" style="margin:3px 0 5px">${t.text}</div>
+              ${t.reply? html`<div class="sm dim" style="border-left:2px solid var(--border);padding-left:9px">You: ${t.reply}</div>`:null}
+            </div>
+            ${t.resolved
+              ? html`<span class="pill p-ok"><i class="dot"></i>resolved</span>`
+              : html`<button class="btn ghost" style="padding:2px 10px;font-size:12px" onClick=${function(){act({t:"resolve_thread",pr:pr.id,id:t.id});}}>Resolve</button>`}
+          </div>
+        </div>`; })}
+        ${open? html`<div style="padding:9px 13px"><div class="sm dim">A reviewer's comment is a blocking policy here â€” <b>Complete</b> stays locked until every thread is resolved. Search <b>comment resolution policy</b>.</div></div>`:null}
+      </div>` : null}
+
       ${pr.status==="active" ? html`<div class="row" style="gap:9px;flex-wrap:wrap">
         <button class="btn ghost" onClick=${function(){act({t:"approve_pr",id:pr.id});}} disabled=${approvals>0}>
           ${approvals>0?"Approved":"Approve as Priya"}
@@ -1850,20 +1948,84 @@ function PRsView(s, act){
   </div>`;
 }
 
+/* the real product's Run pipeline panel: branch, parameters, stages to run */
+function RunDialog(s, act){
+  var dlg = s.runDlg;
+  if(!dlg) return null;
+  var branches = Object.keys(s.repo.branches);
+  return html`<div class="modal-bg" onClick=${function(e){ if(e.target===e.currentTarget) act({t:"run_dlg",v:null}); }}>
+    <div class="modal" role="dialog" aria-label="Run pipeline">
+      <div class="modal-h">
+        <span>Run pipeline</span>
+        <button class="tbtn" style="margin-left:auto" onClick=${function(){act({t:"run_dlg",v:null});}}>âœ•</button>
+      </div>
+      <div class="modal-b">
+        <div class="w-k">Branch/tag</div>
+        <select class="fld" style="width:100%;margin:5px 0 3px" value=${dlg.branch}
+                onChange=${function(e){act({t:"run_set",k:"branch",v:e.target.value});}}>
+          ${branches.map(function(b){ return html`<option key=${b} value=${b}>${b}</option>`; })}
+        </select>
+        <div class="sm dim" style="margin-bottom:14px">The pipeline runs the <span class="mono">azure-pipelines.yml</span> as it exists <i>on that branch</i> â€” so a change to the pipeline is reviewed like any other change.</div>
+
+        <div class="w-k">Parameters</div>
+        <div style="margin:6px 0 14px">
+          <div class="minirow"><span class="sm" style="flex:1">environment</span>
+            <select class="fld mono" style="font-size:12px" value=${dlg.env} onChange=${function(e){act({t:"run_set",k:"env",v:e.target.value});}}>
+              <option value="dev">dev</option><option value="prod">prod</option>
+            </select></div>
+          <div class="minirow"><span class="sm" style="flex:1">runTests</span>
+            <input type="checkbox" checked=${dlg.runTests} onChange=${function(e){act({t:"run_set",k:"runTests",v:e.target.checked});}} /></div>
+          <div class="sm dim" style="margin-top:5px">Declared as <span class="mono">parameters:</span> at the top of the YAML. Typed, with defaults â€” search <b>runtime parameters</b>.</div>
+        </div>
+
+        <div class="w-k">Stages to run</div>
+        <div style="margin:6px 0 4px">
+          ${["Build","Deploy_Dev","Deploy_Prod"].map(function(st){
+            return html`<div class="minirow" key=${st}>
+              <input type="checkbox" checked=${dlg.stages[st]!==false} disabled=${st==="Build"}
+                     onChange=${function(e){act({t:"run_stage",k:st,v:e.target.checked});}} />
+              <span class="sm" style="flex:1">${st}</span>
+              ${st==="Build"? html`<span class="sm dim">always runs</span>`
+                : st==="Deploy_Prod"? html`<span class="pill p-wait">needs approval</span>`
+                : html`<span class="pill p-ok">automatic</span>`}
+            </div>`;
+          })}
+        </div>
+        <div class="sm dim">Unticking a stage skips it for this run only â€” how you'd deploy to dev without touching prod.</div>
+      </div>
+      <div class="modal-f">
+        <button class="btn ghost" onClick=${function(){act({t:"run_dlg",v:null});}}>Cancel</button>
+        <button class="btn" onClick=${function(){act({t:"run_go"});}}>Run</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 /* ---------- Pipelines ---------- */
 function PipesView(s, act){
   var run = s.runs.filter(function(r){return r.id===s.openRun;})[0] || s.runs[0];
+  var runBtn = html`<button class="btn" onClick=${function(){act({t:"run_dlg",v:"open"});}}>â–· Run pipeline</button>`;
+
   if(!s.runs.length) return html`<div class="stack">
-    <div class="head"><h1 class="h-title">Pipelines</h1><div class="h-sub">Stages contain jobs; jobs contain steps. Learn that hierarchy and YAML pipelines stop being mysterious.</div></div>
-    <div class="panel"><div class="empty">No runs yet.<br/>Try <code>az pipelines run --cd</code> to queue one with deploy stages.</div></div>
+    <div class="head" style="display:flex;align-items:flex-start;gap:12px">
+      <div style="flex:1"><h1 class="h-title">Pipelines</h1><div class="h-sub">Stages contain jobs; jobs contain steps. Learn that hierarchy and YAML pipelines stop being mysterious.</div></div>
+      ${runBtn}
+    </div>
+    ${RunDialog(s, act)}
+    <div class="panel"><div class="panel-h">taskapi CI<span class="r mono">azure-pipelines.yml</span></div>
+      <div class="empty">This pipeline has never run.<br/>Press <b>â–· Run pipeline</b> above, or push to <code>main</code> to trigger it automatically.</div></div>
   </div>`;
 
   return html`
   <div class="stack">
-    <div class="head">
-      <h1 class="h-title">Pipelines</h1>
-      <div class="h-sub">One build artifact flows through every environment â€” never rebuilt. Search the phrase <b>build once, deploy many</b>.</div>
+    <div class="head" style="display:flex;align-items:flex-start;gap:12px">
+      <div style="flex:1">
+        <h1 class="h-title">Pipelines</h1>
+        <div class="h-sub">One build artifact flows through every environment â€” never rebuilt. Search the phrase <b>build once, deploy many</b>.</div>
+      </div>
+      ${runBtn}
     </div>
+    ${RunDialog(s, act)}
 
     ${s.gate && s.gate.runId===run.id ? html`<div class="gatebar">
       <div class="txt"><b>Waiting for approval.</b> Stage <span class="mono">${run.stages[s.gate.stageIdx].name}</span> targets environment <span class="mono">${s.gate.env}</span>, which requires a human. Nothing deploys until someone clicks.</div>
@@ -1887,7 +2049,14 @@ function PipesView(s, act){
     </div>
 
     <div class="panel">
-      <div class="panel-h">Run #${run.id}<span class="r mono">${run.commitMsg}</span></div>
+      <div class="panel-h">
+        ${glyph(run.status,16)}<span>Run #${run.id}</span>
+        <span class="r mono">${run.commitMsg}</span>
+        ${run.status==="running"||run.status==="waiting"
+          ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:8px" onClick=${function(){act({t:"cancel_run",id:run.id});}}>Cancel</button>` : null}
+        ${run.status==="failed"||run.status==="canceled"
+          ? html`<button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:8px" onClick=${function(){act({t:"retry_run",id:run.id});}}>â†» Re-run</button>` : null}
+      </div>
       <div class="stagestrip">
         ${run.stages.map(function(st,i){
           return html`<div class=${"stage"+(i===run.cursor.st&&run.status==="running"?" act":"")} key=${i}>
@@ -2039,6 +2208,100 @@ function ArtsView(s){
 
 function pageHead(t, sub){
   return html`<div class="head"><h1 class="h-title">${t}</h1><div class="h-sub">${sub}</div></div>`;
+}
+
+/* ---------- Connect: how your machine talks to Azure Repos ---------- */
+function ConnectView(s, act){
+  var url = "https://dev.azure.com/cody/taskapi/_git/" + s.activeRepo;
+  return html`<div class="stack">
+    ${pageHead("Clone to your machine","The only thing that differs from GitHub is this URL and how you authenticate to it. Everything after the clone is identical.")}
+
+    <div class="panel">
+      <div class="panel-h">Clone repository<span class="r mono">${s.activeRepo}</span></div>
+      <div style="padding:13px">
+        <div class="w-k" style="margin-bottom:6px">HTTPS</div>
+        <div class="cmdline"><span class="mono">${url}</span></div>
+        <div class="w-k" style="margin:13px 0 6px">SSH</div>
+        <div class="cmdline"><span class="mono">git@ssh.dev.azure.com:v3/cody/taskapi/${s.activeRepo}</span></div>
+        <div class="sm dim" style="margin-top:11px">In the real product this is behind the <b>Clone</b> button at the top-right of Files.</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-h">From VS Code</div>
+        <div style="padding:13px">
+          ${[["1","Ctrl+Shift+P â†’ <b>Git: Clone</b>","or Clone Repository in the Source Control view"],
+             ["2","Paste the HTTPS URL above","pick a local folder"],
+             ["3","A sign-in window appears","Git Credential Manager handles it â€” including MFA"],
+             ["4","Work normally","the Source Control panel, staging, commits â€” all unchanged"]].map(function(x,i){
+            return html`<div key=${i} style="display:flex;gap:11px;padding:6px 0;border-bottom:1px solid var(--border)">
+              <span class="stepno">${x[0]}</span>
+              <div><div class="sm" dangerouslySetInnerHTML=${{__html:x[1]}}></div><div class="sm dim">${x[2]}</div></div>
+            </div>`;
+          })}
+          <div class="sm dim" style="margin-top:11px">VS Code has no idea it's talking to Azure rather than GitHub. It's just a Git remote.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h">How you authenticate</div>
+        <div style="padding:13px">
+          <div class="minirow">${glyph("succeeded",15)}<span class="sm" style="flex:1"><b>Git Credential Manager</b> â€” the default</span></div>
+          <div class="sm dim" style="margin:2px 0 10px 24px">Ships with Git for Windows. Pops a browser sign-in, supports MFA and Entra ID, then caches the credential in Windows Credential Manager. You never see a token.</div>
+          <div class="minirow">${glyph("waiting",15)}<span class="sm" style="flex:1"><b>Personal access token</b> â€” the fallback</span></div>
+          <div class="sm dim" style="margin:2px 0 10px 24px">For scripts, CI, or a self-hosted agent. Paste it where Git asks for a password. Scoped and expiring â€” see <b>Tokens &amp; SSH</b>.</div>
+          <div class="minirow">${glyph("pending",15)}<span class="sm" style="flex:1"><b>SSH key</b></span></div>
+          <div class="sm dim" style="margin:2px 0 0 24px">Use the SSH URL. Common on Linux and macOS, or where HTTPS is blocked.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h">Push goes here, not to GitHub</div>
+      <div style="padding:13px">
+        <div class="mono sm" style="line-height:2">
+          <div>your laptop  <span class="dim">â€” VS Code, your working tree</span></div>
+          <div style="padding-left:22px">â”‚  <span class="dim">git push</span></div>
+          <div style="padding-left:22px">â–¼</div>
+          <div><span style="color:var(--azure)">Azure Repos</span>  <span class="dim">â€” the server copy everyone shares</span></div>
+          <div style="padding-left:22px">â”œâ”€ <span class="dim">branch policies run here, and can refuse your push</span></div>
+          <div style="padding-left:22px">â”œâ”€ <span class="dim">a pull request opens here</span></div>
+          <div style="padding-left:22px">â””â”€ <span class="dim">a push can trigger Pipelines automatically</span></div>
+        </div>
+        <div class="sm dim" style="margin-top:11px">Your teammates pull from that same server copy. That is the whole point of it, and the reason a push is never just "saving".</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- what happened while you were away ---------- */
+function StandupView(s, act){
+  return html`<div class="stack">
+    ${pageHead("Day " + s.day + " â€” what changed overnight","Most of a working day is reacting to what other people did. This is the screen that tells you.")}
+    <div class="panel">
+      <div class="panel-h">Activity<span class="r num">${s.teamLog.length}</span></div>
+      ${s.teamLog.length ? html`<div class="rows">${s.teamLog.map(function(e,i){ return html`<div class="row" key=${i}>
+        <span class="avatar">${e.who.split(" ").map(function(x){return x[0];}).join("").slice(0,2)}</span>
+        <div style="flex:1;min-width:0"><div class="sm">${e.what}</div><div class="sm dim">${e.who} Â· day ${e.day}</div></div>
+        ${e.tag ? html`<span class=${"pill "+e.cls}>${e.tag}</span>` : null}
+      </div>`; })}</div>`
+      : html`<div class="empty">Nothing yet â€” you're on day 1.<br/>Press <b>End day</b> in the top bar to let your teammates work.</div>`}
+    </div>
+    <div class="panel">
+      <div class="panel-h">Your morning checklist</div>
+      <div style="padding:13px">
+        <div class="minirow">${glyph(behind(s,"main")?"failed":"succeeded",15)}<span class="sm" style="flex:1">Local <span class="mono">main</span> up to date</span>
+          <span class="sm dim">${behind(s,"main") ? behind(s,"main")+" behind â€” run git pull" : "in sync"}</span></div>
+        <div class="minirow">${glyph(openPRs(s).length?"waiting":"succeeded",15)}<span class="sm" style="flex:1">Pull requests waiting on you</span>
+          <span class="sm dim">${openPRs(s).length || "none"}</span></div>
+        <div class="minirow">${glyph(unresolved(s)?"failed":"succeeded",15)}<span class="sm" style="flex:1">Review comments to address</span>
+          <span class="sm dim">${unresolved(s) || "none"}</span></div>
+        <div class="minirow">${glyph("pending",15)}<span class="sm" style="flex:1">Work assigned to you</span>
+          <span class="sm dim">${s.workItems.filter(function(w){return w.who===USER&&w.state!=="Closed";}).length} items</span></div>
+      </div>
+    </div>
+  </div>`;
 }
 
 /* the repo switcher that sits on every Repos page */
@@ -2539,6 +2802,8 @@ function WorkItemsView(s, act){
             <span style="min-width:76px">${html`<span class=${"pill "+(w.state==="Closed"?"p-ok":w.state==="Active"?"p-run":w.state==="Resolved"?"p-wait":"p-idle")}>${w.state}</span>`}</span>
             <span class="sm dim" style="min-width:104px">${w.who}</span>
             <span class="sm num" style="min-width:28px">${w.pts}</span>
+            ${w.state!=="Closed" ? html`<button class="btn ghost" style="padding:2px 9px;font-size:11.5px;white-space:nowrap"
+              onClick=${function(){act({t:"branch_from_wi",id:w.id});}} title="Create a branch linked to this work item">+ Branch</button>` : null}
           </div>`;
         })}
       </div>
@@ -2943,9 +3208,111 @@ function App(){
   function act(a){
     set(function(p){
       var n=JSON.parse(JSON.stringify(p));
-      if(a.t==="view"){ n.view=a.v; if(a.v==="chain"||a.v==="witems"||a.v==="kanban") n.flags.sawBoards=true; }
+      if(a.t==="view"){
+        n.view=a.v;
+        if(a.v==="chain"||a.v==="witems"||a.v==="kanban") n.flags.sawBoards=true;
+        if(a.v==="connect") n.flags.sawConnect=true;
+        if(a.v==="standup") n.flags.sawStandup=true;
+      }
       if(a.t==="open_file") n.openFile=a.p;
       if(a.t==="draft") n[a.k]=a.v;
+
+      /* ---- the Run pipeline panel ---- */
+      if(a.t==="run_dlg"){
+        n.runDlg = a.v ? {branch:n.repo.head, env:"dev", runTests:true, stages:{}} : null;
+      }
+      if(a.t==="run_set" && n.runDlg) n.runDlg[a.k]=a.v;
+      if(a.t==="run_stage" && n.runDlg) n.runDlg.stages[a.k]=a.v;
+      if(a.t==="run_go" && n.runDlg){
+        var dlg=n.runDlg, br=dlg.branch;
+        var wantDev = dlg.stages.Deploy_Dev!==false, wantProd = dlg.stages.Deploy_Prod!==false;
+        var r=newRun(n,{commit:n.repo.branches[br], branch:br, name:"taskapi CI"+((wantDev||wantProd)?"/CD":""),
+                        trigger:"Manually queued by "+USER, cd:(wantDev||wantProd)});
+        if(wantDev||wantProd){
+          r.stages = r.stages.filter(function(st){
+            if(st.name==="Deploy_Dev") return wantDev;
+            if(st.name==="Deploy_Prod") return wantProd;
+            return true;
+          });
+        }
+        n.runs.unshift(r); n.openRun=n.nextRun; n.nextRun++;
+        n.runDlg=null; n.view="pipelines"; n.flags.ranPipeline=true;
+        n.term.push({k:"cmd",t:"(Run pipeline â€” branch "+br+")"});
+        n.term.push({k:"ok",t:"Queued run #"+r.id+" on "+br+" Â· stages: "+r.stages.map(function(x){return x.name;}).join(", ")});
+      }
+      if(a.t==="cancel_run"){
+        n.runs.forEach(function(r){ if(r.id===a.id && (r.status==="running"||r.status==="waiting")){
+          r.status="canceled";
+          r.stages.forEach(function(st){ if(st.status==="running"||st.status==="pending"||st.status==="waiting") st.status="canceled"; });
+        }});
+        if(n.gate && n.gate.runId===a.id) n.gate=null;
+        n.term.push({k:"warn",t:"Run #"+a.id+" canceled."});
+      }
+      if(a.t==="retry_run"){
+        var old=n.runs.filter(function(r){return r.id===a.id;})[0];
+        if(old){
+          var again=newRun(n,{commit:old.commit,branch:old.branch,name:old.name,
+                              trigger:"Re-run of #"+old.id+" by "+USER, cd:old.stages.length>1, prId:old.prId});
+          n.runs.unshift(again); n.openRun=n.nextRun; n.nextRun++;
+          if(old.prId) n.prs.forEach(function(p){ if(p.id===old.prId) p.buildRunId=again.id; });
+          n.term.push({k:"ok",t:"Re-running #"+old.id+" as #"+again.id+" â€” same commit, fresh agent."});
+          n.term.push({k:"dim",t:"Re-running is the first thing to try on a flaky failure. If it passes now, the test is the bug."});
+        }
+      }
+      if(a.t==="resolve_thread"){
+        n.prs.forEach(function(p){ if(p.id===a.pr) (p.threads||[]).forEach(function(t){
+          if(t.id===a.id){ t.resolved=true; t.reply="Fixed, thanks."; }
+        });});
+        n.term.push({k:"ok",t:"Comment thread resolved on PR !"+a.pr+"."});
+      }
+      if(a.t==="branch_from_wi"){
+        var wi=n.workItems.filter(function(x){return x.id===a.id;})[0];
+        if(wi){
+          var slug=wi.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,32);
+          var nb=(wi.type==="Bug"?"bugfix/":"feature/")+wi.id+"-"+slug;
+          if(!n.repo.branches[nb]) n.repo.branches[nb]=n.repo.branches.main;
+          n.repo.head=nb; n.wiBranch=n.wiBranch||{}; n.wiBranch[nb]=wi.id;
+          if(wi.state==="New") wi.state="Active";
+          if(wi.who==="unassigned") wi.who=USER;
+          n.flags.createdBranch=true; n.flags.branchFromWi=true;
+          n.view="files";
+          n.term.push({k:"cmd",t:"(New branch from work item #"+wi.id+")"});
+          n.term.push({k:"ok",t:"Created and switched to "+nb});
+          n.term.push({k:"dim",t:"Azure names it from the work item and links them, so the PR you open later inherits the link automatically."});
+        }
+      }
+
+      /* ---- end the day: your teammates get to work ---- */
+      if(a.t==="end_day"){
+        n.day++;
+        var msgs=[
+          "Bump jackson-databind to 2.17.2 (CVE-2026-1841)",
+          "Add pagination to GET /api/tasks",
+          "Fix flaky TaskControllerTest",
+          "Tidy application.properties comments"
+        ];
+        var m=msgs[(n.day-2)%msgs.length];
+        var id2=sha();
+        n.repo.commits[id2]={sha:id2,msg:m,parent:n.repo.remote.main,author:"Priya Raman",branch:"main",files:["pom.xml"]};
+        n.repo.remote.main=id2;   // server moves; your laptop does NOT
+        n.teamLog.unshift({who:"Priya Raman",day:n.day,what:"Merged PR to main â€” "+m,tag:"main moved",cls:"p-run"});
+
+        var mine=n.prs.filter(function(p){return p.status==="active";})[0];
+        if(mine){
+          mine.threads=mine.threads||[];
+          if(!mine.threads.length){
+            mine.threads.push({id:1,by:"Priya Raman",file:"src/main/java/com/cody/taskapi/web/TaskController.java",line:12,
+              text:"Can this return a typed record rather than a String? We have ApiError in shared-java-libs for exactly this."});
+            n.teamLog.unshift({who:"Priya Raman",day:n.day,what:"Left a comment on PR !"+mine.id,tag:"needs you",cls:"p-fail"});
+          }
+          mine.behind=(mine.behind||0)+1;
+        }
+        n.workItems.forEach(function(w){ if(w.who==="unassigned" && w.state==="New"){ w.who=USER; w.state="New"; } });
+        n.view="standup";
+        n.term.push({k:"warn",t:"â€” Day "+n.day+" â€”"});
+        n.term.push({k:"info",t:"Priya merged to main while you were away. Your local main is now behind."});
+        n.term.push({k:"dim",t:"Run 'git pull' to catch up. This is the first thing you do every morning."});
+      }
       if(a.t==="edit_file"){
         var fp=n.openFile;
         if(fp){
@@ -2956,7 +3323,7 @@ function App(){
       }
       if(a.t==="ui_commit"){
         var msg=(n.draftMsg||"").trim();
-        var br=(n.draftBranch===undefined?"main":n.draftBranch).trim();
+        var br=(n.draftBranch===undefined?n.repo.head:n.draftBranch).trim();
         var files=Object.keys(n.repo.workdir).concat(Object.keys(n.repo.index));
         if(!files.length){ n.term.push({k:"err",t:"Nothing to commit."}); return n; }
         if(!msg){ n.term.push({k:"err",t:"A commit message is required."}); return n; }
@@ -3063,6 +3430,7 @@ function App(){
   var labDone=doneCount===L.objectives.length;
 
   var views={
+    connect:ConnectView, standup:StandupView,
     projects:ProjectsView, orgusers:OrgUsersView, billing:BillingView, audit:AuditView, exts:ExtensionsView,
     summary:SummaryView, dash:DashView, wiki:WikiView,
     witems:WorkItemsView, kanban:KanbanView, backlog:BacklogView, sprints:SprintView, queries:QueriesView, plans:PlansView, chain:BoardsView,
@@ -3078,6 +3446,7 @@ function App(){
   var runN=s.runs.filter(function(r){return r.status==="running"||r.status==="waiting";}).length;
   var alertN=s.alerts.filter(function(a){return a.state==="Open";}).length;
   var NAV=[
+    {g:"My day", ico:I.files, items:[["standup","What changed",s.teamLog.length||null],["connect","Clone / VS Code"]]},
     {g:"Organization", ico:I.over, items:[["projects","Projects",s.projects.length],["orgusers","Users"],["billing","Billing"],["audit","Auditing"],["exts","Extensions"],["tokens","Tokens & SSH"]]},
     {g:"Overview", ico:I.over, items:[["summary","Summary"],["dash","Dashboards"],["wiki","Wiki"]]},
     {g:"Boards", ico:I.boards, items:[["witems","Work items"],["kanban","Board"],["backlog","Backlogs"],["sprints","Sprints"],["queries","Queries"],["plans","Delivery Plans"],["chain","Traceability"]]},
@@ -3102,7 +3471,9 @@ function App(){
         <span>/</span><span>${LABEL[s.view]||s.view}</span>
       </div>
       <div class="spacer"></div>
-      <span class="sm dim">Sandbox â€” nothing here reaches a real service</span>
+      ${behind(s,"main") ? html`<span class="pill p-wait"><i class="dot"></i>main is ${behind(s,"main")} behind</span>` : null}
+      <span class="sm dim">Day ${s.day}</span>
+      <button class="daybtn" onClick=${function(){ act({t:"end_day"}); }} title="Let your teammates work overnight">End day â­</button>
       <button class="tbtn" onClick=${function(){ setGuide(!guide); }}>${guide?"Hide guide":"Show guide"}</button>
       <button class="tbtn" onClick=${function(){ set(initial()); }}>Reset</button>
     </div>

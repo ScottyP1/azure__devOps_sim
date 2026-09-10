@@ -1128,9 +1128,116 @@ function runCommand(s, line){
    4. LABS
    ============================================================ */
 
-/* One continuous change lifecycle. Each phase unlocks the next the moment its
-   objectives are satisfied â€” you never pick a lab, you just keep moving forward,
-   the same way a real change moves through a real system. */
+/* A guided tour. Each step names the tab, what you'll see there, what to do,
+   and why it matters. `goto` powers a button that navigates for you, so there
+   is never any hunting. `check` (optional) ticks green when you've done it. */
+var TOUR = [
+  { stage:"Look around", title:"The two halves", goto:"connect",
+    body: html`<p><b>What this is.</b> The whole app is two things pretending to be two machines.</p>
+      <p>The <b style="color:var(--ok)">terminal at the bottom</b> is your laptop. The <b style="color:var(--azure)">screen above it</b> is the Azure DevOps server your team shares.</p>
+      <p><b>Do this.</b> Look at the green LOCAL label on the terminal bar, then the blue SERVER chip in the top bar. Everything you learn here is about code moving between those two.</p>`,
+    concept:{k:"Why it matters", v:html`Beginners think <b>commit</b> and <b>push</b> are the same action. They aren't: commit saves on the left, push moves it to the right where other people and the rules live.`} },
+
+  { stage:"Look around", title:"Repositories â€” where code lives", goto:"repolist",
+    body: html`<p><b>You'll see.</b> Four repos in one project: the Java API, a React front end, Bicep infrastructure, and a shared library.</p>
+      <p><b>Do this.</b> Click any row to switch to it. Notice the terminal's prompt changes with you â€” it follows whichever repo you're in.</p>
+      <p><b>Why.</b> A project holds <i>many</i> repos. Real work spans them: a feature can need a change in the API and the front end at once.</p>`,
+    concept:{k:"The hierarchy", v:html`<b>organization</b> â†’ <b>project</b> â†’ <b>repo</b>. Billing sits on the org, boards and pipelines on the project, branch policies on the repo. Knowing which level a setting lives on answers most "why can't Iâ€¦" questions.`} },
+
+  { stage:"Look around", title:"Files â€” the server's copy", goto:"files",
+    body: html`<p><b>You'll see.</b> The file tree, and the contents of whichever file you click. This is what the <i>server</i> holds â€” what a teammate would get if they cloned right now.</p>
+      <p><b>Do this.</b> Click <code>azure-pipelines.yml</code> and read it. That file <i>is</i> the build; you'll watch it execute later.</p>`,
+    concept:{k:"Worth knowing", v:html`The pipeline definition lives <i>in the repo</i>, so changing the build is reviewed like any other code change. Search <b>pipeline as code</b>.`} },
+
+  { stage:"Look around", title:"Branches â€” and the one you can't touch", goto:"branches",
+    body: html`<p><b>You'll see.</b> Every branch, whether the server has it, and a <b>protected</b> badge on <code>main</code>.</p>
+      <p><b>Do this.</b> Read the five policies listed underneath. Those are the rules that will refuse your push in a few steps' time.</p>`,
+    concept:{k:"Terms", v:html`<b>Branch policy</b>, <b>protected branch</b>. Set once by an admin, enforced by the server on everyone. This is the biggest difference between a personal repo and a job.`} },
+
+  { stage:"Look around", title:"Boards â€” the work itself", goto:"witems",
+    body: html`<p><b>You'll see.</b> Work items: stories, bugs and tasks, with state, assignee and points.</p>
+      <p><b>Do this.</b> Find <b>#42 â€” Add GET /api/tasks endpoint</b>, assigned to you. Then glance at <b>Board</b> and <b>Sprints</b> in the sidebar to see the same items as a kanban wall and a burndown.</p>`,
+    concept:{k:"Why it matters", v:html`Nothing should reach production without one of these numbers attached. It's the "why was this change allowed" record.`} },
+
+  { stage:"Look around", title:"Pipelines, environments and the machines", goto:"pools",
+    body: html`<p><b>You'll see.</b> Agent pools â€” the actual computers that run your build. A Microsoft-hosted pool with a free-minutes meter, and a self-hosted agent running on a laptop.</p>
+      <p><b>Do this.</b> Then look at <b>Library</b> (variable groups, secrets, a service connection with an expired token) and <b>Environments</b> (dev deploys itself, prod needs a human).</p>`,
+    concept:{k:"Real-world", v:html`An expired <b>service connection</b> or a <b>PAT</b> is the most common cause of "the pipeline worked yesterday". Both are on these screens.`} },
+
+  { stage:"Your morning", title:"Time passes â€” teammates work", goto:"standup",
+    body: html`<p><b>Do this.</b> Press <b>End day â­</b> in the top bar.</p>
+      <p><b>What happens.</b> Priya merges something to <code>main</code> overnight. A <b>main is 1 behind</b> badge appears in the top bar â€” the server has a commit your laptop doesn't.</p>
+      <p><b>Then.</b> Read this screen: it's what changed while you were away.</p>`,
+    check:function(s){return s.day>1;},
+    concept:{k:"Why it matters", v:html`Most of a working day is reacting to other people. A repo you haven't pulled is a repo that's already wrong.`} },
+
+  { stage:"Your morning", title:"Catch up before you touch anything", goto:"commits",
+    body: html`<p><b>Do this.</b> Type <code>git pull</code> in the terminal.</p>
+      <p><b>What you'll see.</b> A fast-forward, and Priya's commits listed by author as they land on your machine. The "behind" badge disappears.</p>
+      <p><b>Why.</b> Branch off stale code and you'll get conflicts later. Pulling first is the first move of every real morning.</p>`,
+    check:function(s){return s.flags.pulled;},
+    concept:{k:"Terms", v:html`<b>fetch</b> downloads without merging; <b>pull</b> does both. Try <span class="mono">git fetch</span> to feel the difference.`} },
+
+  { stage:"Make a change", title:"Try the obvious thing â€” and fail", goto:"files",
+    body: html`<p><b>Do this.</b> Click <code>TaskController.java</code> in the tree, press <b>âœŽ Edit</b>. A commit bar appears. Type a message, leave the branch as <code>main</code>, press <b>Commit</b>.</p>
+      <p><b>What happens.</b> Refused: <code>TF402455</code>. The server said no, not your laptop.</p>
+      <p><b>Why.</b> This is the mistake everyone makes â€” you forget to branch, do the work, and find out at push time.</p>`,
+    check:function(s){return s.flags.pushRejected;},
+    concept:{k:"Terms", v:html`<b>TF402455</b> is the real Azure DevOps error code for this. Worth recognising on sight.`} },
+
+  { stage:"Make a change", title:"Branch from the ticket", goto:"witems",
+    body: html`<p><b>Do this.</b> On work item <b>#42</b>, press <b>+ Branch</b>.</p>
+      <p><b>What happens.</b> Azure creates <code>feature/42-add-get-api-tasks-endpoint</code>, switches you to it, and links branch to ticket.</p>
+      <p><b>Then.</b> Go back to <b>Files</b>, press <b>Commit</b> again â€” this time the branch box already holds your new branch. It commits and pushes in one go.</p>`,
+    check:function(s){return s.flags.pushedBranch;},
+    concept:{k:"Why it matters", v:html`Branching from the item is the habit that makes the audit chain build itself â€” the PR you open next inherits the link for free.`} },
+
+  { stage:"Review", title:"Open the pull request", goto:"prs",
+    body: html`<p><b>Do this.</b> In the terminal: <code>az repos pr create --title "Add tasks endpoint" --work-item 42</code></p>
+      <p><b>What you'll see.</b> The PR appears with a <b>policy checklist</b> of four items, and a build starts on its own. <b>Complete</b> is greyed out.</p>
+      <p><b>Why.</b> That checklist <i>is</i> the gate. Nothing merges until all four are green.</p>`,
+    check:function(s){return s.flags.openedPR;},
+    concept:{k:"Terms", v:html`<b>Pull request</b> (GitLab calls it a merge request), <b>build validation</b>, <b>required reviewer</b>.`} },
+
+  { stage:"Review", title:"Watch the machine check you", goto:"pipelines",
+    body: html`<p><b>Do this.</b> Open Pipelines and click any step to expand its log.</p>
+      <p><b>What you'll see.</b> Stages â†’ jobs â†’ steps, with logs streaming. Nobody asked for this build; opening the PR triggered it.</p>`,
+    check:function(s){return s.flags.openedLogs;},
+    concept:{k:"Learn this shape", v:html`<b>stages â†’ jobs â†’ steps</b>. Once that hierarchy clicks, YAML pipelines stop being mysterious.`} },
+
+  { stage:"Review", title:"Feedback lands on you", goto:"prs",
+    body: html`<p><b>Do this.</b> Press <b>End day â­</b> again, then come back to the PR.</p>
+      <p><b>What happens.</b> Priya has left a comment on your code. <b>Complete</b> is now blocked by it â€” unresolved comments are a policy, not a suggestion.</p>
+      <p><b>Then.</b> Read it and press <b>Resolve</b>, then <b>Approve as Priya</b>, then <b>Complete merge</b>.</p>`,
+    check:function(s){return s.flags.prCompleted;},
+    concept:{k:"Terms", v:html`<b>Comment resolution policy</b>. Also note votes reset when you push again â€” search <b>reset votes on new push</b>.`} },
+
+  { stage:"Ship it", title:"Run the pipeline yourself", goto:"pipelines",
+    body: html`<p><b>Do this.</b> Press <b>â–· Run pipeline</b> at the top right.</p>
+      <p><b>What you'll see.</b> The real run panel: a <b>branch selector</b>, typed <b>parameters</b>, and <b>stages to run</b> you can untick. Pick <code>main</code>, leave everything ticked, press Run.</p>
+      <p><b>Then.</b> Watch <code>Build</code> publish one artifact, and <code>Deploy_Dev</code> ship it with nobody's permission.</p>`,
+    check:function(s){return s.envs.dev.deploys.length>0;},
+    concept:{k:"The principle", v:html`<b>Build once, deploy many.</b> One jar is built and promoted through every environment. Rebuild per environment and you never shipped what you tested.`} },
+
+  { stage:"Ship it", title:"The gate â€” this is a CAB", goto:"pipelines",
+    body: html`<p><b>What happens.</b> <code>Deploy_Prod</code> stops and sits in <b>waiting</b>. Nothing deploys.</p>
+      <p><b>Do this.</b> Press <b>Approve</b> in the amber bar.</p>
+      <p><b>Why.</b> That pause is a <b>Change Advisory Board</b> after it's been automated: one approver, one click, and a permanent record of who said yes.</p>`,
+    check:function(s){return s.envs.prod.deploys.length>0;},
+    concept:{k:"Terms", v:html`<b>Approvals and checks</b>, <b>CAB</b>, <b>RFC</b>, <b>standard vs normal change</b>, <b>change freeze</b>. Getting a deploy reclassified a <i>standard change</i> is how teams escape the weekly meeting.`} },
+
+  { stage:"Ship it", title:"Prove it was legitimate", goto:"chain",
+    body: html`<p><b>You'll see.</b> The chain filled in green: work item â†’ commit â†’ PR â†’ build â†’ artifact â†’ approval â†’ deploy.</p>
+      <p><b>Why.</b> This is the only thing an auditor actually asks for. You built it without trying, just by following the process.</p>`,
+    check:function(s){return s.flags.sawBoards&&s.envs.prod.deploys.length>0;},
+    concept:{k:"Terms", v:html`<b>Traceability</b>, <b>audit trail</b>, <b>segregation of duties</b>, <b>SOX</b>, <b>DORA metrics</b>.`} },
+
+  { stage:"Ship it", title:"Now break it on purpose", goto:"files",
+    body: html`<p><b>Do this.</b> In the terminal: <code>edit src/main/java/com/cody/taskapi/web/TaskController.java --bug</code>, then commit it to a new branch and open a PR.</p>
+      <p><b>What happens.</b> The build goes red and the PR is blocked before a human wastes a minute on it. Open the failed step to read the compiler error, then try <b>â†» Re-run</b>.</p>`,
+    check:function(s){return s.flags.sawRedBuild;},
+    concept:{k:"Terms", v:html`<b>Fail fast</b>, <b>change failure rate</b>, <b>forward-fix vs rollback</b>. A machine saying no is cheap; production saying no is not.`} }
+];
 var FLOW = [
   {
     stage:"Setup",
@@ -3145,6 +3252,7 @@ function App(){
   var st=useState(initial);
   var s=st[0], set=st[1];
   var readIdx=useState(null), reading=readIdx[0], setReading=readIdx[1];
+  var tourS=useState(0), tour=tourS[0], setTour=tourS[1];
   var guideS=useState(true), guide=guideS[0], setGuide=guideS[1];
   var thS=useState(236), termH=thS[0], setTermH=thS[1];
   var dragS=useState(false), dragging=dragS[0], setDragging=dragS[1];
@@ -3551,50 +3659,40 @@ function App(){
       </div>
 
       <aside class="lab" style=${guide?null:{display:"none"}}>
-        <div class="lab-h">
-          <div class="lab-k">The life of one change</div>
-          <div class="lab-t">${allDone?"Full circuit flown":"Phase "+(cursor+1)+" of "+FLOW.length}</div>
-          <div class="sm dim" style="margin-top:4px">Finish a phase and the next opens on its own. You can't skip â€” neither can a real change.</div>
-        </div>
-
-        <ol class="flow">
-          ${FLOW.map(function(p,i){
-            var done=p.objectives.every(function(o){return o.check(s);});
-            var here=i===active, isNext=i===cursor;
-            var cls="fl"+(done?" done":"")+(here?" here":"")+(i>cursor&&!done?" locked":"");
-            var newStage = i===0 || FLOW[i-1].stage!==p.stage;
-            return html`<${React.Fragment} key=${i}>
-              ${newStage? html`<li class="fl-stage">${p.stage}</li>`:null}
-              <li class=${cls}>
-                <button class="fl-b" onClick=${function(){ setReading(i===active?null:i); }} aria-expanded=${here}>
-                  <span class="fl-m">${done?"âœ“":isNext?"â—":"â—‹"}</span>
-                  <span class="fl-t">${p.title}</span>
-                  ${!done&&i<cursor?null:null}
-                  <span class="fl-c num">${p.objectives.filter(function(o){return o.check(s);}).length}/${p.objectives.length}</span>
-                </button>
-
-                ${here? html`<div class="fl-body">
-                  <div class="lab-b" style="border:0;padding:2px 0 10px">${p.brief}</div>
-                  ${p.objectives.map(function(o,j){
-                    var d=o.check(s);
-                    return html`<div class=${"obj"+(d?" done":"")} key=${j} style="padding:7px 0;border-bottom:0"><span class="bx">${d?"âœ“":""}</span><span class="tx">${o.t}</span></div>`;
-                  })}
-                  ${done? html`<div class="done-banner" style="margin:10px 0 4px">
-                    ${i<FLOW.length-1? "Done â€” phase "+(i+2)+" is open below." : "That's the entire loop, end to end."}
-                  </div>`:null}
-                  <div class="concept" style="margin:10px 0 4px">
-                    <div class="k">${p.concept.k}</div>
-                    <div class="v">${p.concept.v}</div>
-                  </div>
-                </div>`:null}
-              </li>
-            <//>`;
-          })}
-        </ol>
-
-        ${reading!==null&&reading!==cursor? html`<div class="labnav">
-          <button class="btn ghost" onClick=${function(){ setReading(null); }}>Back to where I am</button>
-        </div>`:null}
+        ${(function(){
+          var T=TOUR[Math.min(tour,TOUR.length-1)];
+          var done=T.check? T.check(s) : null;
+          return html`<${React.Fragment}>
+            <div class="lab-h">
+              <div class="lab-k">Step ${tour+1} of ${TOUR.length} Â· ${T.stage}</div>
+              <div class="lab-t">${T.title}</div>
+            </div>
+            <div class="progress">
+              ${TOUR.map(function(x,i){ return html`<i key=${i} class=${i<tour?"d":i===tour?"c":""}></i>`; })}
+            </div>
+            ${T.goto? html`<div style="padding:0 16px 12px">
+              <button class="btn" style="width:100%" onClick=${function(){act({t:"view",v:T.goto});}}>
+                Take me to ${LABEL[T.goto]||T.goto} â†’
+              </button>
+            </div>`:null}
+            <div class="lab-b">${T.body}</div>
+            ${T.check? html`<div class=${"obj"+(done?" done":"")} style="border-bottom:0">
+              <span class="bx">${done?"âœ“":""}</span>
+              <span class="tx">${done? "Done â€” press Next below." : "Not done yet â€” this ticks when you've done it."}</span>
+            </div>`:null}
+            <div class="concept">
+              <div class="k">${T.concept.k}</div>
+              <div class="v">${T.concept.v}</div>
+            </div>
+            <div class="labnav">
+              <button class="btn ghost" onClick=${function(){ setTour(Math.max(0,tour-1)); }} disabled=${tour===0}>â—‚ Back</button>
+              <button class=${"btn"+(done===false?" ghost":"")} style="flex:1"
+                onClick=${function(){ setTour(Math.min(TOUR.length-1,tour+1)); }} disabled=${tour===TOUR.length-1}>
+                ${tour===TOUR.length-1? "That's the tour" : "Next â–¸"}
+              </button>
+            </div>
+          <//>`;
+        })()}
       </aside>
     </div>
   </div>`;

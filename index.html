@@ -191,6 +191,12 @@ select.fld{cursor:pointer}
 .daybtn{background:var(--azure);color:#fff;border:1px solid var(--azure);padding:4px 11px;border-radius:4px;cursor:pointer;font-size:12.5px;font-weight:600}
 .daybtn:hover{background:var(--azure-ink)}
 .behind-warn{background:var(--wait-soft);border:1px solid var(--wait);border-radius:5px;padding:10px 13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.srvchip{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--azure);background:var(--azure-soft);border:1px solid var(--azure);border-radius:11px;padding:1px 9px;white-space:nowrap}
+.split{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.split-side{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.split-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.split-arrow{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:0 4px;text-align:center}
+@media (max-width:720px){.split{grid-template-columns:1fr}.split-arrow{flex-direction:row;justify-content:center}}
 
 /* ---------- file explorer ---------- */
 .fx{display:grid;grid-template-columns:minmax(230px,300px) 1fr;min-height:340px}
@@ -615,9 +621,9 @@ function initial(){
     nextPr:1, nextRun:1,
     flags:{},
     term:[
-      {k:"info", t:"Azure DevOps Flight Sim â€” a simulation running entirely in this browser tab."},
-      {k:"warn", t:"Not connected to anything: no network, no disk, and NOT your real dev\\taskapi folder."},
-      {k:"dim",  t:"The repos here are made up. They only look like your project so the code reads familiar."},
+      {k:"info", t:"This terminal is YOUR MACHINE. Everything on the screen above is the SERVER."},
+      {k:"dim",  t:"Repo already cloned to ~/dev/taskapi on branch main."},
+      {k:"dim",  t:"Work here, then 'git push' to send it up. 'git pull' brings your team's work down."},
       {k:"dim",  t:"Type 'help' for the command list, or follow the flow on the right."},
       {k:"dim",  t:""}
     ]
@@ -996,7 +1002,8 @@ function runCommand(s, line){
       say("plain","Enumerating objects: "+(n*3+2)+", done.");
       say("plain","To "+ORG);
       say("ok"," * ["+(fresh?"new branch":"updated")+"]      "+br+" -> "+br);
-      say("dim","Your files are on the server now. The banner in Files above just flipped to 'in sync'.");
+      say("info","â†’ Your code just crossed from LOCAL to SERVER. Look up: it's on the screen above now.");
+      say("dim","Everyone on the team can see this branch. That's the difference between committing and pushing.");
       st.pushes.unshift({branch:br,n:n||1,sha:st.repo.branches[br],rejected:false});
       st.view="files";
       F.pushedBranch=true;
@@ -1737,8 +1744,8 @@ function FilesView(s, act){
 
       ${dirtyCount ? html`<div style="background:var(--wait-soft);border-bottom:1px solid var(--border);padding:11px 13px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px">
-          <span class="pill p-wait"><i class="dot"></i>${dirtyCount} uncommitted</span>
-          <span class="sm" style="color:var(--ink-2)">Changed on your machine only. Nobody else can see it until you commit and push.</span>
+          <span class="pill p-wait"><i class="dot"></i>${dirtyCount} only on your machine</span>
+          <span class="sm" style="color:var(--ink-2)">These edits exist in the <b style="color:var(--ok)">LOCAL</b> half â€” the terminal below. They cross to the <b style="color:var(--azure)">SERVER</b> when you push.</span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <input class="fld" style="flex:2;min-width:190px" placeholder="Commit message"
@@ -2217,14 +2224,23 @@ function ConnectView(s, act){
   return html`<div class="stack">
     ${pageHead("Clone to your machine","The only thing that differs from GitHub is this URL and how you authenticate to it. Everything after the clone is identical.")}
 
-    <div class="behind-warn" style="background:var(--fail-soft);border-color:var(--fail)">
-      <span class="pill p-fail"><i class="dot"></i>read-only demo</span>
-      <span class="sm" style="flex:1;min-width:230px;color:var(--ink)">
-        <b>This page is a diagram, not a button.</b> The URL below is fictional and the terminal in this app is a
-        simulation running in your browser â€” it never reaches a network, a disk, or your real
-        <span class="mono">dev\\taskapi</span> folder. Copying this URL into real VS Code will fail, by design.
-      </span>
+    <div class="split">
+      <div class="split-side">
+        <div class="split-k" style="color:var(--term-green)">â— LOCAL â€” your machine</div>
+        <div class="sm" style="color:var(--ink-2)">The <b>terminal at the bottom of this page</b> is your laptop. Your clone, your working tree, your branches. Nobody else can see anything here.</div>
+        <div class="sm mono dim" style="margin-top:7px">~/dev/${s.activeRepo}</div>
+      </div>
+      <div class="split-arrow">
+        <div class="mono sm" style="color:var(--azure);font-weight:700">git push â†’</div>
+        <div class="mono sm dim">â† git pull</div>
+      </div>
+      <div class="split-side">
+        <div class="split-k" style="color:var(--azure)">â— SERVER â€” Azure DevOps</div>
+        <div class="sm" style="color:var(--ink-2)">Everything <b>above the terminal</b> is the server. Shared with your team. Policies live here, and they can refuse your push.</div>
+        <div class="sm mono dim" style="margin-top:7px">dev.azure.com/cody/taskapi</div>
+      </div>
     </div>
+    <div class="sm dim">Both halves are simulated inside this page, so you can watch code cross the line. Cloning was already done for you â€” the commands below are what produced the local side.</div>
 
     <div class="panel">
       <div class="panel-h">Clone repository<span class="r mono">${s.activeRepo}</span><span class="pill p-idle">example</span></div>
@@ -3476,6 +3492,7 @@ function App(){
         <svg class="glyph" viewBox="0 0 24 24" fill="none"><path d="M3 7.5 9.5 3l5 2.2V3L21 6.2v11.6L15.5 21l-9-3.2v3.1L3 17.2z" fill="var(--azure)"/></svg>
         <span>Flight Sim</span>
       </div>
+      <span class="srvchip" title="Everything on this screen is the shared server. The terminal below is your laptop.">â— SERVER Â· dev.azure.com</span>
       <div class="crumbs">
         <span>${s.org.name}</span><span>/</span><b>${s.project}</b>
         ${/^(files|commits|pushes|branches|tags|prs|forks|secure|repolist)$/.test(s.view)? html`<span>/</span><span style="color:var(--azure)">${s.activeRepo}</span>`:null}
@@ -3510,7 +3527,10 @@ function App(){
           <div class=${"term-grip"+(dragging?" drag":"")} onPointerDown=${startDrag}
                role="separator" aria-label="Resize terminal" title="Drag to resize"></div>
           <div class="term-h">
-            <span class="t">Terminal â€” ${s.activeRepo}</span>
+            <span class="t" style="color:var(--term-green);font-weight:700">â— LOCAL</span>
+            <span class="t">your machine Â· ~/dev/${s.activeRepo} Â· ${s.repo.head}</span>
+            ${dirtyN? html`<span class="t" style="color:var(--term-yellow)">${dirtyN} change${dirtyN>1?"s":""} not on the server</span>`:null}
+            ${ahead(s,s.repo.head)? html`<span class="t" style="color:var(--term-yellow)">${ahead(s,s.repo.head)} commit${ahead(s,s.repo.head)>1?"s":""} unpushed</span>`:null}
             <span class="sp"></span>
             <button class="tbtn2" onClick=${function(){ setTermH(Math.min(760, termH+120)); setMin(false); }} title="Taller">taller</button>
             <button class="tbtn2" onClick=${function(){ setTermH(Math.max(90, termH-120)); }} title="Shorter">shorter</button>

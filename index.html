@@ -1157,14 +1157,13 @@ var FLOW = [
   },
   {
     stage:"Morning",
-    title:"Pick up your assigned work",
-    brief: html`<p>Work doesn't start with code, it starts with a <b>work item</b>. Go to <b>Boards â†’ Work items</b>, find <b>#42</b>, and press <b>+ Branch</b>.</p>
-      <p>Azure names the branch after the item and links the two, so the PR you open later inherits that link for free.</p>`,
+    title:"See what you've been asked to do",
+    brief: html`<p>Work doesn't start with code, it starts with a <b>work item</b> â€” the ticket that says why this change is allowed to exist.</p>
+      <p>Go to <b>Boards â†’ Work items</b> and find <b>#42, "Add GET /api/tasks endpoint"</b>, assigned to you. That number follows the change all the way to production.</p>`,
     objectives:[
-      {t:html`Open <b>Boards â†’ Work items</b>`, check:function(s){return s.flags.sawBoards;}},
-      {t:html`Press <b>+ Branch</b> on a work item`, check:function(s){return s.flags.branchFromWi;}}
+      {t:html`Open <b>Boards â†’ Work items</b> and find <b>#42</b>`, check:function(s){return s.flags.sawBoards;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Work item</b>, <b>branch naming</b>, <b>traceability</b>. Creating the branch from the item is the habit that makes the audit chain build itself.`}
+    concept:{k:"Terms to look up", v:html`<b>Work item</b>, <b>backlog</b>, <b>sprint</b>, <b>assigned to</b>. In a stand-up you talk about these numbers, not about branches.`}
   },
   {
     stage:"Code",
@@ -1174,22 +1173,22 @@ var FLOW = [
       <p><b>In the UI:</b> go to <b>Repos â†’ Files</b>, click <code>TaskController.java</code> in the tree, press <b>âœŽ Edit</b>, then type a commit message and press <b>Commit</b> with the branch left as <code>main</code>.</p>
       <p><b>Or in the terminal:</b> run <code>ls</code> to see the file list, then the four commands below.</p>`,
     objectives:[
-      {t:html`Change a file â€” <b>âœŽ Edit</b> in Files, or <code>edit &lt;path&gt;</code> (<code>ls</code> lists them)`, check:function(s){return s.flags.edited;}},
-      {t:html`Stage it: <code>git add .</code> <span class="dim">(the UI does this for you)</span>`, check:function(s){return s.flags.staged;}},
-      {t:html`Commit it: <code>git commit -m "Add tasks endpoint"</code>`, check:function(s){return s.flags.committed;}},
-      {t:html`Try to put it on <code>main</code> â€” and read the rejection`, check:function(s){return s.flags.pushRejected;}}
+      {t:html`Change a file â€” <b>âœŽ Edit</b> in Files, or <code>edit &lt;path&gt;</code>`, check:function(s){return s.flags.edited;}},
+      {t:html`Try to put it on <code>main</code>, and read what the server says back`, check:function(s){return s.flags.pushRejected;}}
     ],
     concept:{k:"Terms to look up", v:html`<b>Branch policy</b>, <b>protected branch</b>, <b>pre-receive hook</b>. <b>TF402455</b> is the real Azure DevOps error code. The <i>server</i> refused you â€” your laptop was happy.`}
   },
   {
     stage:"Code",
-    title:"Take the sanctioned path",
-    brief: html`<p>Your commit already exists locally â€” it's just sitting on a branch the server won't accept. Move it onto a branch of its own and publish that instead.</p><p>Naming matters at work: <code>feature/</code>, <code>bugfix/</code>, <code>hotfix/</code>.</p>`,
+    title:"Do it the way the team does",
+    brief: html`<p>The change is fine â€” it just can't live on <code>main</code>. It needs its own branch, and that branch should be tied to the ticket.</p>
+      <p>Go back to <b>Boards â†’ Work items</b> and press <b>+ Branch</b> on <b>#42</b>. Azure names it after the item and links the two, so the PR you open next inherits the link for free.</p>
+      <p>Then commit, and watch it cross from <b style="color:var(--ok)">LOCAL</b> to <b style="color:var(--azure)">SERVER</b>.</p>`,
     objectives:[
-      {t:html`<code>git checkout -b feature/tasks-endpoint</code>`, check:function(s){return s.flags.createdBranch;}},
-      {t:html`<code>git push -u origin feature/tasks-endpoint</code>`, check:function(s){return s.flags.pushedBranch;}}
+      {t:html`Press <b>+ Branch</b> on work item <b>#42</b>`, check:function(s){return s.flags.branchFromWi;}},
+      {t:html`Commit to that branch â€” it pushes as you commit`, check:function(s){return s.flags.pushedBranch;}}
     ],
-    concept:{k:"Terms to look up", v:html`<b>Topic branch</b>, <b>upstream branch</b>, <b>trunk-based development</b>, <b>GitFlow</b>, <b>Release Flow</b>. Short-lived branches are the modern default â€” long ones rot.`}
+    concept:{k:"Terms to look up", v:html`<b>Topic branch</b>, <b>branch naming</b>, <b>trunk-based development</b>, <b>GitFlow</b>, <b>Release Flow</b>. Short-lived branches tied to a ticket are the modern default â€” long ones rot and conflict.`}
   },
   {
     stage:"Review",
